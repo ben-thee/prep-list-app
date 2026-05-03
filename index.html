@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Kitchen Prep List</title>
+
+  <style>
+    :root {
+      --bg: #020617;
+      --card: #0f172a;
+      --line: #1f2937;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #f43f5e;
+      --green: #22c55e;
+      --red: #ef4444;
+      --orange: #f97316;
+      --yellow: #eab308;
+      --blue: #3b82f6;
+      --purple: #a855f7;
+      --gray: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, rgba(244, 63, 94, 0.24), transparent 34%),
+        linear-gradient(180deg, #020617, #000);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 12px;
+    }
+
+    .app {
+      max-width: 760px;
+      margin: 0 auto;
+      padding-bottom: 94px;
+    }
+
+    .top {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(2, 6, 23, 0.92);
+      backdrop-filter: blur(14px);
+      padding: 12px 0 14px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 25px;
+      letter-spacing: -0.6px;
+    }
+
+    .status {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.14);
+      border: 1px solid rgba(34, 197, 94, 0.28);
+      color: #dcfce7;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 14px rgba(34, 197, 94, 0.9);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 11px 0 2px;
+      scrollbar-width: none;
+    }
+
+    .tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab {
+      flex: 0 0 auto;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(15, 23, 42, 0.88);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 10px 13px;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: rgba(244, 63, 94, 0.2);
+      color: white;
+      border-color: rgba(244, 63, 94, 0.58);
+    }
+
+    .section {
+      margin-top: 18px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 9px;
+      font-size: 15px;
+      font-weight: 950;
+      color: #e2e8f0;
+    }
+
+    .count {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 54px 1fr 116px;
+      align-items: center;
+      gap: 9px;
+      min-height: 66px;
+      padding: 10px;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.17);
+      border-left: 7px solid var(--gray);
+      background: rgba(15, 23, 42, 0.91);
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.17);
+    }
+
+    .item.checked {
+      opacity: 0.72;
+      background: rgba(15, 23, 42, 0.56);
+    }
+
+    .item.checked .name {
+      text-decoration: line-through;
+      color: #94a3b8;
+    }
+
+    .check-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 15px;
+      border: 2px solid rgba(148, 163, 184, 0.34);
+      background: rgba(2, 6, 23, 0.55);
+      color: white;
+      font-size: 25px;
+      font-weight: 950;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .check-btn.on {
+      background: var(--red);
+      border-color: var(--red);
+    }
+
+    .name-wrap {
+      min-width: 0;
+    }
+
+    .name {
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: -0.2px;
+      overflow-wrap: anywhere;
+    }
+
+    .meta {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .color-select {
+      width: 100%;
+      border-radius: 13px;
+      border: 1px solid rgba(148, 163, 184, 0.23);
+      background: #020617;
+      color: white;
+      padding: 11px 8px;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .delete-btn {
+      width: 100%;
+      border-radius: 13px;
+      border: 1px solid rgba(239, 68, 68, 0.44);
+      background: rgba(239, 68, 68, 0.16);
+      color: #fecaca;
+      padding: 11px 8px;
+      font-size: 13px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .empty {
+      margin-top: 18px;
+      padding: 22px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed rgba(148, 163, 184, 0.28);
+      border-radius: 18px;
+    }
+
+    .bottom-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 70;
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      background: rgba(2, 6, 23, 0.92);
+      border-top: 1px solid rgba(148, 163, 184, 0.15);
+      backdrop-filter: blur(16px);
+    }
+
+    .bottom-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .btn {
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: rgba(15, 23, 42, 0.96);
+      color: white;
+      border-radius: 15px;
+      padding: 13px 12px;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .btn:active,
+    .tab:active,
+    .check-btn:active {
+      transform: scale(0.985);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f43f5e, #fb7185);
+      border: none;
+    }
+
+    .btn-danger {
+      color: #fecaca;
+      background: rgba(239, 68, 68, 0.14);
+      border-color: rgba(239, 68, 68, 0.36);
+    }
+
+    .btn-danger.active {
+      background: var(--red);
+      color: white;
+      border-color: var(--red);
+    }
+
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      padding: 14px;
+      background: rgba(0, 0, 0, 0.72);
+    }
+
+    .modal-bg.show {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      background: #0f172a;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    }
+
+    .modal h2 {
+      margin: 0 0 13px;
+      font-size: 20px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 12px;
+      font-weight: 850;
+      color: var(--muted);
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: #020617;
+      color: white;
+      border-radius: 14px;
+      padding: 14px 12px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .modal-actions {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .toast {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.2s ease;
+      padding: 11px 14px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      color: white;
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: 0 16px 48px rgba(0,0,0,.35);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 430px) {
+      body {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+
+      .item {
+        grid-template-columns: 50px 1fr 102px;
+        gap: 7px;
+        padding: 9px;
+      }
+
+      .name {
+        font-size: 15px;
+      }
+
+      .color-select,
+      .delete-btn {
+        font-size: 12px;
+        padding: 10px 7px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="toast" id="toast">Saved</div>
+
+  <div class="app">
+    <div class="top">
+      <div class="title-row">
+        <div>
+          <h1>Kitchen Prep List</h1>
+          <div class="status" id="statusText">Connecting...</div>
+        </div>
+
+        <div class="live-pill">
+          <span class="dot"></span>
+          LIVE
+        </div>
+      </div>
+
+      <div class="tabs" id="tabs"></div>
+    </div>
+
+    <div id="content"></div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="bottom-inner">
+      <button class="btn btn-primary" id="addBtn">+ Add Item</button>
+      <button class="btn btn-danger" id="deleteModeBtn">Delete Mode: OFF</button>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="modalBg">
+    <div class="modal">
+      <h2>Add Prep Item</h2>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Section</label>
+          <select id="sectionInput">
+            <option value="Kitchen">Kitchen</option>
+            <option value="Bar">Bar</option>
+            <option value="Sauce">Sauce</option>
+            <option value="Grill">Grill</option>
+            <option value="Bakery">Bakery</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Item name</label>
+          <input id="nameInput" placeholder="Example: Grill Chicken" />
+        </div>
+
+        <div class="field">
+          <label>Color</label>
+          <select id="colorInput">
+            <option value="gray">Gray</option>
+            <option value="red">Red</option>
+            <option value="orange">Orange</option>
+            <option value="yellow">Yellow</option>
+            <option value="green">Green</option>
+            <option value="blue">Blue</option>
+            <option value="purple">Purple</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" id="cancelAddBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveAddBtn">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      updateDoc,
+      deleteDoc,
+      doc,
+      onSnapshot,
+      serverTimestamp,
+      writeBatch,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzdxT4kocIK04UJhhbMQjpVw4Wtim5yVg",
+      authDomain: "prep-5ada7.firebaseapp.com",
+      projectId: "prep-5ada7",
+      storageBucket: "prep-5ada7.firebasestorage.app",
+      messagingSenderId: "678949496330",
+      appId: "1:678949496330:web:037d9332743ec51638e1f3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const prepRef = collection(db, "prepItems");
+
+    const content = document.getElementById("content");
+    const tabs = document.getElementById("tabs");
+    const statusText = document.getElementById("statusText");
+    const toast = document.getElementById("toast");
+
+    const addBtn = document.getElementById("addBtn");
+    const deleteModeBtn = document.getElementById("deleteModeBtn");
+    const modalBg = document.getElementById("modalBg");
+    const cancelAddBtn = document.getElementById("cancelAddBtn");
+    const saveAddBtn = document.getElementById("saveAddBtn");
+    const sectionInput = document.getElementById("sectionInput");
+    const nameInput = document.getElementById("nameInput");
+    const colorInput = document.getElementById("colorInput");
+
+    let items = [];
+    let currentSection = "All";
+    let deleteMode = false;
+
+    const colorMap = {
+      gray: "#64748b",
+      red: "#ef4444",
+      orange: "#f97316",
+      yellow: "#eab308",
+      green: "#22c55e",
+      blue: "#3b82f6",
+      purple: "#a855f7"
+    };
+
+    const defaultItems = [
+      { section: "Kitchen", name: "Cook Rice", color: "gray", sort: 1 },
+      { section: "Kitchen", name: "Grill Chicken", color: "orange", sort: 2 },
+      { section: "Kitchen", name: "Gnocchi", color: "yellow", sort: 3 },
+      { section: "Kitchen", name: "Basil Pick", color: "green", sort: 4 },
+
+      { section: "Sauce", name: "Aioli", color: "blue", sort: 1 },
+      { section: "Sauce", name: "Dressing", color: "purple", sort: 2 },
+
+      { section: "Bar", name: "Milk Stock", color: "gray", sort: 1 },
+      { section: "Bar", name: "Coffee Beans", color: "orange", sort: 2 },
+
+      { section: "Bakery", name: "Cookies", color: "red", sort: 1 }
+    ];
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 900);
+    }
+
+    function formatTime(date) {
+      if (!date) return "";
+      try {
+        return date.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      } catch {
+        return "";
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function getSections() {
+      const set = new Set(items.map(item => item.section || "Other"));
+      return ["All", ...Array.from(set).sort()];
+    }
+
+    function renderTabs() {
+      const sections = getSections();
+
+      if (!sections.includes(currentSection)) {
+        currentSection = "All";
+      }
+
+      tabs.innerHTML = sections.map(section => {
+        const count = section === "All"
+          ? items.length
+          : items.filter(item => item.section === section).length;
+
+        return `
+          <button class="tab ${section === currentSection ? "active" : ""}" data-section="${escapeHtml(section)}">
+            ${escapeHtml(section)} ${count}
+          </button>
+        `;
+      }).join("");
+
+      tabs.querySelectorAll(".tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentSection = btn.dataset.section;
+          render();
+        });
+      });
+    }
+
+    function groupBySection(list) {
+      const grouped = {};
+
+      list.forEach(item => {
+        const section = item.section || "Other";
+        if (!grouped[section]) grouped[section] = [];
+        grouped[section].push(item);
+      });
+
+      Object.keys(grouped).forEach(section => {
+        grouped[section].sort((a, b) => {
+          const sortA = Number(a.sort || 9999);
+          const sortB = Number(b.sort || 9999);
+
+          if (sortA !== sortB) return sortA - sortB;
+
+          return String(a.name || "").localeCompare(String(b.name || ""));
+        });
+      });
+
+      return grouped;
+    }
+
+    function render() {
+      renderTabs();
+
+      let visibleItems = [...items];
+
+      if (currentSection !== "All") {
+        visibleItems = visibleItems.filter(item => item.section === currentSection);
+      }
+
+      if (visibleItems.length === 0) {
+        content.innerHTML = `
+          <div class="empty">
+            No prep items yet. Tap <b>+ Add Item</b> to create one.
+          </div>
+        `;
+        return;
+      }
+
+      const grouped = groupBySection(visibleItems);
+      const sections = Object.keys(grouped).sort();
+
+      content.innerHTML = sections.map(section => {
+        const list = grouped[section];
+        const done = list.filter(item => item.checked).length;
+
+        return `
+          <div class="section">
+            <div class="section-title">
+              <span>${escapeHtml(section)}</span>
+              <span class="count">${done}/${list.length} done</span>
+            </div>
+
+            <div class="list">
+              ${list.map(item => renderItem(item)).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      bindItemEvents();
+    }
+
+    function renderItem(item) {
+      const color = colorMap[item.color] || colorMap.gray;
+      const updatedAt = item.updatedAt?.toDate ? item.updatedAt.toDate() : null;
+      const updatedText = updatedAt ? `Updated ${formatTime(updatedAt)}` : "Not updated yet";
+
+      return `
+        <div class="item ${item.checked ? "checked" : ""}" style="border-left-color:${color}" data-id="${item.id}">
+          <button class="check-btn ${item.checked ? "on" : ""}" data-action="check" data-id="${item.id}">
+            ${item.checked ? "✓" : ""}
+          </button>
+
+          <div class="name-wrap">
+            <div class="name">${escapeHtml(item.name || "")}</div>
+            <div class="meta">${updatedText}</div>
+          </div>
+
+          ${
+            deleteMode
+              ? `<button class="delete-btn" data-action="delete" data-id="${item.id}">Delete</button>`
+              : `
+                <select class="color-select" data-action="color" data-id="${item.id}">
+                  <option value="gray" ${item.color === "gray" ? "selected" : ""}>Gray</option>
+                  <option value="red" ${item.color === "red" ? "selected" : ""}>Red</option>
+                  <option value="orange" ${item.color === "orange" ? "selected" : ""}>Orange</option>
+                  <option value="yellow" ${item.color === "yellow" ? "selected" : ""}>Yellow</option>
+                  <option value="green" ${item.color === "green" ? "selected" : ""}>Green</option>
+                  <option value="blue" ${item.color === "blue" ? "selected" : ""}>Blue</option>
+                  <option value="purple" ${item.color === "purple" ? "selected" : ""}>Purple</option>
+                </select>
+              `
+          }
+        </div>
+      `;
+    }
+
+    function bindItemEvents() {
+      document.querySelectorAll('[data-action="check"]').forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          const item = items.find(x => x.id === id);
+
+          if (!item) return;
+
+          btn.disabled = true;
+
+          try {
+            await updateDoc(doc(db, "prepItems", id), {
+              checked: !item.checked,
+              updatedAt: serverTimestamp()
+            });
+
+            showToast("Saved");
+          } catch (error) {
+            console.error(error);
+            showToast("Save failed");
+            btn.disabled = false;
+          }
+        });
+      });
+
+      document.querySelectorAll('[data-action="color"]').forEach(select => {
+        select.addEventListener("change", async () => {
+          const id = select.dataset.id;
+
+          try {
+            await updateDoc(doc(db, "prepItems", id), {
+              color: select.value,
+              updatedAt: serverTimestamp()
+            });
+
+            showToast("Color saved");
+          } catch (error) {
+            console.error(error);
+            showToast("Save failed");
+          }
+        });
+      });
+
+      document.querySelectorAll('[data-action="delete"]').forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          const item = items.find(x => x.id === id);
+
+          if (!item) return;
+
+          const ok = confirm(`Delete "${item.name}"?`);
+          if (!ok) return;
+
+          try {
+            await deleteDoc(doc(db, "prepItems", id));
+            showToast("Deleted");
+          } catch (error) {
+            console.error(error);
+            showToast("Delete failed");
+          }
+        });
+      });
+    }
+
+    async function seedDefaultItemsIfEmpty() {
+      const snap = await getDocs(prepRef);
+
+      if (!snap.empty) return;
+
+      const batch = writeBatch(db);
+
+      defaultItems.forEach(item => {
+        const newDoc = doc(prepRef);
+
+        batch.set(newDoc, {
+          ...item,
+          checked: false,
+          updatedAt: serverTimestamp()
+        });
+      });
+
+      await batch.commit();
+    }
+
+    addBtn.addEventListener("click", () => {
+      nameInput.value = "";
+      colorInput.value = "gray";
+      modalBg.classList.add("show");
+
+      setTimeout(() => {
+        nameInput.focus();
+      }, 100);
+    });
+
+    cancelAddBtn.addEventListener("click", () => {
+      modalBg.classList.remove("show");
+    });
+
+    modalBg.addEventListener("click", event => {
+      if (event.target === modalBg) {
+        modalBg.classList.remove("show");
+      }
+    });
+
+    saveAddBtn.addEventListener("click", async () => {
+      const section = sectionInput.value.trim();
+      const name = nameInput.value.trim();
+      const color = colorInput.value;
+
+      if (!name) {
+        showToast("Item name required");
+        nameInput.focus();
+        return;
+      }
+
+      saveAddBtn.disabled = true;
+
+      try {
+        const sectionItems = items.filter(item => item.section === section);
+        const maxSort = sectionItems.reduce((max, item) => {
+          return Math.max(max, Number(item.sort || 0));
+        }, 0);
+
+        await addDoc(prepRef, {
+          section,
+          name,
+          color,
+          checked: false,
+          sort: maxSort + 1,
+          updatedAt: serverTimestamp()
+        });
+
+        modalBg.classList.remove("show");
+        showToast("Item added");
+      } catch (error) {
+        console.error(error);
+        showToast("Add failed");
+      } finally {
+        saveAddBtn.disabled = false;
+      }
+    });
+
+    deleteModeBtn.addEventListener("click", () => {
+      deleteMode = !deleteMode;
+
+      deleteModeBtn.textContent = deleteMode ? "Delete Mode: ON" : "Delete Mode: OFF";
+      deleteModeBtn.classList.toggle("active", deleteMode);
+
+      render();
+    });
+
+    onSnapshot(
+      prepRef,
+      async snapshot => {
+        items = snapshot.docs.map(docSnap => ({
+          id: docSnap.id,
+          ...docSnap.data()
+        }));
+
+        items.sort((a, b) => {
+          const sectionCompare = String(a.section || "").localeCompare(String(b.section || ""));
+
+          if (sectionCompare !== 0) return sectionCompare;
+
+          const sortA = Number(a.sort || 9999);
+          const sortB = Number(b.sort || 9999);
+
+          if (sortA !== sortB) return sortA - sortB;
+
+          return String(a.name || "").localeCompare(String(b.name || ""));
+        });
+
+        statusText.textContent = `Connected • ${items.length} items • Real-time sync`;
+
+        render();
+
+        if (items.length === 0) {
+          try {
+            await seedDefaultItemsIfEmpty();
+          } catch (error) {
+            console.error(error);
+          }
+        }
+      },
+      error => {
+        console.error(error);
+
+        statusText.textContent = "Connection error";
+
+        content.innerHTML = `
+          <div class="empty">
+            Cannot connect to Firestore.<br>
+            Check Firestore Rules and firebaseConfig.
+          </div>
+        `;
+      }
+    );
+  </script>
+</body>
+</html>
