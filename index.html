@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=980, initial-scale=0.38, maximum-scale=2, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
   <style>
     * {
@@ -9,25 +9,25 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    html {
-      width: 980px;
-      min-width: 980px;
-    }
-
+    html,
     body {
+      width: 100%;
+      min-width: 0;
       margin: 0;
-      padding: 8px;
+      padding: 0;
       background: #ffffff;
       font-family: Arial, Helvetica, sans-serif;
       color: #000;
-      width: 980px;
-      min-width: 980px;
-      overflow-x: auto;
+      overflow-x: hidden;
+    }
+
+    body {
+      padding: 4px;
     }
 
     .page {
-      width: 964px;
-      min-width: 964px;
+      width: 100%;
+      min-width: 0;
       max-width: none;
       margin: 0 auto;
       background: #fff;
@@ -35,11 +35,11 @@
 
     .title {
       text-align: center;
-      font-size: 58px;
+      font-size: 30px;
       font-weight: 900;
-      letter-spacing: 12px;
+      letter-spacing: 7px;
       line-height: 1;
-      margin: 4px 0 14px;
+      margin: 2px 0 8px;
     }
 
     .controls {
@@ -48,19 +48,21 @@
       z-index: 50;
       background: rgba(255, 255, 255, .96);
       border: 2px solid #000;
-      padding: 8px;
-      margin-bottom: 12px;
+      padding: 5px;
+      margin-bottom: 8px;
       display: grid;
-      grid-template-columns: 1fr auto auto auto auto;
-      gap: 8px;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
       align-items: center;
     }
 
     .status {
-      font-size: 14px;
+      grid-column: 1 / -1;
+      font-size: 11px;
       font-weight: 700;
       color: #111;
-      white-space: nowrap;
+      white-space: normal;
+      line-height: 1.2;
     }
 
     button {
@@ -68,8 +70,8 @@
       background: #fff;
       color: #000;
       font-weight: 900;
-      padding: 9px 12px;
-      font-size: 14px;
+      padding: 7px 4px;
+      font-size: 11px;
       cursor: pointer;
     }
 
@@ -91,33 +93,34 @@
 
     .addPanel {
       display: grid;
-      grid-template-columns: 130px 1fr auto;
-      gap: 8px;
-      margin-bottom: 12px;
+      grid-template-columns: 72px 1fr 82px;
+      gap: 5px;
+      margin-bottom: 8px;
       border: 2px solid #000;
-      padding: 8px;
+      padding: 5px;
     }
 
     select,
     input {
       border: 2px solid #000;
-      padding: 9px;
-      font-size: 15px;
+      padding: 6px 4px;
+      font-size: 11px;
       font-weight: 700;
       background: #fff;
       color: #000;
+      min-width: 0;
     }
 
     #newSection {
-      border-radius: 22px;
-      padding-left: 14px;
-      padding-right: 14px;
+      border-radius: 18px;
+      padding-left: 7px;
+      padding-right: 7px;
     }
 
     .layout {
       display: grid !important;
       grid-template-columns: 1fr 1fr !important;
-      gap: 20px;
+      gap: 6px;
       align-items: start;
       width: 100%;
     }
@@ -126,7 +129,7 @@
     .rightCol {
       display: flex;
       flex-direction: column;
-      gap: 22px;
+      gap: 8px;
       min-width: 0;
     }
 
@@ -134,21 +137,22 @@
       border: 2px solid #000;
       background: #fff;
       width: 100%;
+      min-width: 0;
     }
 
     .boxTitle {
       text-align: center;
-      font-size: 32px;
+      font-size: 21px;
       font-weight: 900;
-      padding: 4px 8px;
+      padding: 3px 4px;
       border-bottom: 2px solid #000;
       line-height: 1.1;
     }
 
     .row {
       display: grid;
-      grid-template-columns: 58px 1fr 106px;
-      min-height: 40px;
+      grid-template-columns: 28px 1fr 55px;
+      min-height: 31px;
       border-bottom: 1.5px solid #000;
       background: #fff;
     }
@@ -163,19 +167,20 @@
       justify-content: center;
       border-right: 1.5px solid #000;
       cursor: pointer;
-      min-height: 40px;
-      padding: 4px;
+      min-height: 31px;
+      padding: 2px;
     }
 
     .itemName {
       display: flex;
       align-items: center;
-      padding: 4px 14px;
-      font-size: 20px;
+      padding: 3px 5px;
+      font-size: 12px;
       font-weight: 900;
-      line-height: 1.1;
+      line-height: 1.05;
       cursor: pointer;
       word-break: break-word;
+      min-width: 0;
     }
 
     .colorCell {
@@ -183,45 +188,45 @@
       align-items: center;
       justify-content: center;
       border-left: 1.5px solid #000;
-      min-height: 40px;
-      padding: 4px;
+      min-height: 31px;
+      padding: 2px;
     }
 
     .colorSelect {
-      width: 96px;
-      height: 32px;
+      width: 50px;
+      height: 24px;
       border: 1.5px solid #000;
       background: #fff;
       color: #000;
-      padding: 1px 2px;
-      font-size: 13px;
+      padding: 0 1px;
+      font-size: 9px;
       font-weight: 900;
       cursor: pointer;
-      border-radius: 18px;
+      border-radius: 14px;
     }
 
     .deleteBtn {
-      width: 96px;
-      height: 32px;
+      width: 50px;
+      height: 24px;
       border: 1.5px solid #000;
       background: #ff0000;
       color: #fff;
-      padding: 1px 2px;
-      font-size: 12px;
+      padding: 0 1px;
+      font-size: 9px;
       font-weight: 900;
       cursor: pointer;
-      border-radius: 18px;
+      border-radius: 14px;
     }
 
     .customCheck {
-      width: 28px;
-      height: 28px;
+      width: 20px;
+      height: 20px;
       border: 2px solid #000;
       background: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
+      font-size: 20px;
       line-height: 1;
       font-weight: 900;
       color: transparent;
@@ -251,8 +256,100 @@
     .loading {
       text-align: center;
       padding: 40px;
-      font-size: 22px;
+      font-size: 18px;
       font-weight: 900;
+    }
+
+    @media (min-width: 780px) {
+      body {
+        padding: 12px;
+      }
+
+      .page {
+        max-width: 1080px;
+      }
+
+      .title {
+        font-size: 58px;
+        letter-spacing: 12px;
+        margin: 4px 0 14px;
+      }
+
+      .controls {
+        padding: 8px;
+        margin-bottom: 12px;
+        grid-template-columns: 1fr auto auto auto auto;
+        gap: 8px;
+      }
+
+      .status {
+        grid-column: auto;
+        font-size: 14px;
+        white-space: nowrap;
+      }
+
+      button {
+        padding: 9px 12px;
+        font-size: 14px;
+      }
+
+      .addPanel {
+        grid-template-columns: 130px 1fr auto;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding: 8px;
+      }
+
+      select,
+      input {
+        padding: 9px;
+        font-size: 15px;
+      }
+
+      .layout {
+        gap: 20px;
+      }
+
+      .leftCol,
+      .rightCol {
+        gap: 22px;
+      }
+
+      .boxTitle {
+        font-size: 32px;
+        padding: 4px 8px;
+      }
+
+      .row {
+        grid-template-columns: 58px 1fr 106px;
+        min-height: 40px;
+      }
+
+      .checkCell,
+      .colorCell {
+        min-height: 40px;
+        padding: 4px;
+      }
+
+      .itemName {
+        font-size: 20px;
+        padding: 4px 14px;
+        line-height: 1.1;
+      }
+
+      .colorSelect,
+      .deleteBtn {
+        width: 96px;
+        height: 32px;
+        font-size: 13px;
+        padding: 1px 2px;
+      }
+
+      .customCheck {
+        width: 28px;
+        height: 28px;
+        font-size: 28px;
+      }
     }
   </style>
 </head>
