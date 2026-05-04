@@ -91,6 +91,13 @@
       border-color: #111;
     }
 
+    #importBtn {
+      grid-column: 1 / -1;
+      background: #000;
+      color: #fff;
+      border-color: #000;
+    }
+
     .addPanel {
       display: grid;
       grid-template-columns: 72px 1fr 82px;
@@ -278,7 +285,7 @@
       .controls {
         padding: 8px;
         margin-bottom: 12px;
-        grid-template-columns: 1fr auto auto auto auto;
+        grid-template-columns: 1fr auto auto auto auto auto;
         gap: 8px;
       }
 
@@ -286,6 +293,10 @@
         grid-column: auto;
         font-size: 14px;
         white-space: nowrap;
+      }
+
+      #importBtn {
+        grid-column: auto;
       }
 
       button {
@@ -364,6 +375,7 @@
       <button onclick="refreshNow()">REFRESH</button>
       <button onclick="toggleAddPanel()">ADD</button>
       <button id="deleteModeBtn" onclick="toggleDeleteMode()">DELETE MODE</button>
+      <button id="importBtn" onclick="importFullList()">IMPORT FULL LIST</button>
     </div>
 
     <div id="addPanel" class="addPanel">
@@ -419,56 +431,103 @@
 
     const SECTION_ORDER = ["Prep", "Sauce", "Bakery", "Cookie"];
 
-    const defaultItems = [
-      { section: "Prep", item: "Apricot", checked: false, color: "none", sort: 1 },
-      { section: "Prep", item: "Bacon", checked: false, color: "none", sort: 2 },
-      { section: "Prep", item: "Basil pick", checked: false, color: "none", sort: 3 },
-      { section: "Prep", item: "Boiled egg", checked: false, color: "none", sort: 4 },
-      { section: "Prep", item: "Bread crumb", checked: false, color: "none", sort: 5 },
-      { section: "Prep", item: "Brown honey butter", checked: false, color: "none", sort: 6 },
-      { section: "Prep", item: "Burrata", checked: false, color: "none", sort: 7 },
-      { section: "Prep", item: "Cabbage grill", checked: false, color: "none", sort: 8 },
-      { section: "Prep", item: "Cabbage slice", checked: false, color: "none", sort: 9 },
-      { section: "Prep", item: "Caramelised onion", checked: false, color: "none", sort: 10 },
-      { section: "Prep", item: "Cashew nut crush", checked: false, color: "none", sort: 11 },
-      { section: "Prep", item: "Cashew nut whole", checked: false, color: "none", sort: 12 },
-      { section: "Prep", item: "Chilli oil", checked: false, color: "none", sort: 13 },
-      { section: "Prep", item: "Cook rice", checked: false, color: "none", sort: 14 },
-      { section: "Prep", item: "Cos", checked: false, color: "none", sort: 15 },
-      { section: "Prep", item: "Cream pancake", checked: false, color: "none", sort: 16 },
-      { section: "Prep", item: "Crouton", checked: false, color: "none", sort: 17 },
-      { section: "Prep", item: "Dill", checked: false, color: "none", sort: 18 },
-      { section: "Prep", item: "Edamame", checked: false, color: "none", sort: 19 },
-      { section: "Prep", item: "Feta", checked: false, color: "none", sort: 20 },
-      { section: "Prep", item: "Focaccia", checked: false, color: "none", sort: 21 },
-      { section: "Prep", item: "Fried chicken", checked: false, color: "none", sort: 22 },
-      { section: "Prep", item: "Fry kale", checked: false, color: "none", sort: 23 },
-      { section: "Prep", item: "Garlic butter", checked: false, color: "none", sort: 24 },
+    const rawList = [
+      ["Prep", "Apricot"],
+      ["Prep", "Bacon"],
+      ["Prep", "Basil pick"],
+      ["Prep", "Boiled egg"],
+      ["Prep", "Bread crumb"],
+      ["Prep", "Brown honey butter"],
+      ["Prep", "Burrato"],
+      ["Prep", "Cabbage grill"],
+      ["Prep", "Cabbage slice"],
+      ["Prep", "Caramelised onion"],
+      ["Prep", "Cashew nut crush"],
+      ["Prep", "Cashew nut whole"],
+      ["Prep", "Chilli oil"],
+      ["Prep", "Cook rice"],
+      ["Prep", "Cos"],
+      ["Prep", "Cream pancake"],
+      ["Prep", "Crouton"],
+      ["Prep", "Dill"],
+      ["Prep", "Edamame"],
+      ["Prep", "Feta"],
+      ["Prep", "Focaccia"],
+      ["Prep", "Fried chicken"],
+      ["Prep", "Fry kale"],
+      ["Prep", "Garlic butter"],
+      ["Prep", "Gnocchi"],
+      ["Prep", "Grill chicken"],
+      ["Prep", "Gruyere"],
+      ["Prep", "Hashbrown"],
+      ["Prep", "Kale slice"],
+      ["Prep", "Kha stock"],
+      ["Prep", "Lime leaf cut"],
+      ["Prep", "Mushroom pickle"],
+      ["Prep", "Onion cut"],
+      ["Prep", "Pancake mix"],
+      ["Prep", "Parmesan"],
+      ["Prep", "Pistachio"],
+      ["Prep", "Poached egg"],
+      ["Prep", "Prawn"],
+      ["Prep", "Provolone"],
+      ["Prep", "Pumpkin"],
+      ["Prep", "Pumpkin seed"],
+      ["Prep", "Raisin"],
+      ["Prep", "Rocket"],
+      ["Prep", "Scramble egg"],
+      ["Prep", "Shiitake mushroom"],
+      ["Prep", "Shiso"],
+      ["Prep", "Smoke salmon"],
+      ["Prep", "Spring onion"],
+      ["Prep", "Sweet potato"],
+      ["Prep", "Tamato slice"],
+      ["Prep", "White miso butter"],
 
-      { section: "Sauce", item: "Aioli", checked: false, color: "none", sort: 1 },
-      { section: "Sauce", item: "Basil dressing", checked: false, color: "none", sort: 2 },
-      { section: "Sauce", item: "Caesar", checked: false, color: "none", sort: 3 },
-      { section: "Sauce", item: "Garlic confit", checked: false, color: "none", sort: 4 },
-      { section: "Sauce", item: "Katsu", checked: false, color: "none", sort: 5 },
-      { section: "Sauce", item: "Lemon juice", checked: false, color: "none", sort: 6 },
-      { section: "Sauce", item: "Miso mayo", checked: false, color: "none", sort: 7 },
-      { section: "Sauce", item: "Ponzu", checked: false, color: "none", sort: 8 },
-      { section: "Sauce", item: "Potato starch", checked: false, color: "none", sort: 9 },
-      { section: "Sauce", item: "Shoyu", checked: false, color: "none", sort: 10 },
-      { section: "Sauce", item: "Somtum", checked: false, color: "none", sort: 11 },
-      { section: "Sauce", item: "Somtum with fish sauce", checked: false, color: "none", sort: 12 },
-      { section: "Sauce", item: "Spicy mayo", checked: false, color: "none", sort: 13 },
-      { section: "Sauce", item: "Tahini", checked: false, color: "none", sort: 14 },
-      { section: "Sauce", item: "Teriyaki", checked: false, color: "none", sort: 15 },
-      { section: "Sauce", item: "Tom yum mayo", checked: false, color: "none", sort: 16 },
-      { section: "Sauce", item: "Yuzu benny", checked: false, color: "none", sort: 17 },
+      ["Sauce", "Aioli"],
+      ["Sauce", "Basil dressing"],
+      ["Sauce", "Caesar"],
+      ["Sauce", "Garlic confit"],
+      ["Sauce", "Katsu"],
+      ["Sauce", "Lemon juice"],
+      ["Sauce", "Miso mayo"],
+      ["Sauce", "Ponzu"],
+      ["Sauce", "Potato starch"],
+      ["Sauce", "Shoyu"],
+      ["Sauce", "Somtum"],
+      ["Sauce", "Somtum with fish sauce"],
+      ["Sauce", "Spicy mayo"],
+      ["Sauce", "Tahini"],
+      ["Sauce", "Teriyaki"],
+      ["Sauce", "Tom yum mayo"],
+      ["Sauce", "Yuzu benny"],
 
-      { section: "Bakery", item: "Banana bread", checked: false, color: "none", sort: 1 },
-      { section: "Bakery", item: "Carrot cake", checked: false, color: "none", sort: 2 },
-      { section: "Bakery", item: "Cream cheese", checked: false, color: "none", sort: 3 },
-      { section: "Bakery", item: "Miso butter", checked: false, color: "none", sort: 4 },
-      { section: "Bakery", item: "Orange cake", checked: false, color: "none", sort: 5 }
+      ["Bakery", "Banana bread"],
+      ["Bakery", "Carrot cake"],
+      ["Bakery", "Cream cheese"],
+      ["Bakery", "Miso butter"],
+      ["Bakery", "Orange cake"],
+
+      ["Cookie", "Almond cookie"],
+      ["Cookie", "Lemon basil cookie"],
+      ["Cookie", "Matcha cookie"],
+      ["Cookie", "Miso cookie"]
     ];
+
+    const defaultItems = rawList.map(([section, item], index) => {
+      const sort = rawList
+        .slice(0, index + 1)
+        .filter(row => row[0] === section)
+        .length;
+
+      return {
+        section,
+        item,
+        checked: false,
+        color: "none",
+        sort
+      };
+    });
 
     function setStatus(text) {
       document.getElementById("status").textContent = text;
@@ -521,20 +580,67 @@
       const snap = await getDocs(prepRef);
       if (!snap.empty) return;
 
-      const batch = writeBatch(db);
+      await writeFullList(false);
+    }
+
+    async function writeFullList(shouldDeleteExisting) {
+      const currentSnap = await getDocs(prepRef);
+
+      let batch = writeBatch(db);
+      let opCount = 0;
+
+      if (shouldDeleteExisting) {
+        currentSnap.forEach(docSnap => {
+          batch.delete(doc(db, "prepItems", docSnap.id));
+          opCount++;
+
+          if (opCount >= 450) {
+            throw new Error("Too many items to delete in one batch");
+          }
+        });
+      }
 
       defaultItems.forEach(data => {
         const id = makeId(data.section, data.item);
 
         batch.set(doc(db, "prepItems", id), {
           id,
-          ...data,
+          section: data.section,
+          item: data.item,
+          checked: false,
+          color: "none",
+          sort: data.sort,
           updatedAt: serverTimestamp()
         });
+
+        opCount++;
       });
 
       await batch.commit();
     }
+
+    async function importFullList() {
+      const ok = confirm(
+        "Import full prep list?\n\nThis will delete old prep items and replace them with the full list."
+      );
+
+      if (!ok) return;
+
+      setSavingState(true);
+      setStatus("Importing full list...");
+
+      try {
+        await writeFullList(true);
+        setStatus("Full list imported ✅");
+      } catch (error) {
+        console.error(error);
+        setStatus("Import failed ❌ " + (error.message || ""));
+      } finally {
+        setSavingState(false);
+      }
+    }
+
+    window.importFullList = importFullList;
 
     function loadRealtime() {
       setStatus("Loading...");
