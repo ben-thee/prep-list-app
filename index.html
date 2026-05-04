@@ -91,13 +91,6 @@
       border-color: #111;
     }
 
-    #importBtn {
-      grid-column: 1 / -1;
-      background: #000;
-      color: #fff;
-      border-color: #000;
-    }
-
     .addPanel {
       display: grid;
       grid-template-columns: 72px 1fr 82px;
@@ -285,7 +278,7 @@
       .controls {
         padding: 8px;
         margin-bottom: 12px;
-        grid-template-columns: 1fr auto auto auto auto auto;
+        grid-template-columns: 1fr auto auto auto auto;
         gap: 8px;
       }
 
@@ -293,10 +286,6 @@
         grid-column: auto;
         font-size: 14px;
         white-space: nowrap;
-      }
-
-      #importBtn {
-        grid-column: auto;
       }
 
       button {
@@ -374,17 +363,12 @@
       <button id="updateBtn" onclick="manualSave()">UPDATE</button>
       <button onclick="refreshNow()">REFRESH</button>
       <button onclick="toggleAddPanel()">ADD</button>
+      <button onclick="addSection()">ADD SECTION</button>
       <button id="deleteModeBtn" onclick="toggleDeleteMode()">DELETE MODE</button>
-      <button id="importBtn" onclick="importFullList()">IMPORT FULL LIST</button>
     </div>
 
     <div id="addPanel" class="addPanel">
-      <select id="newSection">
-        <option value="Prep">Prep</option>
-        <option value="Sauce">Sauce</option>
-        <option value="Bakery">Bakery</option>
-        <option value="Cookie">Cookie</option>
-      </select>
+      <select id="newSection"></select>
 
       <input id="newItem" placeholder="New item name">
 
@@ -406,9 +390,7 @@
       updateDoc,
       deleteDoc,
       onSnapshot,
-      getDocs,
-      serverTimestamp,
-      writeBatch
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -427,107 +409,43 @@
     let items = [];
     let deleteMode = false;
     let isSaving = false;
-    let firstLoadDone = false;
 
-    const SECTION_ORDER = ["Prep", "Sauce", "Bakery", "Cookie"];
+    const BASE_SECTIONS = ["Prep", "Sauce", "Bakery", "Cookie"];
+    const CUSTOM_SECTIONS_KEY = "prep_custom_sections_v1";
 
-    const rawList = [
-      ["Prep", "Apricot"],
-      ["Prep", "Bacon"],
-      ["Prep", "Basil pick"],
-      ["Prep", "Boiled egg"],
-      ["Prep", "Bread crumb"],
-      ["Prep", "Brown honey butter"],
-      ["Prep", "Burrato"],
-      ["Prep", "Cabbage grill"],
-      ["Prep", "Cabbage slice"],
-      ["Prep", "Caramelised onion"],
-      ["Prep", "Cashew nut crush"],
-      ["Prep", "Cashew nut whole"],
-      ["Prep", "Chilli oil"],
-      ["Prep", "Cook rice"],
-      ["Prep", "Cos"],
-      ["Prep", "Cream pancake"],
-      ["Prep", "Crouton"],
-      ["Prep", "Dill"],
-      ["Prep", "Edamame"],
-      ["Prep", "Feta"],
-      ["Prep", "Focaccia"],
-      ["Prep", "Fried chicken"],
-      ["Prep", "Fry kale"],
-      ["Prep", "Garlic butter"],
-      ["Prep", "Gnocchi"],
-      ["Prep", "Grill chicken"],
-      ["Prep", "Gruyere"],
-      ["Prep", "Hashbrown"],
-      ["Prep", "Kale slice"],
-      ["Prep", "Kha stock"],
-      ["Prep", "Lime leaf cut"],
-      ["Prep", "Mushroom pickle"],
-      ["Prep", "Onion cut"],
-      ["Prep", "Pancake mix"],
-      ["Prep", "Parmesan"],
-      ["Prep", "Pistachio"],
-      ["Prep", "Poached egg"],
-      ["Prep", "Prawn"],
-      ["Prep", "Provolone"],
-      ["Prep", "Pumpkin"],
-      ["Prep", "Pumpkin seed"],
-      ["Prep", "Raisin"],
-      ["Prep", "Rocket"],
-      ["Prep", "Scramble egg"],
-      ["Prep", "Shiitake mushroom"],
-      ["Prep", "Shiso"],
-      ["Prep", "Smoke salmon"],
-      ["Prep", "Spring onion"],
-      ["Prep", "Sweet potato"],
-      ["Prep", "Tamato slice"],
-      ["Prep", "White miso butter"],
+    function getStoredCustomSections() {
+      try {
+        const saved = localStorage.getItem(CUSTOM_SECTIONS_KEY);
+        const parsed = saved ? JSON.parse(saved) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
 
-      ["Sauce", "Aioli"],
-      ["Sauce", "Basil dressing"],
-      ["Sauce", "Caesar"],
-      ["Sauce", "Garlic confit"],
-      ["Sauce", "Katsu"],
-      ["Sauce", "Lemon juice"],
-      ["Sauce", "Miso mayo"],
-      ["Sauce", "Ponzu"],
-      ["Sauce", "Potato starch"],
-      ["Sauce", "Shoyu"],
-      ["Sauce", "Somtum"],
-      ["Sauce", "Somtum with fish sauce"],
-      ["Sauce", "Spicy mayo"],
-      ["Sauce", "Tahini"],
-      ["Sauce", "Teriyaki"],
-      ["Sauce", "Tom yum mayo"],
-      ["Sauce", "Yuzu benny"],
+    function saveCustomSections(sections) {
+      localStorage.setItem(CUSTOM_SECTIONS_KEY, JSON.stringify(sections));
+    }
 
-      ["Bakery", "Banana bread"],
-      ["Bakery", "Carrot cake"],
-      ["Bakery", "Cream cheese"],
-      ["Bakery", "Miso butter"],
-      ["Bakery", "Orange cake"],
+    function normalizeSectionName(value) {
+      return String(value || "")
+        .trim()
+        .replace(/\s+/g, " ");
+    }
 
-      ["Cookie", "Almond cookie"],
-      ["Cookie", "Lemon basil cookie"],
-      ["Cookie", "Matcha cookie"],
-      ["Cookie", "Miso cookie"]
-    ];
+    function getAllSections() {
+      const fromItems = items
+        .map(item => normalizeSectionName(item.section))
+        .filter(Boolean);
 
-    const defaultItems = rawList.map(([section, item], index) => {
-      const sort = rawList
-        .slice(0, index + 1)
-        .filter(row => row[0] === section)
-        .length;
+      const combined = [
+        ...BASE_SECTIONS,
+        ...getStoredCustomSections(),
+        ...fromItems
+      ];
 
-      return {
-        section,
-        item,
-        checked: false,
-        color: "none",
-        sort
-      };
-    });
+      return Array.from(new Set(combined));
+    }
 
     function setStatus(text) {
       document.getElementById("status").textContent = text;
@@ -546,6 +464,21 @@
       }
     }
 
+    function updateSectionDropdown() {
+      const select = document.getElementById("newSection");
+      const current = select.value;
+      const sections = getAllSections();
+
+      select.innerHTML = sections.map(section => {
+        const safe = escapeAttr(section);
+        return `<option value="${safe}">${escapeHtml(section)}</option>`;
+      }).join("");
+
+      if (sections.includes(current)) {
+        select.value = current;
+      }
+    }
+
     function updateDeleteModeButton() {
       const btn = document.getElementById("deleteModeBtn");
 
@@ -559,13 +492,16 @@
     }
 
     function sortItemsLocal() {
-      const order = { Prep: 1, Sauce: 2, Bakery: 3, Cookie: 4 };
+      const sections = getAllSections();
 
       items.sort((a, b) => {
-        const sa = order[a.section] || 99;
-        const sb = order[b.section] || 99;
+        const sa = sections.indexOf(a.section);
+        const sb = sections.indexOf(b.section);
 
-        if (sa !== sb) return sa - sb;
+        const sectionA = sa === -1 ? 999 : sa;
+        const sectionB = sb === -1 ? 999 : sb;
+
+        if (sectionA !== sectionB) return sectionA - sectionB;
 
         const sortA = Number(a.sort || 9999);
         const sortB = Number(b.sort || 9999);
@@ -576,92 +512,19 @@
       });
     }
 
-    async function seedDefaultItemsIfEmpty() {
-      const snap = await getDocs(prepRef);
-      if (!snap.empty) return;
-
-      await writeFullList(false);
-    }
-
-    async function writeFullList(shouldDeleteExisting) {
-      const currentSnap = await getDocs(prepRef);
-
-      let batch = writeBatch(db);
-      let opCount = 0;
-
-      if (shouldDeleteExisting) {
-        currentSnap.forEach(docSnap => {
-          batch.delete(doc(db, "prepItems", docSnap.id));
-          opCount++;
-
-          if (opCount >= 450) {
-            throw new Error("Too many items to delete in one batch");
-          }
-        });
-      }
-
-      defaultItems.forEach(data => {
-        const id = makeId(data.section, data.item);
-
-        batch.set(doc(db, "prepItems", id), {
-          id,
-          section: data.section,
-          item: data.item,
-          checked: false,
-          color: "none",
-          sort: data.sort,
-          updatedAt: serverTimestamp()
-        });
-
-        opCount++;
-      });
-
-      await batch.commit();
-    }
-
-    async function importFullList() {
-      const ok = confirm(
-        "Import full prep list?\n\nThis will delete old prep items and replace them with the full list."
-      );
-
-      if (!ok) return;
-
-      setSavingState(true);
-      setStatus("Importing full list...");
-
-      try {
-        await writeFullList(true);
-        setStatus("Full list imported ✅");
-      } catch (error) {
-        console.error(error);
-        setStatus("Import failed ❌ " + (error.message || ""));
-      } finally {
-        setSavingState(false);
-      }
-    }
-
-    window.importFullList = importFullList;
-
     function loadRealtime() {
       setStatus("Loading...");
 
       onSnapshot(
         prepRef,
-        async snapshot => {
+        snapshot => {
           items = snapshot.docs.map(docSnap => ({
             id: docSnap.id,
             ...docSnap.data()
           }));
 
-          if (items.length === 0 && !firstLoadDone) {
-            firstLoadDone = true;
-            setStatus("Creating prep list...");
-            await seedDefaultItemsIfEmpty();
-            return;
-          }
-
-          firstLoadDone = true;
           sortItemsLocal();
+          updateSectionDropdown();
           render();
           updateDeleteModeButton();
 
@@ -685,19 +548,25 @@
       }
 
       const groups = {};
-      SECTION_ORDER.forEach(section => groups[section] = []);
+      const sections = getAllSections();
 
-      items.forEach(item => {
-        if (!groups[item.section]) groups[item.section] = [];
-        groups[item.section].push(item);
+      sections.forEach(section => {
+        groups[section] = [];
       });
 
-      const leftHtml = renderBox("Prep", groups["Prep"] || []);
+      items.forEach(item => {
+        const section = normalizeSectionName(item.section) || "Other";
+        if (!groups[section]) groups[section] = [];
+        groups[section].push(item);
+      });
 
-      const rightHtml =
-        renderBox("Sauce", groups["Sauce"] || []) +
-        renderBox("Bakery", groups["Bakery"] || []) +
-        renderBox("Cookie", groups["Cookie"] || []);
+      const leftSection = sections[0] || "Prep";
+      const leftHtml = renderBox(leftSection, groups[leftSection] || []);
+
+      const rightHtml = sections
+        .slice(1)
+        .map(section => renderBox(section, groups[section] || []))
+        .join("");
 
       content.innerHTML = `
         <div class="layout">
@@ -812,6 +681,7 @@
 
     window.refreshNow = function() {
       setStatus("Refreshing... real-time already ON ✅");
+      updateSectionDropdown();
       render();
 
       setTimeout(() => {
@@ -856,9 +726,40 @@
       panel.style.display = panel.style.display === "none" ? "grid" : "none";
     };
 
+    window.addSection = function() {
+      const name = normalizeSectionName(prompt("New section name:"));
+
+      if (!name) {
+        setStatus("Section name required");
+        return;
+      }
+
+      const sections = getAllSections();
+
+      if (sections.includes(name)) {
+        setStatus("Section already exists ❌");
+        document.getElementById("newSection").value = name;
+        return;
+      }
+
+      const custom = getStoredCustomSections();
+      custom.push(name);
+      saveCustomSections(custom);
+
+      updateSectionDropdown();
+      document.getElementById("newSection").value = name;
+
+      setStatus("Section added ✅ " + name);
+    };
+
     window.addNewItem = async function() {
-      const section = document.getElementById("newSection").value;
+      const section = normalizeSectionName(document.getElementById("newSection").value);
       const itemName = document.getElementById("newItem").value.trim();
+
+      if (!section) {
+        setStatus("เลือก section ก่อน");
+        return;
+      }
 
       if (!itemName) {
         setStatus("ใส่ชื่อ item ก่อน");
@@ -928,9 +829,11 @@
     function escapeAttr(str) {
       return String(str || "")
         .replaceAll("\\", "\\\\")
-        .replaceAll("'", "\\'");
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
+    updateSectionDropdown();
     loadRealtime();
   </script>
 </body>
