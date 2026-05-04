@@ -244,45 +244,60 @@
 
     @media (max-width: 780px) {
       body {
-        padding: 8px;
+        padding: 6px;
+        overflow-x: auto;
+      }
+
+      .page {
+        width: 980px;
+        max-width: none;
+        margin: 0;
       }
 
       .title {
-        font-size: 44px;
-        letter-spacing: 7px;
-      }
-
-      .layout {
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
-
-      .rightCol {
-        gap: 16px;
-      }
-
-      .boxTitle {
-        font-size: 30px;
-      }
-
-      .itemName {
-        font-size: 19px;
+        font-size: 46px;
+        letter-spacing: 10px;
+        margin: 2px 0 10px;
       }
 
       .controls {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr auto auto auto auto;
+        gap: 8px;
+        padding: 8px;
       }
 
       .status {
-        grid-column: 1 / -1;
+        grid-column: auto;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      button {
+        padding: 9px 12px;
+        font-size: 14px;
       }
 
       .addPanel {
+        display: grid;
         grid-template-columns: 130px 1fr auto;
+        gap: 8px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .rightCol {
+        gap: 22px;
+      }
+
+      .boxTitle {
+        font-size: 32px;
       }
 
       .row {
-        grid-template-columns: 58px 1fr 104px;
+        grid-template-columns: 58px 1fr 106px;
         min-height: 40px;
       }
 
@@ -291,17 +306,16 @@
         min-height: 40px;
       }
 
+      .itemName {
+        font-size: 20px;
+        padding: 4px 14px;
+      }
+
       .colorSelect,
       .deleteBtn {
         width: 96px;
         height: 32px;
         font-size: 12px;
-      }
-    }
-
-    @media (max-width: 520px) {
-      .addPanel {
-        grid-template-columns: 1fr;
       }
     }
   </style>
