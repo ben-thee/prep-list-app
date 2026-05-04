@@ -529,6 +529,13 @@
       }
     }
 
+    function compareText(a, b) {
+      return String(a || "").localeCompare(String(b || ""), undefined, {
+        sensitivity: "base",
+        numeric: true
+      });
+    }
+
     function sortItemsLocal() {
       const sections = getAllSections();
 
@@ -541,12 +548,7 @@
 
         if (sectionA !== sectionB) return sectionA - sectionB;
 
-        const sortA = Number(a.sort || 9999);
-        const sortB = Number(b.sort || 9999);
-
-        if (sortA !== sortB) return sortA - sortB;
-
-        return String(a.item || "").localeCompare(String(b.item || ""));
+        return compareText(a.item, b.item);
       });
     }
 
@@ -596,6 +598,10 @@
         const section = normalizeSectionName(item.section) || "Other";
         if (!groups[section]) groups[section] = [];
         groups[section].push(item);
+      });
+
+      Object.keys(groups).forEach(section => {
+        groups[section].sort((a, b) => compareText(a.item, b.item));
       });
 
       const leftSection = sections[0] || "Prep";
@@ -719,6 +725,7 @@
 
     window.refreshNow = function() {
       setStatus("Refreshing... real-time already ON ✅");
+      sortItemsLocal();
       updateSectionDropdown();
       render();
 
@@ -782,6 +789,7 @@
 
       const custom = getStoredCustomSections();
       custom.push(name);
+      custom.sort(compareText);
       saveCustomSections(custom);
 
       updateSectionDropdown();
@@ -816,23 +824,18 @@
           return;
         }
 
-        const sectionItems = items.filter(x => x.section === section);
-        const maxSort = sectionItems.reduce((max, x) => {
-          return Math.max(max, Number(x.sort || 0));
-        }, 0);
-
         await setDoc(doc(db, "prepItems", id), {
           id,
           section,
           item: itemName,
           checked: false,
           color: "none",
-          sort: maxSort + 1,
+          sort: 9999,
           updatedAt: serverTimestamp()
         });
 
         document.getElementById("newItem").value = "";
-        setStatus("Added ✅");
+        setStatus("Added ✅ เรียงตามตัวอักษรแล้ว");
       } catch (error) {
         console.error(error);
         setStatus("Add failed ❌");
