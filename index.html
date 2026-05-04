@@ -85,10 +85,18 @@
       border-color: #000;
     }
 
-    #deleteModeBtn.deleteOn {
-      background: #111;
+    #deleteModeBtn {
+      width: 120px;
+      justify-self: end;
+      background: #000;
       color: #fff;
-      border-color: #111;
+      border-color: #000;
+    }
+
+    #deleteModeBtn.deleteOn {
+      background: #ff0000;
+      color: #fff;
+      border-color: #ff0000;
     }
 
     .addPanel {
@@ -291,6 +299,11 @@
       button {
         padding: 9px 12px;
         font-size: 14px;
+      }
+
+      #deleteModeBtn {
+        width: 140px;
+        justify-self: end;
       }
 
       .addPanel {
@@ -695,9 +708,9 @@
       render();
 
       if (deleteMode) {
-        setStatus("Delete mode ON — กด DELETE เพื่อลบ item");
+        setStatus("Delete mode ON");
       } else {
-        setStatus("Delete mode OFF");
+        setStatus("Loaded ✅ Auto save / real-time sync");
       }
     };
 
