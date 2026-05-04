@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="viewport" content="width=980, initial-scale=0.38, maximum-scale=2, user-scalable=yes">
 
   <style>
     * {
@@ -9,17 +9,26 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    html {
+      width: 980px;
+      min-width: 980px;
+    }
+
     body {
       margin: 0;
-      padding: 12px;
+      padding: 8px;
       background: #ffffff;
       font-family: Arial, Helvetica, sans-serif;
       color: #000;
+      width: 980px;
+      min-width: 980px;
+      overflow-x: auto;
     }
 
     .page {
-      width: 100%;
-      max-width: 1080px;
+      width: 964px;
+      min-width: 964px;
+      max-width: none;
       margin: 0 auto;
       background: #fff;
     }
@@ -51,6 +60,7 @@
       font-size: 14px;
       font-weight: 700;
       color: #111;
+      white-space: nowrap;
     }
 
     button {
@@ -105,10 +115,11 @@
     }
 
     .layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
       gap: 20px;
       align-items: start;
+      width: 100%;
     }
 
     .leftCol,
@@ -116,11 +127,13 @@
       display: flex;
       flex-direction: column;
       gap: 22px;
+      min-width: 0;
     }
 
     .box {
       border: 2px solid #000;
       background: #fff;
+      width: 100%;
     }
 
     .boxTitle {
@@ -240,83 +253,6 @@
       padding: 40px;
       font-size: 22px;
       font-weight: 900;
-    }
-
-    @media (max-width: 780px) {
-      body {
-        padding: 6px;
-        overflow-x: auto;
-      }
-
-      .page {
-        width: 980px;
-        max-width: none;
-        margin: 0;
-      }
-
-      .title {
-        font-size: 46px;
-        letter-spacing: 10px;
-        margin: 2px 0 10px;
-      }
-
-      .controls {
-        grid-template-columns: 1fr auto auto auto auto;
-        gap: 8px;
-        padding: 8px;
-      }
-
-      .status {
-        grid-column: auto;
-        font-size: 13px;
-        white-space: nowrap;
-      }
-
-      button {
-        padding: 9px 12px;
-        font-size: 14px;
-      }
-
-      .addPanel {
-        display: grid;
-        grid-template-columns: 130px 1fr auto;
-        gap: 8px;
-      }
-
-      .layout {
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-      }
-
-      .rightCol {
-        gap: 22px;
-      }
-
-      .boxTitle {
-        font-size: 32px;
-      }
-
-      .row {
-        grid-template-columns: 58px 1fr 106px;
-        min-height: 40px;
-      }
-
-      .checkCell,
-      .colorCell {
-        min-height: 40px;
-      }
-
-      .itemName {
-        font-size: 20px;
-        padding: 4px 14px;
-      }
-
-      .colorSelect,
-      .deleteBtn {
-        width: 96px;
-        height: 32px;
-        font-size: 12px;
-      }
     }
   </style>
 </head>
@@ -472,10 +408,12 @@
       items.sort((a, b) => {
         const sa = order[a.section] || 99;
         const sb = order[b.section] || 99;
+
         if (sa !== sb) return sa - sb;
 
         const sortA = Number(a.sort || 9999);
         const sortB = Number(b.sort || 9999);
+
         if (sortA !== sortB) return sortA - sortB;
 
         return String(a.item || "").localeCompare(String(b.item || ""));
@@ -490,6 +428,7 @@
 
       defaultItems.forEach(data => {
         const id = makeId(data.section, data.item);
+
         batch.set(doc(db, "prepItems", id), {
           id,
           ...data,
@@ -671,6 +610,7 @@
     window.refreshNow = function() {
       setStatus("Refreshing... real-time already ON ✅");
       render();
+
       setTimeout(() => {
         setStatus("Loaded ✅ Auto save / real-time sync");
       }, 500);
