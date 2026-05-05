@@ -4,563 +4,232 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
   <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      width: 100%; min-width: 0; margin: 0; padding: 0;
+      background: #ffffff; font-family: Arial, Helvetica, sans-serif;
+      color: #000; overflow-x: hidden;
     }
 
-    html,
-    body {
-      width: 100%;
-      min-width: 0;
-      margin: 0;
-      padding: 0;
-      background: #ffffff;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #000;
-      overflow-x: hidden;
-    }
+    body { padding: 4px; }
 
-    body {
-      padding: 4px;
-    }
-
-    .page {
-      width: 100%;
-      min-width: 0;
-      max-width: none;
-      margin: 0 auto;
-      background: #fff;
-    }
+    .page { width: 100%; min-width: 0; max-width: none; margin: 0 auto; background: #fff; }
 
     .title {
-      text-align: center;
-      font-size: 30px;
-      font-weight: 900;
-      letter-spacing: 7px;
-      line-height: 1;
-      margin: 2px 0 8px;
+      text-align: center; font-size: 30px; font-weight: 900;
+      letter-spacing: 7px; line-height: 1; margin: 2px 0 8px;
     }
 
     .controls {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(255, 255, 255, .96);
-      border: 2px solid #000;
-      padding: 5px;
-      margin-bottom: 8px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 5px;
-      align-items: center;
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,.96); border: 2px solid #000;
+      padding: 6px; margin-bottom: 8px; display: grid;
+      grid-template-columns: 1fr 1fr; gap: 6px; align-items: stretch;
     }
 
     .status {
-      grid-column: 1 / -1;
-      font-size: 11px;
-      font-weight: 700;
-      color: #111;
-      white-space: normal;
-      line-height: 1.2;
+      grid-column: 1 / -1; font-size: 11px; font-weight: 900;
+      color: #111; white-space: normal; line-height: 1.2;
+      border-bottom: 1.5px solid #000; padding-bottom: 5px; margin-bottom: 1px;
     }
 
     button {
-      border: 2px solid #000;
-      background: #fff;
-      color: #000;
-      font-weight: 900;
-      padding: 7px 4px;
-      font-size: 11px;
-      cursor: pointer;
+      border: 2px solid #000; background: #fff; color: #000;
+      font-weight: 900; padding: 8px 4px; font-size: 11px; cursor: pointer;
+      min-height: 34px; width: 100%;
     }
 
-    button:active {
-      transform: scale(.98);
-    }
+    button:active { transform: scale(.98); }
 
     #editModeBtn {
-      background: #000;
-      color: #fff;
-      border-color: #000;
+      background: #000; color: #fff; border-color: #000;
     }
 
     #editModeBtn.editOn {
-      background: #16a34a;
-      color: #fff;
-      border-color: #16a34a;
+      background: #16a34a; color: #fff; border-color: #16a34a;
     }
 
     #deleteModeBtn {
-      grid-column: 2;
-      justify-self: end;
-      width: 120px;
-      background: #000;
-      color: #fff;
-      border-color: #000;
+      background: #000; color: #fff; border-color: #000;
     }
 
     #deleteModeBtn.deleteOn {
-      background: #ff0000;
-      color: #fff;
-      border-color: #ff0000;
+      background: #ff0000; color: #fff; border-color: #ff0000;
     }
 
     .addPanel {
-      display: grid;
-      grid-template-columns: 72px 1fr 82px;
-      gap: 5px;
-      margin-bottom: 8px;
-      border: 2px solid #000;
-      padding: 5px;
+      display: grid; grid-template-columns: 72px 1fr 82px;
+      gap: 5px; margin-bottom: 8px; border: 2px solid #000; padding: 5px;
     }
 
-    select,
-    input,
-    textarea {
-      border: 2px solid #000;
-      padding: 6px 4px;
-      font-size: 11px;
-      font-weight: 700;
-      background: #fff;
-      color: #000;
-      min-width: 0;
+    select, input, textarea {
+      border: 2px solid #000; padding: 6px 4px; font-size: 11px;
+      font-weight: 700; background: #fff; color: #000; min-width: 0;
       font-family: Arial, Helvetica, sans-serif;
     }
 
-    #newSection {
-      border-radius: 18px;
-      padding-left: 7px;
-      padding-right: 7px;
-    }
+    #newSection { border-radius: 18px; padding-left: 7px; padding-right: 7px; }
 
     .layout {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr !important;
-      gap: 6px;
-      align-items: start;
-      width: 100%;
+      display: grid !important; grid-template-columns: 1fr 1fr !important;
+      gap: 6px; align-items: start; width: 100%;
     }
 
-    .leftCol,
-    .rightCol {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-width: 0;
-    }
+    .leftCol, .rightCol { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 
-    .box {
-      border: 2px solid #000;
-      background: #fff;
-      width: 100%;
-      min-width: 0;
-    }
+    .box { border: 2px solid #000; background: #fff; width: 100%; min-width: 0; }
 
     .boxTitle {
-      text-align: center;
-      font-size: 21px;
-      font-weight: 900;
-      padding: 3px 4px;
-      border-bottom: 2px solid #000;
-      line-height: 1.1;
+      text-align: center; font-size: 21px; font-weight: 900;
+      padding: 3px 4px; border-bottom: 2px solid #000; line-height: 1.1;
     }
 
     .row {
-      display: grid;
-      grid-template-columns: 28px 1fr 55px;
-      min-height: 31px;
-      border-bottom: 1.5px solid #000;
-      background: #fff;
+      display: grid; grid-template-columns: 28px 1fr 55px;
+      min-height: 31px; border-bottom: 1.5px solid #000; background: #fff;
     }
 
-    .row:last-child {
-      border-bottom: 0;
-    }
+    .row:last-child { border-bottom: 0; }
 
     .checkCell {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-right: 1.5px solid #000;
-      cursor: pointer;
-      min-height: 31px;
-      padding: 2px;
+      display: flex; align-items: center; justify-content: center;
+      border-right: 1.5px solid #000; cursor: pointer; min-height: 31px; padding: 2px;
     }
 
     .itemName {
-      display: flex;
-      align-items: center;
-      padding: 3px 5px;
-      font-size: 12px;
-      font-weight: 900;
-      line-height: 1.05;
-      cursor: pointer;
-      word-break: break-word;
-      min-width: 0;
+      display: flex; align-items: center; padding: 3px 5px;
+      font-size: 12px; font-weight: 900; line-height: 1.05;
+      cursor: pointer; word-break: break-word; min-width: 0;
     }
 
     .itemName.hasRecipe::after {
-      content: "•";
-      color: #16a34a;
-      font-size: 14px;
-      margin-left: 4px;
-      line-height: 1;
+      content: "•"; color: #16a34a; font-size: 14px; margin-left: 4px; line-height: 1;
     }
 
     .colorCell {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-left: 1.5px solid #000;
-      min-height: 31px;
-      padding: 2px;
+      display: flex; align-items: center; justify-content: center;
+      border-left: 1.5px solid #000; min-height: 31px; padding: 2px;
     }
 
     .colorSelect {
-      width: 50px;
-      height: 24px;
-      border: 1.5px solid #000;
-      background: #fff;
-      color: #000;
-      padding: 0 1px;
-      font-size: 9px;
-      font-weight: 900;
-      cursor: pointer;
-      border-radius: 14px;
+      width: 50px; height: 24px; border: 1.5px solid #000; background: #fff;
+      color: #000; padding: 0 1px; font-size: 9px; font-weight: 900;
+      cursor: pointer; border-radius: 14px;
     }
 
     .deleteBtn {
-      width: 50px;
-      height: 24px;
-      border: 1.5px solid #000;
-      background: #ff0000;
-      color: #fff;
-      padding: 0 1px;
-      font-size: 9px;
-      font-weight: 900;
-      cursor: pointer;
-      border-radius: 14px;
+      width: 50px; height: 24px; border: 1.5px solid #000;
+      background: #ff0000; color: #fff; padding: 0 1px;
+      font-size: 9px; font-weight: 900; cursor: pointer; border-radius: 14px;
     }
 
     .customCheck {
-      width: 20px;
-      height: 20px;
-      border: 2px solid #000;
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      line-height: 1;
-      font-weight: 900;
-      color: transparent;
-      user-select: none;
+      width: 20px; height: 20px; border: 2px solid #000; background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; line-height: 1; font-weight: 900;
+      color: transparent; user-select: none;
     }
 
-    .customCheck.checked {
-      color: #ff0000;
-    }
+    .customCheck.checked { color: #ff0000; }
 
     .row.row-red { background: rgba(255, 0, 0, .15); }
     .row.row-green { background: rgba(0, 180, 0, .14); }
     .row.row-yellow { background: rgba(255, 210, 0, .24); }
     .row.row-blue { background: rgba(0, 145, 255, .14); }
 
-    .loading {
-      text-align: center;
-      padding: 40px;
-      font-size: 18px;
-      font-weight: 900;
-    }
+    .loading { text-align: center; padding: 40px; font-size: 18px; font-weight: 900; }
 
     .modalOverlay {
-      position: fixed;
-      inset: 0;
-      z-index: 999;
-      background: rgba(0,0,0,.55);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 12px;
+      position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,.55); display: none;
+      align-items: center; justify-content: center; padding: 12px;
     }
 
-    .modalOverlay.show {
-      display: flex;
-    }
+    .modalOverlay.show { display: flex; }
 
     .modalBox {
-      width: min(720px, 100%);
-      max-height: 88vh;
-      overflow: auto;
-      background: #fff;
-      border: 3px solid #000;
-      padding: 10px;
+      width: min(720px, 100%); max-height: 88vh; overflow: auto;
+      background: #fff; border: 3px solid #000; padding: 10px;
       box-shadow: 0 14px 40px rgba(0,0,0,.35);
     }
 
     .modalHeader {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 8px;
-      align-items: center;
-      border-bottom: 2px solid #000;
-      padding-bottom: 8px;
-      margin-bottom: 8px;
+      display: grid; grid-template-columns: 1fr auto; gap: 8px;
+      align-items: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 8px;
     }
 
-    .modalTitle {
-      font-size: 18px;
-      font-weight: 900;
-      line-height: 1.1;
-    }
-
-    .modalSub {
-      font-size: 11px;
-      font-weight: 800;
-      margin-top: 4px;
-      color: #333;
-    }
+    .modalTitle { font-size: 18px; font-weight: 900; line-height: 1.1; }
+    .modalSub { font-size: 11px; font-weight: 800; margin-top: 4px; color: #333; }
 
     .closeBtn {
-      width: 70px;
-      background: #000;
-      color: #fff;
-      border-color: #000;
+      width: 70px; background: #000; color: #fff; border-color: #000;
     }
 
     .recipeTextarea {
-      width: 100%;
-      min-height: 180px;
-      resize: vertical;
-      font-size: 16px;
-      line-height: 1.35;
-      font-weight: 700;
-      padding: 10px;
+      width: 100%; min-height: 260px; resize: vertical;
+      font-size: 16px; line-height: 1.35; font-weight: 700; padding: 10px;
     }
 
-    .recipeTools {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin: 8px 0;
+    .recipeTextView {
+      width: 100%; min-height: 160px; white-space: pre-wrap;
+      border: 2px solid #000; padding: 10px; font-size: 16px;
+      line-height: 1.35; font-weight: 700; background: #fff;
     }
 
-    .recipeTools button {
-      background: #000;
-      color: #fff;
-      border-color: #000;
-      font-size: 12px;
-      padding: 8px 4px;
-    }
-
-    .recipeToolHint {
-      margin: 4px 0 8px;
-      font-size: 11px;
-      font-weight: 800;
-      color: #333;
-      line-height: 1.25;
-    }
-
-    .checklistBox {
-      border: 2px solid #000;
-      margin-top: 8px;
-      background: #fff;
-    }
-
-    .checklistTitle {
-      border-bottom: 2px solid #000;
-      font-size: 13px;
-      font-weight: 900;
-      padding: 6px 8px;
-      background: #f3f4f6;
-    }
-
-    .recipeLine {
-      display: grid;
-      grid-template-columns: 32px 1fr;
-      gap: 6px;
-      align-items: start;
-      border-bottom: 1.5px solid #000;
-      padding: 7px 8px;
-      font-size: 14px;
-      font-weight: 800;
-      line-height: 1.25;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .recipeLine:last-child {
-      border-bottom: 0;
-    }
-
-    .recipeLine input[type="checkbox"] {
-      width: 22px;
-      height: 22px;
-      margin: 0;
-      accent-color: #16a34a;
-    }
-
-    .recipeLine.done .recipeLineText {
-      text-decoration: line-through;
-      opacity: .55;
-    }
-
-    .recipeEmpty {
-      color: #777;
-      font-style: italic;
-      font-weight: 800;
-      padding: 10px;
-      border: 2px solid #000;
-    }
-
-    .modalFoot {
-      margin-top: 8px;
-      font-size: 11px;
-      font-weight: 900;
-      color: #111;
-    }
+    .recipeEmpty { color: #777; font-style: italic; }
+    .modalFoot { margin-top: 8px; font-size: 11px; font-weight: 900; color: #111; }
 
     @media (min-width: 780px) {
-      body {
-        padding: 12px;
-      }
-
-      .page {
-        max-width: 1080px;
-      }
-
-      .title {
-        font-size: 58px;
-        letter-spacing: 12px;
-        margin: 4px 0 14px;
-      }
+      body { padding: 12px; }
+      .page { max-width: 1080px; }
+      .title { font-size: 58px; letter-spacing: 12px; margin: 4px 0 14px; }
 
       .controls {
-        padding: 8px;
-        margin-bottom: 12px;
-        grid-template-columns: 1fr auto auto auto auto;
+        padding: 8px; margin-bottom: 12px;
+        grid-template-columns: 1fr 140px 140px;
+        grid-template-rows: auto auto;
         gap: 8px;
+        align-items: stretch;
       }
 
       .status {
         grid-column: 1;
-        grid-row: 1;
+        grid-row: 1 / 3;
+        align-self: stretch;
+        display: flex;
+        align-items: center;
         font-size: 14px;
         white-space: nowrap;
+        border-bottom: 0;
+        padding-bottom: 0;
+        margin-bottom: 0;
       }
 
-      button {
-        padding: 9px 12px;
-        font-size: 14px;
-      }
+      button { padding: 9px 12px; font-size: 14px; min-height: 40px; }
 
-      .controls button:nth-of-type(1) {
-        grid-column: 2;
-        grid-row: 1;
-      }
-
-      .controls button:nth-of-type(2) {
-        grid-column: 3;
-        grid-row: 1;
-      }
-
-      .controls button:nth-of-type(3) {
-        grid-column: 4;
-        grid-row: 1;
-      }
-
-      #editModeBtn {
-        grid-column: 4;
-        grid-row: 2;
-        width: 130px;
-        justify-self: end;
-      }
-
-      #deleteModeBtn {
-        grid-column: 5;
-        grid-row: 2;
-        width: 140px;
-        justify-self: end;
-        margin-top: 0;
-      }
+      .controls button:nth-of-type(1) { grid-column: 2; grid-row: 1; }
+      .controls button:nth-of-type(2) { grid-column: 3; grid-row: 1; }
+      #editModeBtn { grid-column: 2; grid-row: 2; }
+      #deleteModeBtn { grid-column: 3; grid-row: 2; }
 
       .addPanel {
-        grid-template-columns: 130px 1fr auto;
-        gap: 8px;
-        margin-bottom: 12px;
-        padding: 8px;
+        grid-template-columns: 130px 1fr auto; gap: 8px;
+        margin-bottom: 12px; padding: 8px;
       }
 
-      select,
-      input {
-        padding: 9px;
-        font-size: 15px;
-      }
-
-      .layout {
-        gap: 20px;
-      }
-
-      .leftCol,
-      .rightCol {
-        gap: 22px;
-      }
-
-      .boxTitle {
-        font-size: 32px;
-        padding: 4px 8px;
-      }
-
-      .row {
-        grid-template-columns: 58px 1fr 106px;
-        min-height: 40px;
-      }
-
-      .checkCell,
-      .colorCell {
-        min-height: 40px;
-        padding: 4px;
-      }
-
-      .itemName {
-        font-size: 20px;
-        padding: 4px 14px;
-        line-height: 1.1;
-      }
-
-      .itemName.hasRecipe::after {
-        font-size: 20px;
-        margin-left: 8px;
-      }
-
-      .colorSelect,
-      .deleteBtn {
-        width: 96px;
-        height: 32px;
-        font-size: 13px;
-        padding: 1px 2px;
-      }
-
-      .customCheck {
-        width: 28px;
-        height: 28px;
-        font-size: 28px;
-      }
-
-      .modalTitle {
-        font-size: 26px;
-      }
-
-      .modalSub,
-      .modalFoot,
-      .recipeToolHint {
-        font-size: 13px;
-      }
-
-      .recipeLine {
-        font-size: 16px;
-      }
+      select, input { padding: 9px; font-size: 15px; }
+      .layout { gap: 20px; }
+      .leftCol, .rightCol { gap: 22px; }
+      .boxTitle { font-size: 32px; padding: 4px 8px; }
+      .row { grid-template-columns: 58px 1fr 106px; min-height: 40px; }
+      .checkCell, .colorCell { min-height: 40px; padding: 4px; }
+      .itemName { font-size: 20px; padding: 4px 14px; line-height: 1.1; }
+      .itemName.hasRecipe::after { font-size: 20px; margin-left: 8px; }
+      .colorSelect, .deleteBtn { width: 96px; height: 32px; font-size: 13px; padding: 1px 2px; }
+      .customCheck { width: 28px; height: 28px; font-size: 28px; }
+      .modalTitle { font-size: 26px; }
+      .modalSub, .modalFoot { font-size: 13px; }
     }
   </style>
 </head>
@@ -583,9 +252,7 @@
       <button onclick="addNewItem()">ADD ITEM</button>
     </div>
 
-    <div id="content">
-      <div class="loading">Loading...</div>
-    </div>
+    <div id="content"><div class="loading">Loading...</div></div>
   </div>
 
   <div id="recipeModal" class="modalOverlay" onclick="overlayClose(event)">
@@ -597,7 +264,6 @@
         </div>
         <button class="closeBtn" onclick="closeRecipeModal()">CLOSE</button>
       </div>
-
       <div id="modalBody"></div>
       <div id="modalFoot" class="modalFoot"></div>
     </div>
@@ -606,14 +272,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import {
-      getFirestore,
-      collection,
-      doc,
-      setDoc,
-      updateDoc,
-      deleteDoc,
-      onSnapshot,
-      serverTimestamp
+      getFirestore, collection, doc, setDoc, updateDoc, deleteDoc,
+      onSnapshot, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -635,8 +295,6 @@
     let isSaving = false;
     let activeRecipeItemId = null;
     let recipeSaveTimer = null;
-    let recipeCheckSaveTimer = null;
-    let viewModeRecipeText = "";
 
     const BASE_SECTIONS = ["Prep", "Sauce", "Bakery", "Cookie"];
     const CUSTOM_SECTIONS_KEY = "prep_custom_sections_v1";
@@ -646,9 +304,7 @@
         const saved = localStorage.getItem(CUSTOM_SECTIONS_KEY);
         const parsed = saved ? JSON.parse(saved) : [];
         return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return [];
-      }
+      } catch { return []; }
     }
 
     function saveCustomSections(sections) {
@@ -656,145 +312,77 @@
     }
 
     function normalizeSectionName(value) {
-      return String(value || "")
-        .trim()
-        .replace(/\s+/g, " ");
+      return String(value || "").trim().replace(/\s+/g, " ");
     }
 
     function getAllSections() {
-      const fromItems = items
-        .map(item => normalizeSectionName(item.section))
-        .filter(Boolean);
-
-      const combined = [
-        ...BASE_SECTIONS,
-        ...getStoredCustomSections(),
-        ...fromItems
-      ];
-
-      return Array.from(new Set(combined));
+      const fromItems = items.map(item => normalizeSectionName(item.section)).filter(Boolean);
+      return Array.from(new Set([...BASE_SECTIONS, ...getStoredCustomSections(), ...fromItems]));
     }
 
-    function setStatus(text) {
-      document.getElementById("status").textContent = text;
-    }
+    function setStatus(text) { document.getElementById("status").textContent = text; }
 
     function setSavingState(value) {
       isSaving = value;
-      setStatus(value ? "Saving..." : "Loaded ✅ Auto save / real-time sync");
     }
 
     function updateSectionDropdown() {
       const select = document.getElementById("newSection");
       const current = select.value;
       const sections = getAllSections();
-
       select.innerHTML = sections.map(section => {
         const safe = escapeAttr(section);
         return `<option value="${safe}">${escapeHtml(section)}</option>`;
       }).join("");
-
-      if (sections.includes(current)) {
-        select.value = current;
-      }
+      if (sections.includes(current)) select.value = current;
     }
 
     function updateDeleteModeButton() {
       const btn = document.getElementById("deleteModeBtn");
-
-      if (deleteMode) {
-        btn.classList.add("deleteOn");
-        btn.textContent = "DELETE ON";
-      } else {
-        btn.classList.remove("deleteOn");
-        btn.textContent = "DELETE MODE";
-      }
+      if (deleteMode) { btn.classList.add("deleteOn"); btn.textContent = "DELETE ON"; }
+      else { btn.classList.remove("deleteOn"); btn.textContent = "DELETE MODE"; }
     }
 
     function updateEditModeButton() {
       const btn = document.getElementById("editModeBtn");
-
-      if (editMode) {
-        btn.classList.add("editOn");
-        btn.textContent = "EDIT MODE ON";
-      } else {
-        btn.classList.remove("editOn");
-        btn.textContent = "EDIT MODE OFF";
-      }
+      if (editMode) { btn.classList.add("editOn"); btn.textContent = "EDIT MODE ON"; }
+      else { btn.classList.remove("editOn"); btn.textContent = "EDIT MODE OFF"; }
     }
 
     function compareText(a, b) {
-      return String(a || "").localeCompare(String(b || ""), undefined, {
-        sensitivity: "base",
-        numeric: true
-      });
+      return String(a || "").localeCompare(String(b || ""), undefined, { sensitivity: "base", numeric: true });
     }
 
     function sortItemsLocal() {
       const sections = getAllSections();
-
       items.sort((a, b) => {
-        const sa = sections.indexOf(a.section);
-        const sb = sections.indexOf(b.section);
-
-        const sectionA = sa === -1 ? 999 : sa;
-        const sectionB = sb === -1 ? 999 : sb;
-
+        const sectionA = sections.indexOf(a.section) === -1 ? 999 : sections.indexOf(a.section);
+        const sectionB = sections.indexOf(b.section) === -1 ? 999 : sections.indexOf(b.section);
         if (sectionA !== sectionB) return sectionA - sectionB;
-
         return compareText(a.item, b.item);
       });
     }
 
     function loadRealtime() {
       setStatus("Loading...");
-
-      onSnapshot(
-        prepRef,
-        snapshot => {
-          items = snapshot.docs.map(docSnap => ({
-            id: docSnap.id,
-            ...docSnap.data()
-          }));
-
-          sortItemsLocal();
-          updateSectionDropdown();
-          render();
-          updateDeleteModeButton();
-          updateEditModeButton();
-
-          if (activeRecipeItemId) {
-            const item = items.find(x => x.id === activeRecipeItemId);
-            if (item && document.getElementById("recipeModal").classList.contains("show")) {
-              updateRecipeChecklistOnly(item);
-            }
-          }
-
-          setStatus("Loaded ✅ Auto save / real-time sync");
-        },
-        error => {
-          console.error(error);
-          setStatus("Firebase error ❌ Check Firestore Rules");
-          document.getElementById("content").innerHTML =
-            `<div class="loading">Cannot connect to Firebase</div>`;
-        }
-      );
+      onSnapshot(prepRef, snapshot => {
+        items = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+        sortItemsLocal(); updateSectionDropdown(); render(); updateDeleteModeButton(); updateEditModeButton();
+        setStatus("Loaded ✅ Auto save / real-time sync");
+      }, error => {
+        console.error(error);
+        setStatus("Firebase error ❌ Check Firestore Rules");
+        document.getElementById("content").innerHTML = `<div class="loading">Cannot connect to Firebase</div>`;
+      });
     }
 
     function render() {
       const content = document.getElementById("content");
-
-      if (!items.length) {
-        content.innerHTML = `<div class="loading">No items</div>`;
-        return;
-      }
+      if (!items.length) { content.innerHTML = `<div class="loading">No items</div>`; return; }
 
       const groups = {};
       const sections = getAllSections();
-
-      sections.forEach(section => {
-        groups[section] = [];
-      });
+      sections.forEach(section => { groups[section] = []; });
 
       items.forEach(item => {
         const section = normalizeSectionName(item.section) || "Other";
@@ -802,33 +390,18 @@
         groups[section].push(item);
       });
 
-      Object.keys(groups).forEach(section => {
-        groups[section].sort((a, b) => compareText(a.item, b.item));
-      });
+      Object.keys(groups).forEach(section => { groups[section].sort((a, b) => compareText(a.item, b.item)); });
 
       const leftSection = sections[0] || "Prep";
       const leftHtml = renderBox(leftSection, groups[leftSection] || []);
+      const rightHtml = sections.slice(1).map(section => renderBox(section, groups[section] || [])).join("");
 
-      const rightHtml = sections
-        .slice(1)
-        .map(section => renderBox(section, groups[section] || []))
-        .join("");
-
-      content.innerHTML = `
-        <div class="layout">
-          <div class="leftCol">${leftHtml}</div>
-          <div class="rightCol">${rightHtml}</div>
-        </div>
-      `;
+      content.innerHTML = `<div class="layout"><div class="leftCol">${leftHtml}</div><div class="rightCol">${rightHtml}</div></div>`;
     }
 
     function renderBox(title, list) {
       if (!list.length) return "";
-
-      let html = `
-        <div class="box">
-          <div class="boxTitle">${escapeHtml(title)}</div>
-      `;
+      let html = `<div class="box"><div class="boxTitle">${escapeHtml(title)}</div>`;
 
       list.forEach(item => {
         const checkedClass = item.checked ? "checked" : "";
@@ -838,13 +411,8 @@
         const safeName = escapeAttr(item.item);
 
         let rightControl = "";
-
         if (deleteMode) {
-          rightControl = `
-            <button class="deleteBtn" onclick="confirmDelete('${safeId}', '${safeName}'); event.stopPropagation();">
-              DELETE
-            </button>
-          `;
+          rightControl = `<button class="deleteBtn" onclick="confirmDelete('${safeId}', '${safeName}'); event.stopPropagation();">DELETE</button>`;
         } else {
           rightControl = `
             <select class="colorSelect" onchange="changeColor('${safeId}', this.value)" onclick="event.stopPropagation()">
@@ -853,25 +421,15 @@
               <option value="green" ${item.color === "green" ? "selected" : ""}>Green</option>
               <option value="yellow" ${item.color === "yellow" ? "selected" : ""}>Yellow</option>
               <option value="blue" ${item.color === "blue" ? "selected" : ""}>Blue</option>
-            </select>
-          `;
+            </select>`;
         }
 
         html += `
           <div class="row ${rowColor}">
-            <div class="checkCell" onclick="toggleCheck('${safeId}')">
-              <div class="customCheck ${checkedClass}">✓</div>
-            </div>
-
-            <div class="itemName ${hasRecipe}" onclick="openRecipeModal('${safeId}')">
-              ${escapeHtml(item.item)}
-            </div>
-
-            <div class="colorCell">
-              ${rightControl}
-            </div>
-          </div>
-        `;
+            <div class="checkCell" onclick="toggleCheck('${safeId}')"><div class="customCheck ${checkedClass}">✓</div></div>
+            <div class="itemName ${hasRecipe}" onclick="openRecipeModal('${safeId}')">${escapeHtml(item.item)}</div>
+            <div class="colorCell">${rightControl}</div>
+          </div>`;
       });
 
       html += `</div>`;
@@ -880,315 +438,84 @@
 
     window.toggleCheck = async function(id) {
       if (deleteMode || isSaving) return;
-
-      const item = items.find(x => x.id === id);
-      if (!item) return;
-
-      item.checked = !item.checked;
-      render();
-
-      await saveItemChange(item);
+      const item = items.find(x => x.id === id); if (!item) return;
+      item.checked = !item.checked; render(); await saveItemChange(item);
     };
 
     window.changeColor = async function(id, color) {
       if (isSaving) return;
-
-      const item = items.find(x => x.id === id);
-      if (!item) return;
-
-      item.color = color || "none";
-      render();
-
-      await saveItemChange(item);
+      const item = items.find(x => x.id === id); if (!item) return;
+      item.color = color || "none"; render(); await saveItemChange(item);
     };
 
     async function saveItemChange(item) {
-      setSavingState(true);
-
+      setSavingState(true); setStatus("Saving...");
       try {
         await updateDoc(doc(db, "prepItems", item.id), {
           checked: !!item.checked,
           color: item.color || "none",
           updatedAt: serverTimestamp()
         });
-
         setStatus("Saved ✅ Auto save / real-time sync");
-      } catch (error) {
-        console.error(error);
-        setStatus("Save failed ❌");
-      } finally {
-        isSaving = false;
-      }
+      } catch (error) { console.error(error); setStatus("Save failed ❌"); }
+      finally { setSavingState(false); }
     }
 
     window.toggleEditMode = function() {
       editMode = !editMode;
-
-      if (editMode && deleteMode) {
-        deleteMode = false;
-        updateDeleteModeButton();
-      }
-
-      updateEditModeButton();
-      render();
-
+      if (editMode && deleteMode) { deleteMode = false; updateDeleteModeButton(); }
+      updateEditModeButton(); render();
       setStatus(editMode ? "Edit mode ON — แตะชื่อเพื่อแก้ recipe" : "Edit mode OFF — แตะชื่อเพื่อดู recipe");
     };
 
     window.toggleDeleteMode = function() {
       deleteMode = !deleteMode;
-
-      if (deleteMode && editMode) {
-        editMode = false;
-        updateEditModeButton();
-      }
-
-      updateDeleteModeButton();
-      render();
-
+      if (deleteMode && editMode) { editMode = false; updateEditModeButton(); }
+      updateDeleteModeButton(); render();
       setStatus(deleteMode ? "Delete mode ON" : "Loaded ✅ Auto save / real-time sync");
     };
 
     window.openRecipeModal = function(id) {
-      const item = items.find(x => x.id === id);
-      if (!item) return;
-
+      const item = items.find(x => x.id === id); if (!item) return;
       activeRecipeItemId = id;
       const recipe = String(item.recipe || item.note || "");
-      viewModeRecipeText = recipe;
-
       document.getElementById("modalTitle").textContent = item.item;
-      document.getElementById("modalSub").textContent = editMode
-        ? "EDIT MODE ON — recipe auto save"
-        : "VIEW MODE — recipe read only";
-      document.getElementById("modalFoot").textContent = editMode
-        ? "พิมพ์แล้วจะ save อัตโนมัติ / ช่องติ๊กแต่ละบรรทัดก็ save อัตโนมัติ"
-        : "ช่องติ๊ก save ได้ / ปุ่มคูณใน View mode เป็นแค่ preview ไม่แก้สูตรจริง";
-
-      renderRecipeModalBody(item, recipe);
-      document.getElementById("recipeModal").classList.add("show");
-    };
-
-    function renderRecipeModalBody(item, recipeText) {
-      let editHtml = "";
+      document.getElementById("modalSub").textContent = editMode ? "EDIT MODE ON — recipe auto save" : "VIEW MODE — recipe read only";
+      document.getElementById("modalFoot").textContent = editMode ? "พิมพ์แล้วจะ save อัตโนมัติ" : "เปิด Edit mode เพื่อแก้ไข recipe";
 
       if (editMode) {
-        editHtml = `
-          <textarea id="recipeInput" class="recipeTextarea" placeholder="ใส่ ingredient / recipe / note ที่นี่...">${escapeHtml(recipeText)}</textarea>
-        `;
-      }
-
-      const toolsHtml = `
-        <div class="recipeTools">
-          <button onclick="multiplyRecipeNumbers(0.5)">×0.5</button>
-          <button onclick="multiplyRecipeNumbers(2)">×2</button>
-          <button onclick="multiplyRecipeNumbers(3)">×3</button>
-          <button onclick="multiplyRecipeCustom()">×?</button>
-        </div>
-        <div class="recipeToolHint">
-          ปุ่มคูณจะคูณเฉพาะตัวเลขทั้งหมดใน recipe เช่น 100g → 200g, 1.5 tbsp → 3 tbsp
-        </div>
-      `;
-
-      document.getElementById("modalBody").innerHTML = `
-        ${editHtml}
-        ${toolsHtml}
-        <div id="recipeChecklist"></div>
-      `;
-
-      if (editMode) {
+        document.getElementById("modalBody").innerHTML = `<textarea id="recipeInput" class="recipeTextarea" placeholder="ใส่ ingredient / recipe / note ที่นี่...">${escapeHtml(recipe)}</textarea>`;
         setTimeout(() => {
           const textarea = document.getElementById("recipeInput");
           if (!textarea) return;
-
           textarea.focus();
-          textarea.addEventListener("input", () => {
-            scheduleRecipeSave(textarea.value);
-            renderRecipeChecklist(textarea.value, getCurrentRecipeChecks());
-          });
+          textarea.addEventListener("input", () => scheduleRecipeSave(textarea.value));
         }, 0);
-      }
-
-      renderRecipeChecklist(recipeText, getRecipeChecks(item));
-    }
-
-    function updateRecipeChecklistOnly(item) {
-      const recipeText = editMode
-        ? String(document.getElementById("recipeInput")?.value ?? item.recipe ?? "")
-        : viewModeRecipeText || String(item.recipe || "");
-
-      renderRecipeChecklist(recipeText, getRecipeChecks(item));
-    }
-
-    function recipeLines(recipeText) {
-      return String(recipeText || "")
-        .split(/\r?\n/)
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
-    }
-
-    function getRecipeChecks(item) {
-      const checks = item && item.recipeChecks && typeof item.recipeChecks === "object"
-        ? item.recipeChecks
-        : {};
-
-      return { ...checks };
-    }
-
-    function getCurrentRecipeChecks() {
-      const item = items.find(x => x.id === activeRecipeItemId);
-      return getRecipeChecks(item);
-    }
-
-    function renderRecipeChecklist(recipeText, checks) {
-      const box = document.getElementById("recipeChecklist");
-      if (!box) return;
-
-      const lines = recipeLines(recipeText);
-
-      if (!lines.length) {
-        box.innerHTML = `<div class="recipeEmpty">ยังไม่มี recipe/note สำหรับ item นี้</div>`;
-        return;
-      }
-
-      const rows = lines.map((line, index) => {
-        const key = String(index);
-        const isDone = !!checks[key];
-        return `
-          <label class="recipeLine ${isDone ? "done" : ""}">
-            <input type="checkbox" ${isDone ? "checked" : ""} onchange="toggleRecipeLine('${key}', this.checked)">
-            <span class="recipeLineText">${escapeHtml(line)}</span>
-          </label>
-        `;
-      }).join("");
-
-      box.innerHTML = `
-        <div class="checklistBox">
-          <div class="checklistTitle">INGREDIENT / RECIPE CHECKLIST</div>
-          ${rows}
-        </div>
-      `;
-    }
-
-    window.toggleRecipeLine = function(key, checked) {
-      const item = items.find(x => x.id === activeRecipeItemId);
-      if (!item) return;
-
-      const checks = getRecipeChecks(item);
-      checks[key] = checked;
-      item.recipeChecks = checks;
-
-      const currentText = editMode
-        ? String(document.getElementById("recipeInput")?.value || "")
-        : viewModeRecipeText || String(item.recipe || "");
-
-      renderRecipeChecklist(currentText, checks);
-      scheduleRecipeCheckSave(item.id, checks);
-    };
-
-    function scheduleRecipeCheckSave(id, checks) {
-      if (recipeCheckSaveTimer) clearTimeout(recipeCheckSaveTimer);
-
-      setStatus("Checklist saving...");
-
-      recipeCheckSaveTimer = setTimeout(async () => {
-        try {
-          await updateDoc(doc(db, "prepItems", id), {
-            recipeChecks: checks,
-            updatedAt: serverTimestamp()
-          });
-          setStatus("Checklist saved ✅");
-        } catch (error) {
-          console.error(error);
-          setStatus("Checklist save failed ❌");
-        }
-      }, 250);
-    }
-
-    window.multiplyRecipeNumbers = function(multiplier) {
-      const item = items.find(x => x.id === activeRecipeItemId);
-      if (!item) return;
-
-      let currentText = "";
-
-      if (editMode) {
-        const textarea = document.getElementById("recipeInput");
-        currentText = textarea ? textarea.value : String(item.recipe || "");
-        const nextText = multiplyNumbersInText(currentText, multiplier);
-
-        if (textarea) textarea.value = nextText;
-        item.recipe = nextText;
-
-        renderRecipeChecklist(nextText, getRecipeChecks(item));
-        scheduleRecipeSave(nextText);
       } else {
-        currentText = viewModeRecipeText || String(item.recipe || "");
-        viewModeRecipeText = multiplyNumbersInText(currentText, multiplier);
-        renderRecipeModalBody(item, viewModeRecipeText);
-      }
-    };
-
-    window.multiplyRecipeCustom = function() {
-      const raw = prompt("คูณกี่เท่า? เช่น 2 หรือ 0.5");
-      if (raw === null) return;
-
-      const multiplier = Number(String(raw).trim());
-
-      if (!Number.isFinite(multiplier)) {
-        setStatus("Multiplier invalid ❌");
-        return;
+        const view = recipe.trim()
+          ? escapeHtml(recipe)
+          : `<span class="recipeEmpty">ยังไม่มี recipe/note สำหรับ item นี้</span>`;
+        document.getElementById("modalBody").innerHTML = `<div class="recipeTextView">${view}</div>`;
       }
 
-      multiplyRecipeNumbers(multiplier);
+      document.getElementById("recipeModal").classList.add("show");
     };
-
-    function multiplyNumbersInText(text, multiplier) {
-      return String(text || "").replace(/-?\d+(?:\.\d+)?/g, match => {
-        const original = Number(match);
-        if (!Number.isFinite(original)) return match;
-
-        const result = original * multiplier;
-        return formatNumber(result);
-      });
-    }
-
-    function formatNumber(value) {
-      if (Number.isInteger(value)) return String(value);
-
-      const rounded = Math.round(value * 1000) / 1000;
-      return String(rounded).replace(/\.?0+$/, "");
-    }
 
     window.overlayClose = function(event) {
       if (event.target && event.target.id === "recipeModal") closeRecipeModal();
     };
 
     window.closeRecipeModal = function() {
-      if (recipeSaveTimer) {
-        clearTimeout(recipeSaveTimer);
-        recipeSaveTimer = null;
-      }
-
-      if (recipeCheckSaveTimer) {
-        clearTimeout(recipeCheckSaveTimer);
-        recipeCheckSaveTimer = null;
-      }
-
+      if (recipeSaveTimer) { clearTimeout(recipeSaveTimer); recipeSaveTimer = null; }
       document.getElementById("recipeModal").classList.remove("show");
       activeRecipeItemId = null;
-      viewModeRecipeText = "";
     };
 
     function scheduleRecipeSave(value) {
       if (!activeRecipeItemId) return;
-
-      const item = items.find(x => x.id === activeRecipeItemId);
-      if (item) item.recipe = value;
-
+      const item = items.find(x => x.id === activeRecipeItemId); if (item) item.recipe = value;
       if (recipeSaveTimer) clearTimeout(recipeSaveTimer);
-
       setStatus("Recipe saving...");
-
       recipeSaveTimer = setTimeout(() => saveRecipeNow(activeRecipeItemId, value), 550);
     }
 
@@ -1198,7 +525,6 @@
           recipe: value,
           updatedAt: serverTimestamp()
         });
-
         setStatus("Recipe saved ✅");
       } catch (error) {
         console.error(error);
@@ -1208,21 +534,11 @@
 
     window.confirmDelete = async function(id, itemName) {
       if (!deleteMode || isSaving) return;
-
-      const ok = confirm("Delete this item?\n\n" + itemName);
-      if (!ok) return;
-
-      setSavingState(true);
-
-      try {
-        await deleteDoc(doc(db, "prepItems", id));
-        setStatus("Deleted ✅");
-      } catch (error) {
-        console.error(error);
-        setStatus("Delete failed ❌");
-      } finally {
-        isSaving = false;
-      }
+      const ok = confirm("Delete this item?\n\n" + itemName); if (!ok) return;
+      setSavingState(true); setStatus("Deleting " + itemName + "...");
+      try { await deleteDoc(doc(db, "prepItems", id)); setStatus("Deleted ✅"); }
+      catch (error) { console.error(error); setStatus("Delete failed ❌"); }
+      finally { setSavingState(false); }
     };
 
     window.toggleAddPanel = function() {
@@ -1232,89 +548,35 @@
 
     window.addSection = function() {
       const name = normalizeSectionName(prompt("New section name:"));
-
-      if (!name) {
-        setStatus("Section name required");
-        return;
-      }
-
+      if (!name) { setStatus("Section name required"); return; }
       const sections = getAllSections();
-
-      if (sections.includes(name)) {
-        setStatus("Section already exists ❌");
-        document.getElementById("newSection").value = name;
-        return;
-      }
-
-      const custom = getStoredCustomSections();
-      custom.push(name);
-      custom.sort(compareText);
-      saveCustomSections(custom);
-
-      updateSectionDropdown();
-      document.getElementById("newSection").value = name;
-
+      if (sections.includes(name)) { setStatus("Section already exists ❌"); document.getElementById("newSection").value = name; return; }
+      const custom = getStoredCustomSections(); custom.push(name); custom.sort(compareText); saveCustomSections(custom);
+      updateSectionDropdown(); document.getElementById("newSection").value = name;
       setStatus("Section added ✅ " + name);
     };
 
     window.addNewItem = async function() {
       const section = normalizeSectionName(document.getElementById("newSection").value);
       const itemName = document.getElementById("newItem").value.trim();
-
-      if (!section) {
-        setStatus("เลือก section ก่อน");
-        return;
-      }
-
-      if (!itemName) {
-        setStatus("ใส่ชื่อ item ก่อน");
-        return;
-      }
-
-      setSavingState(true);
-
+      if (!section) { setStatus("เลือก section ก่อน"); return; }
+      if (!itemName) { setStatus("ใส่ชื่อ item ก่อน"); return; }
+      setSavingState(true); setStatus("Adding item...");
       try {
         const id = makeId(section, itemName);
-
-        if (items.some(x => x.id === id)) {
-          setStatus("Item already exists ❌");
-          isSaving = false;
-          return;
-        }
-
+        if (items.some(x => x.id === id)) { setStatus("Item already exists ❌"); setSavingState(false); return; }
         await setDoc(doc(db, "prepItems", id), {
-          id,
-          section,
-          item: itemName,
-          checked: false,
-          color: "none",
-          recipe: "",
-          recipeChecks: {},
-          sort: 9999,
-          updatedAt: serverTimestamp()
+          id, section, item: itemName, checked: false, color: "none", recipe: "", sort: 9999, updatedAt: serverTimestamp()
         });
-
         document.getElementById("newItem").value = "";
         setStatus("Added ✅ เรียงตามตัวอักษรแล้ว");
-      } catch (error) {
-        console.error(error);
-        setStatus("Add failed ❌");
-      } finally {
-        isSaving = false;
-      }
+      } catch (error) { console.error(error); setStatus("Add failed ❌"); }
+      finally { setSavingState(false); }
     };
 
     function makeId(section, itemName) {
-      const slug = String(itemName || "")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-
-      const sec = String(section || "")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-
+      const slug = String(itemName || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      const sec = String(section || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
       return sec + "-" + slug;
     }
 
