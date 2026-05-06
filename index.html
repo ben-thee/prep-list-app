@@ -223,6 +223,44 @@
       line-height: 1.35; font-weight: 700; background: #fff;
     }
 
+    .recipeCheckList {
+      width: 100%;
+      min-height: 160px;
+      border: 2px solid #000;
+      background: #fff;
+      padding: 0;
+      font-size: 16px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .recipeCheckLine {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 7px;
+      align-items: start;
+      padding: 7px 10px;
+      border-bottom: 1.5px solid #000;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .recipeCheckLine:last-child {
+      border-bottom: 0;
+    }
+
+    .recipeCheckLine input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      margin: 0;
+      accent-color: #16a34a;
+    }
+
+    .recipeCheckLine.done .recipeCheckText {
+      text-decoration: line-through;
+      opacity: .55;
+    }
+
     .recipeEmpty { color: #777; font-style: italic; }
     .modalFoot { margin-top: 8px; font-size: 11px; font-weight: 900; color: #111; }
 
@@ -277,6 +315,7 @@
       .modalTitle { font-size: 26px; }
       .recipeMultiplierTools button { min-height: 30px; padding: 5px 9px; font-size: 12px; }
       .renameBtn { min-height: 30px; padding: 5px 10px; font-size: 12px; }
+      .recipeCheckLine { grid-template-columns: 30px 1fr; padding: 8px 10px; }
       .modalSub, .modalFoot { font-size: 13px; }
     }
   </style>
@@ -315,6 +354,7 @@
               <button onclick="multiplyRecipePreview(3)">×3</button>
               <button onclick="multiplyRecipeCustom()">×?</button>
               <button onclick="resetRecipePreview()">กลับค่าเดิม</button>
+              <button onclick="resetRecipeChecks()">รีเซ็ตติ๊ก</button>
             </div>
             <button id="renameRecipeBtn" class="renameBtn" onclick="renameActiveItem()">RENAME</button>
           </div>
@@ -353,6 +393,7 @@
     let isSaving = false;
     let activeRecipeItemId = null;
     let recipeSaveTimer = null;
+    let recipeCheckSaveTimer = null;
     let originalRecipePreview = "";
     let currentRecipePreview = ""; 
 
@@ -585,11 +626,76 @@
     };
 
     function renderRecipePreview(recipeText) {
-      const view = String(recipeText || "").trim()
-        ? escapeHtml(recipeText)
-        : `<span class="recipeEmpty">ยังไม่มี recipe/note สำหรับ item นี้</span>`;
+      const lines = recipeLines(recipeText);
 
-      document.getElementById("modalBody").innerHTML = `<div class="recipeTextView">${view}</div>`;
+      if (!lines.length) {
+        document.getElementById("modalBody").innerHTML =
+          `<div class="recipeTextView"><span class="recipeEmpty">ยังไม่มี recipe/note สำหรับ item นี้</span></div>`;
+        return;
+      }
+
+      const item = items.find(x => x.id === activeRecipeItemId);
+      const checks = getRecipeChecks(item);
+
+      const rows = lines.map((line, index) => {
+        const key = String(index);
+        const checked = !!checks[key];
+
+        return `
+          <label class="recipeCheckLine ${checked ? "done" : ""}">
+            <input type="checkbox" ${checked ? "checked" : ""} onchange="toggleRecipeCheck('${key}', this.checked)">
+            <span class="recipeCheckText">${escapeHtml(line)}</span>
+          </label>
+        `;
+      }).join("");
+
+      document.getElementById("modalBody").innerHTML = `<div class="recipeCheckList">${rows}</div>`;
+    }
+
+    function recipeLines(recipeText) {
+      return String(recipeText || "")
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean);
+    }
+
+    function getRecipeChecks(item) {
+      if (!item || !item.recipeChecks || typeof item.recipeChecks !== "object") return {};
+      return { ...item.recipeChecks };
+    }
+
+    window.toggleRecipeCheck = function(key, checked) {
+      if (editMode || !activeRecipeItemId) return;
+
+      const item = items.find(x => x.id === activeRecipeItemId);
+      if (!item) return;
+
+      const checks = getRecipeChecks(item);
+      checks[key] = checked;
+      item.recipeChecks = checks;
+
+      renderRecipePreview(currentRecipePreview || originalRecipePreview);
+      scheduleRecipeCheckSave(item.id, checks);
+    };
+
+    function scheduleRecipeCheckSave(id, checks) {
+      if (recipeCheckSaveTimer) clearTimeout(recipeCheckSaveTimer);
+
+      setStatus("Checklist saving...");
+
+      recipeCheckSaveTimer = setTimeout(async () => {
+        try {
+          await updateDoc(doc(db, "prepItems", id), {
+            recipeChecks: checks,
+            updatedAt: serverTimestamp()
+          });
+
+          setStatus("Checklist saved ✅");
+        } catch (error) {
+          console.error(error);
+          setStatus("Checklist save failed ❌");
+        }
+      }, 300);
     }
 
     window.multiplyRecipePreview = function(multiplier) {
@@ -613,7 +719,35 @@
       setStatus("Recipe preview reset ✅ not saved");
     };
 
-    window.renameActiveItem = async function() {
+
+    window.resetRecipeChecks = async function() {
+      if (editMode || !activeRecipeItemId) return;
+
+      const item = items.find(x => x.id === activeRecipeItemId);
+      if (!item) return;
+
+      const ok = confirm("Reset all recipe ticks?");
+      if (!ok) return;
+
+      item.recipeChecks = {};
+      renderRecipePreview(currentRecipePreview || originalRecipePreview);
+
+      setStatus("Resetting checklist...");
+
+      try {
+        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
+          recipeChecks: {},
+          updatedAt: serverTimestamp()
+        });
+
+        setStatus("Checklist reset ✅");
+      } catch (error) {
+        console.error(error);
+        setStatus("Checklist reset failed ❌");
+      }
+    };
+
+        window.renameActiveItem = async function() {
       if (!editMode || !activeRecipeItemId) return;
 
       const item = items.find(x => x.id === activeRecipeItemId);
@@ -691,6 +825,7 @@
 
     window.closeRecipeModal = function() {
       if (recipeSaveTimer) { clearTimeout(recipeSaveTimer); recipeSaveTimer = null; }
+      if (recipeCheckSaveTimer) { clearTimeout(recipeCheckSaveTimer); recipeCheckSaveTimer = null; }
 
       const tools = document.getElementById("recipeMultiplierTools");
       const renameBtn = document.getElementById("renameRecipeBtn");
@@ -758,7 +893,7 @@
         const id = makeId(section, itemName);
         if (items.some(x => x.id === id)) { setStatus("Item already exists ❌"); setSavingState(false); return; }
         await setDoc(doc(db, "prepItems", id), {
-          id, section, item: itemName, checked: false, color: "none", recipe: "", sort: 9999, updatedAt: serverTimestamp()
+          id, section, item: itemName, checked: false, color: "none", recipe: "", recipeChecks: {}, sort: 9999, updatedAt: serverTimestamp()
         });
         document.getElementById("newItem").value = "";
         setStatus("Added ✅ เรียงตามตัวอักษรแล้ว");
