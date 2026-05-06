@@ -160,6 +160,36 @@
     }
 
     .modalTitle { font-size: 18px; font-weight: 900; line-height: 1.1; }
+
+    .modalTitleRow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .recipeMultiplierTools {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .recipeMultiplierTools.show {
+      display: flex;
+    }
+
+    .recipeMultiplierTools button {
+      width: auto;
+      min-height: 28px;
+      padding: 4px 7px;
+      font-size: 11px;
+      background: #000;
+      color: #fff;
+      border-color: #000;
+      line-height: 1;
+    }
+
     .modalSub { font-size: 11px; font-weight: 800; margin-top: 4px; color: #333; }
 
     .closeBtn {
@@ -229,6 +259,7 @@
       .colorSelect, .deleteBtn { width: 96px; height: 32px; font-size: 13px; padding: 1px 2px; }
       .customCheck { width: 28px; height: 28px; font-size: 28px; }
       .modalTitle { font-size: 26px; }
+      .recipeMultiplierTools button { min-height: 30px; padding: 5px 9px; font-size: 12px; }
       .modalSub, .modalFoot { font-size: 13px; }
     }
   </style>
@@ -259,7 +290,15 @@
     <div class="modalBox">
       <div class="modalHeader">
         <div>
-          <div id="modalTitle" class="modalTitle">Recipe</div>
+          <div class="modalTitleRow">
+            <div id="modalTitle" class="modalTitle">Recipe</div>
+            <div id="recipeMultiplierTools" class="recipeMultiplierTools">
+              <button onclick="multiplyRecipePreview(0.5)">×0.5</button>
+              <button onclick="multiplyRecipePreview(2)">×2</button>
+              <button onclick="multiplyRecipePreview(3)">×3</button>
+              <button onclick="multiplyRecipeCustom()">×?</button>
+            </div>
+          </div>
           <div id="modalSub" class="modalSub">View mode</div>
         </div>
         <button class="closeBtn" onclick="closeRecipeModal()">CLOSE</button>
@@ -295,6 +334,8 @@
     let isSaving = false;
     let activeRecipeItemId = null;
     let recipeSaveTimer = null;
+    let originalRecipePreview = "";
+    let currentRecipePreview = ""; 
 
     const BASE_SECTIONS = ["Prep", "Sauce", "Bakery", "Cookie"];
     const CUSTOM_SECTIONS_KEY = "prep_custom_sections_v1";
@@ -479,9 +520,25 @@
       const item = items.find(x => x.id === id); if (!item) return;
       activeRecipeItemId = id;
       const recipe = String(item.recipe || item.note || "");
+      originalRecipePreview = recipe;
+      currentRecipePreview = recipe;
+
       document.getElementById("modalTitle").textContent = item.item;
-      document.getElementById("modalSub").textContent = editMode ? "EDIT MODE ON — recipe auto save" : "VIEW MODE — recipe read only";
-      document.getElementById("modalFoot").textContent = editMode ? "พิมพ์แล้วจะ save อัตโนมัติ" : "เปิด Edit mode เพื่อแก้ไข recipe";
+      document.getElementById("modalSub").textContent = editMode
+        ? "EDIT MODE ON — recipe auto save"
+        : "VIEW MODE — recipe read only / multiply preview only";
+      document.getElementById("modalFoot").textContent = editMode
+        ? "พิมพ์แล้วจะ save อัตโนมัติ"
+        : "ปุ่มคูณด้านหลังชื่อจะเปลี่ยนตัวเลขในสูตรชั่วคราวเท่านั้น — ปิดแล้วกลับค่าเดิม ไม่ save";
+
+      const tools = document.getElementById("recipeMultiplierTools");
+      if (tools) {
+        if (editMode) {
+          tools.classList.remove("show");
+        } else {
+          tools.classList.add("show");
+        }
+      }
 
       if (editMode) {
         document.getElementById("modalBody").innerHTML = `<textarea id="recipeInput" class="recipeTextarea" placeholder="ใส่ ingredient / recipe / note ที่นี่...">${escapeHtml(recipe)}</textarea>`;
@@ -492,14 +549,63 @@
           textarea.addEventListener("input", () => scheduleRecipeSave(textarea.value));
         }, 0);
       } else {
-        const view = recipe.trim()
-          ? escapeHtml(recipe)
-          : `<span class="recipeEmpty">ยังไม่มี recipe/note สำหรับ item นี้</span>`;
-        document.getElementById("modalBody").innerHTML = `<div class="recipeTextView">${view}</div>`;
+        renderRecipePreview(currentRecipePreview);
       }
 
       document.getElementById("recipeModal").classList.add("show");
     };
+
+    function renderRecipePreview(recipeText) {
+      const view = String(recipeText || "").trim()
+        ? escapeHtml(recipeText)
+        : `<span class="recipeEmpty">ยังไม่มี recipe/note สำหรับ item นี้</span>`;
+
+      document.getElementById("modalBody").innerHTML = `<div class="recipeTextView">${view}</div>`;
+    }
+
+    window.multiplyRecipePreview = function(multiplier) {
+      if (editMode) return;
+
+      currentRecipePreview = multiplyNumbersInText(currentRecipePreview || originalRecipePreview, multiplier);
+      renderRecipePreview(currentRecipePreview);
+
+      const label = formatNumber(multiplier);
+      document.getElementById("modalSub").textContent = `VIEW MODE — preview ×${label} only`;
+      setStatus(`Recipe preview ×${label} — not saved`);
+    };
+
+    window.multiplyRecipeCustom = function() {
+      if (editMode) return;
+
+      const raw = prompt("คูณกี่เท่า? เช่น 2 หรือ 0.5");
+      if (raw === null) return;
+
+      const multiplier = Number(String(raw).trim());
+
+      if (!Number.isFinite(multiplier)) {
+        setStatus("Multiplier invalid ❌");
+        return;
+      }
+
+      multiplyRecipePreview(multiplier);
+    };
+
+    function multiplyNumbersInText(text, multiplier) {
+      return String(text || "").replace(/-?\d+(?:\.\d+)?/g, match => {
+        const original = Number(match);
+        if (!Number.isFinite(original)) return match;
+
+        const result = original * multiplier;
+        return formatNumber(result);
+      });
+    }
+
+    function formatNumber(value) {
+      if (Number.isInteger(value)) return String(value);
+
+      const rounded = Math.round(value * 1000) / 1000;
+      return String(rounded).replace(/\.?0+$/, "");
+    }
 
     window.overlayClose = function(event) {
       if (event.target && event.target.id === "recipeModal") closeRecipeModal();
@@ -507,8 +613,14 @@
 
     window.closeRecipeModal = function() {
       if (recipeSaveTimer) { clearTimeout(recipeSaveTimer); recipeSaveTimer = null; }
+
+      const tools = document.getElementById("recipeMultiplierTools");
+      if (tools) tools.classList.remove("show");
+
       document.getElementById("recipeModal").classList.remove("show");
       activeRecipeItemId = null;
+      originalRecipePreview = "";
+      currentRecipePreview = "";
     };
 
     function scheduleRecipeSave(value) {
