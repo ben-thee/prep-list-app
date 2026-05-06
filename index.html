@@ -190,6 +190,22 @@
       line-height: 1;
     }
 
+    .renameBtn {
+      display: none;
+      width: auto;
+      min-height: 28px;
+      padding: 4px 8px;
+      font-size: 11px;
+      background: #000;
+      color: #fff;
+      border-color: #000;
+      line-height: 1;
+    }
+
+    .renameBtn.show {
+      display: inline-block;
+    }
+
     .modalSub { font-size: 11px; font-weight: 800; margin-top: 4px; color: #333; }
 
     .closeBtn {
@@ -260,6 +276,7 @@
       .customCheck { width: 28px; height: 28px; font-size: 28px; }
       .modalTitle { font-size: 26px; }
       .recipeMultiplierTools button { min-height: 30px; padding: 5px 9px; font-size: 12px; }
+      .renameBtn { min-height: 30px; padding: 5px 10px; font-size: 12px; }
       .modalSub, .modalFoot { font-size: 13px; }
     }
   </style>
@@ -297,7 +314,9 @@
               <button onclick="multiplyRecipePreview(2)">×2</button>
               <button onclick="multiplyRecipePreview(3)">×3</button>
               <button onclick="multiplyRecipeCustom()">×?</button>
+              <button onclick="resetRecipePreview()">กลับค่าเดิม</button>
             </div>
+            <button id="renameRecipeBtn" class="renameBtn" onclick="renameActiveItem()">RENAME</button>
           </div>
           <div id="modalSub" class="modalSub">View mode</div>
         </div>
@@ -529,14 +548,24 @@
         : "VIEW MODE — recipe read only / multiply preview only";
       document.getElementById("modalFoot").textContent = editMode
         ? "พิมพ์แล้วจะ save อัตโนมัติ"
-        : "ปุ่มคูณด้านหลังชื่อจะเปลี่ยนตัวเลขในสูตรชั่วคราวเท่านั้น — ปิดแล้วกลับค่าเดิม ไม่ save";
+        : "ปุ่มคูณด้านหลังชื่อจะเปลี่ยนตัวเลขในสูตรชั่วคราวเท่านั้น — กดกลับค่าเดิมหรือปิดแล้วเปิดใหม่ ไม่ save";
 
       const tools = document.getElementById("recipeMultiplierTools");
+      const renameBtn = document.getElementById("renameRecipeBtn");
+
       if (tools) {
         if (editMode) {
           tools.classList.remove("show");
         } else {
           tools.classList.add("show");
+        }
+      }
+
+      if (renameBtn) {
+        if (editMode) {
+          renameBtn.classList.add("show");
+        } else {
+          renameBtn.classList.remove("show");
         }
       }
 
@@ -572,6 +601,55 @@
       const label = formatNumber(multiplier);
       document.getElementById("modalSub").textContent = `VIEW MODE — preview ×${label} only`;
       setStatus(`Recipe preview ×${label} — not saved`);
+    };
+
+    
+    window.resetRecipePreview = function() {
+      if (editMode) return;
+
+      currentRecipePreview = originalRecipePreview;
+      renderRecipePreview(currentRecipePreview);
+      document.getElementById("modalSub").textContent = "VIEW MODE — recipe read only / multiply preview only";
+      setStatus("Recipe preview reset ✅ not saved");
+    };
+
+    window.renameActiveItem = async function() {
+      if (!editMode || !activeRecipeItemId) return;
+
+      const item = items.find(x => x.id === activeRecipeItemId);
+      if (!item) return;
+
+      const newName = String(prompt("Rename item:", item.item || "") || "").trim();
+
+      if (!newName) {
+        setStatus("Rename cancelled");
+        return;
+      }
+
+      if (items.some(x => x.id !== activeRecipeItemId && String(x.section) === String(item.section) && String(x.item).toLowerCase() === newName.toLowerCase())) {
+        setStatus("Rename failed ❌ item already exists");
+        return;
+      }
+
+      setStatus("Renaming...");
+
+      try {
+        item.item = newName;
+
+        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
+          item: newName,
+          updatedAt: serverTimestamp()
+        });
+
+        document.getElementById("modalTitle").textContent = newName;
+        sortItemsLocal();
+        render();
+
+        setStatus("Renamed ✅");
+      } catch (error) {
+        console.error(error);
+        setStatus("Rename failed ❌");
+      }
     };
 
     window.multiplyRecipeCustom = function() {
@@ -615,7 +693,9 @@
       if (recipeSaveTimer) { clearTimeout(recipeSaveTimer); recipeSaveTimer = null; }
 
       const tools = document.getElementById("recipeMultiplierTools");
+      const renameBtn = document.getElementById("renameRecipeBtn");
       if (tools) tools.classList.remove("show");
+      if (renameBtn) renameBtn.classList.remove("show");
 
       document.getElementById("recipeModal").classList.remove("show");
       activeRecipeItemId = null;
