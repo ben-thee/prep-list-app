@@ -256,6 +256,16 @@
       accent-color: #16a34a;
     }
 
+    .recipeCheckSpacer {
+      width: 22px;
+      height: 22px;
+      display: block;
+    }
+
+    .recipeCheckLine.noCheck .recipeCheckText {
+      opacity: .95;
+    }
+
     .recipeCheckLine.done .recipeCheckText {
       text-decoration: line-through;
       opacity: .55;
@@ -353,8 +363,8 @@
               <button onclick="multiplyRecipePreview(2)">×2</button>
               <button onclick="multiplyRecipePreview(3)">×3</button>
               <button onclick="multiplyRecipeCustom()">×?</button>
-              <button onclick="resetRecipePreview()">กลับค่าเดิม</button>
-              <button onclick="resetRecipeChecks()">รีเซ็ตติ๊ก</button>
+              <button onclick="resetRecipePreview()">RESET ORIGINAL</button>
+              <button onclick="resetRecipeChecks()">RESET TICKS</button>
             </div>
             <button id="renameRecipeBtn" class="renameBtn" onclick="renameActiveItem()">RENAME</button>
           </div>
@@ -566,7 +576,7 @@
       editMode = !editMode;
       if (editMode && deleteMode) { deleteMode = false; updateDeleteModeButton(); }
       updateEditModeButton(); render();
-      setStatus(editMode ? "Edit mode ON — แตะชื่อเพื่อแก้ recipe" : "Edit mode OFF — แตะชื่อเพื่อดู recipe");
+      setStatus(editMode ? "Edit mode ON — tap item name to edit recipe" : "Edit mode OFF — tap item name to view recipe");
     };
 
     window.toggleDeleteMode = function() {
@@ -586,10 +596,10 @@
       document.getElementById("modalTitle").textContent = item.item;
       document.getElementById("modalSub").textContent = editMode
         ? "EDIT MODE ON — recipe auto save"
-        : "VIEW MODE — recipe read only / multiply preview only";
+        : "VIEW MODE — read only / multiplier preview only";
       document.getElementById("modalFoot").textContent = editMode
-        ? "พิมพ์แล้วจะ save อัตโนมัติ"
-        : "ปุ่มคูณด้านหลังชื่อจะเปลี่ยนตัวเลขในสูตรชั่วคราวเท่านั้น — กดกลับค่าเดิมหรือปิดแล้วเปิดใหม่ ไม่ save";
+        ? "Typing auto-saves"
+        : "Checkboxes appear only on lines that contain numbers. Multiplier buttons are temporary previews only and are not saved.";
 
       const tools = document.getElementById("recipeMultiplierTools");
       const renameBtn = document.getElementById("renameRecipeBtn");
@@ -611,7 +621,7 @@
       }
 
       if (editMode) {
-        document.getElementById("modalBody").innerHTML = `<textarea id="recipeInput" class="recipeTextarea" placeholder="ใส่ ingredient / recipe / note ที่นี่...">${escapeHtml(recipe)}</textarea>`;
+        document.getElementById("modalBody").innerHTML = `<textarea id="recipeInput" class="recipeTextarea" placeholder="Add ingredients / recipe / notes here...">${escapeHtml(recipe)}</textarea>`;
         setTimeout(() => {
           const textarea = document.getElementById("recipeInput");
           if (!textarea) return;
@@ -630,7 +640,7 @@
 
       if (!lines.length) {
         document.getElementById("modalBody").innerHTML =
-          `<div class="recipeTextView"><span class="recipeEmpty">ยังไม่มี recipe/note สำหรับ item นี้</span></div>`;
+          `<div class="recipeTextView"><span class="recipeEmpty">No recipe/note for this item yet</span></div>`;
         return;
       }
 
@@ -639,7 +649,17 @@
 
       const rows = lines.map((line, index) => {
         const key = String(index);
-        const checked = !!checks[key];
+        const hasNumber = /-?\d+(?:\.\d+)?/.test(line);
+        const checked = hasNumber && !!checks[key];
+
+        if (!hasNumber) {
+          return `
+            <div class="recipeCheckLine noCheck">
+              <span class="recipeCheckSpacer"></span>
+              <span class="recipeCheckText">${escapeHtml(line)}</span>
+            </div>
+          `;
+        }
 
         return `
           <label class="recipeCheckLine ${checked ? "done" : ""}">
@@ -715,7 +735,7 @@
 
       currentRecipePreview = originalRecipePreview;
       renderRecipePreview(currentRecipePreview);
-      document.getElementById("modalSub").textContent = "VIEW MODE — recipe read only / multiply preview only";
+      document.getElementById("modalSub").textContent = "VIEW MODE — read only / multiplier preview only";
       setStatus("Recipe preview reset ✅ not saved");
     };
 
@@ -789,7 +809,7 @@
     window.multiplyRecipeCustom = function() {
       if (editMode) return;
 
-      const raw = prompt("คูณกี่เท่า? เช่น 2 หรือ 0.5");
+      const raw = prompt("Multiply by what? Example: 2 or 0.5");
       if (raw === null) return;
 
       const multiplier = Number(String(raw).trim());
@@ -886,8 +906,8 @@
     window.addNewItem = async function() {
       const section = normalizeSectionName(document.getElementById("newSection").value);
       const itemName = document.getElementById("newItem").value.trim();
-      if (!section) { setStatus("เลือก section ก่อน"); return; }
-      if (!itemName) { setStatus("ใส่ชื่อ item ก่อน"); return; }
+      if (!section) { setStatus("Select a section first"); return; }
+      if (!itemName) { setStatus("Enter an item name first"); return; }
       setSavingState(true); setStatus("Adding item...");
       try {
         const id = makeId(section, itemName);
@@ -896,7 +916,7 @@
           id, section, item: itemName, checked: false, color: "none", recipe: "", recipeChecks: {}, sort: 9999, updatedAt: serverTimestamp()
         });
         document.getElementById("newItem").value = "";
-        setStatus("Added ✅ เรียงตามตัวอักษรแล้ว");
+        setStatus("Added ✅ sorted alphabetically");
       } catch (error) { console.error(error); setStatus("Add failed ❌"); }
       finally { setSavingState(false); }
     };
