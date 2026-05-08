@@ -206,6 +206,25 @@
       display: inline-block;
     }
 
+    .modalActionSelect {
+      display: none;
+      width: auto;
+      min-height: 28px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 900;
+      background: #111827;
+      color: #fff;
+      border: 2px solid #111827;
+      line-height: 1;
+      cursor: pointer;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .modalActionSelect.show {
+      display: inline-block;
+    }
+
     .moveSectionBtn {
       background: #111827;
       color: #fff;
@@ -331,6 +350,7 @@
       .modalTitle { font-size: 26px; }
       .recipeMultiplierTools button { min-height: 30px; padding: 5px 9px; font-size: 12px; }
       .modalActionBtn { min-height: 30px; padding: 5px 10px; font-size: 12px; }
+      .modalActionSelect { min-height: 30px; padding: 5px 10px; font-size: 12px; }
       .recipeCheckLine { grid-template-columns: 30px 1fr; padding: 8px 10px; }
       .modalSub, .modalFoot { font-size: 13px; }
     }
@@ -373,7 +393,9 @@
               <button onclick="resetRecipeChecks()">RESET TICKS</button>
             </div>
             <button id="renameRecipeBtn" class="modalActionBtn" onclick="renameActiveItem()">RENAME</button>
-            <button id="moveSectionBtn" class="modalActionBtn moveSectionBtn" onclick="moveActiveItemSection()">MOVE SECTION</button>
+            <select id="moveSectionSelectBtn" class="modalActionSelect moveSectionBtn" onchange="moveActiveItemSectionFromSelect(this)">
+              <option value="">MOVE SECTION</option>
+            </select>
           </div>
           <div id="modalSub" class="modalSub">View mode</div>
         </div>
@@ -631,7 +653,7 @@
 
       const tools = document.getElementById("recipeMultiplierTools");
       const renameBtn = document.getElementById("renameRecipeBtn");
-      const moveBtn = document.getElementById("moveSectionBtn");
+      const moveSelect = document.getElementById("moveSectionSelectBtn");
 
       if (tools) {
         if (editMode) {
@@ -649,11 +671,12 @@
         }
       }
 
-      if (moveBtn) {
+      if (moveSelect) {
         if (editMode) {
-          moveBtn.classList.add("show");
+          populateMoveSectionSelect(item.section);
+          moveSelect.classList.add("show");
         } else {
-          moveBtn.classList.remove("show");
+          moveSelect.classList.remove("show");
         }
       }
 
@@ -844,92 +867,81 @@
     };
 
 
-    window.moveActiveItemSection = async function() {
-      if (!editMode || !activeRecipeItemId) return;
+    function populateMoveSectionSelect(currentSection) {
+      const select = document.getElementById("moveSectionSelectBtn");
+      if (!select) return;
 
-      const item = items.find(x => x.id === activeRecipeItemId);
-      if (!item) return;
-
-      const sections = getAllSections().filter(section => section !== item.section);
+      const sections = getAllSections().filter(section => section !== currentSection);
 
       if (!sections.length) {
-        setStatus("No other section available ❌");
+        select.innerHTML = `<option value="">NO SECTION</option>`;
+        select.disabled = true;
         return;
       }
 
-      const oldPicker = document.getElementById("moveSectionPicker");
-      if (oldPicker) oldPicker.remove();
+      select.disabled = false;
+      select.innerHTML = `
+        <option value="">MOVE SECTION</option>
+        ${sections.map(section => `<option value="${escapeAttr(section)}">${escapeHtml(section)}</option>`).join("")}
+      `;
+      select.value = "";
+    }
 
-      const wrapper = document.createElement("div");
-      wrapper.id = "moveSectionPicker";
-      wrapper.style.marginTop = "8px";
-      wrapper.style.display = "grid";
-      wrapper.style.gridTemplateColumns = "1fr auto";
-      wrapper.style.gap = "6px";
+    window.moveActiveItemSectionFromSelect = async function(select) {
+      if (!editMode || !activeRecipeItemId) {
+        if (select) select.value = "";
+        return;
+      }
 
-      const select = document.createElement("select");
-      select.id = "moveSectionSelect";
-      select.style.fontSize = "14px";
-      select.style.fontWeight = "900";
-      select.style.padding = "8px";
-      select.innerHTML = sections.map(section => {
-        return `<option value="${escapeAttr(section)}">${escapeHtml(section)}</option>`;
-      }).join("");
+      const item = items.find(x => x.id === activeRecipeItemId);
+      if (!item) {
+        if (select) select.value = "";
+        return;
+      }
 
-      const moveBtn = document.createElement("button");
-      moveBtn.textContent = "MOVE";
-      moveBtn.style.background = "#000";
-      moveBtn.style.color = "#fff";
-      moveBtn.style.borderColor = "#000";
-      moveBtn.style.width = "90px";
-      moveBtn.onclick = async function() {
-        const newSection = normalizeSectionName(select.value);
+      const newSection = normalizeSectionName(select.value);
 
-        if (!newSection) {
-          setStatus("Select section first");
-          return;
-        }
+      if (!newSection) return;
 
-        if (items.some(x =>
-          x.id !== activeRecipeItemId &&
-          String(x.section).toLowerCase() === newSection.toLowerCase() &&
-          String(x.item).toLowerCase() === String(item.item).toLowerCase()
-        )) {
-          setStatus("Move failed ❌ item already exists in that section");
-          return;
-        }
+      if (String(newSection) === String(item.section)) {
+        setStatus("Already in this section");
+        select.value = "";
+        return;
+      }
 
-        setStatus("Moving section...");
+      if (items.some(x =>
+        x.id !== activeRecipeItemId &&
+        String(x.section).toLowerCase() === newSection.toLowerCase() &&
+        String(x.item).toLowerCase() === String(item.item).toLowerCase()
+      )) {
+        setStatus("Move failed ❌ item already exists in that section");
+        select.value = "";
+        return;
+      }
 
-        try {
-          item.section = newSection;
+      setStatus("Moving section...");
 
-          await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
-            section: newSection,
-            updatedAt: serverTimestamp()
-          });
+      try {
+        item.section = newSection;
 
-          sortItemsLocal();
-          updateSectionDropdown();
-          render();
+        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
+          section: newSection,
+          updatedAt: serverTimestamp()
+        });
 
-          document.getElementById("modalSub").textContent = "EDIT MODE ON — moved to " + newSection;
-          wrapper.remove();
+        sortItemsLocal();
+        updateSectionDropdown();
+        render();
+        populateMoveSectionSelect(newSection);
 
-          setStatus("Moved to " + newSection + " ✅");
-        } catch (error) {
-          console.error(error);
-          setStatus("Move failed ❌");
-        }
-      };
-
-      wrapper.appendChild(select);
-      wrapper.appendChild(moveBtn);
-
-      const modalFoot = document.getElementById("modalFoot");
-      modalFoot.insertAdjacentElement("beforebegin", wrapper);
-
-      setStatus("Choose section from dropdown");
+        document.getElementById("modalSub").textContent = "EDIT MODE ON — moved to " + newSection;
+        setStatus("Moved to " + newSection + " ✅");
+      } catch (error) {
+        console.error(error);
+        setStatus("Move failed ❌");
+      } finally {
+        select.value = "";
+      }
     };
 
     window.multiplyRecipeCustom = function() {
@@ -975,12 +987,13 @@
 
       const tools = document.getElementById("recipeMultiplierTools");
       const renameBtn = document.getElementById("renameRecipeBtn");
-      const moveBtn = document.getElementById("moveSectionBtn");
-      const movePicker = document.getElementById("moveSectionPicker");
+      const moveSelect = document.getElementById("moveSectionSelectBtn");
       if (tools) tools.classList.remove("show");
       if (renameBtn) renameBtn.classList.remove("show");
-      if (moveBtn) moveBtn.classList.remove("show");
-      if (movePicker) movePicker.remove();
+      if (moveSelect) {
+        moveSelect.classList.remove("show");
+        moveSelect.value = "";
+      }
 
       document.getElementById("recipeModal").classList.remove("show");
       activeRecipeItemId = null;
