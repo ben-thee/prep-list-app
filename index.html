@@ -190,7 +190,7 @@
       line-height: 1;
     }
 
-    .renameBtn {
+    .modalActionBtn {
       display: none;
       width: auto;
       min-height: 28px;
@@ -202,8 +202,14 @@
       line-height: 1;
     }
 
-    .renameBtn.show {
+    .modalActionBtn.show {
       display: inline-block;
+    }
+
+    .moveSectionBtn {
+      background: #111827;
+      color: #fff;
+      border-color: #111827;
     }
 
     .modalSub { font-size: 11px; font-weight: 800; margin-top: 4px; color: #333; }
@@ -324,7 +330,7 @@
       .customCheck { width: 28px; height: 28px; font-size: 28px; }
       .modalTitle { font-size: 26px; }
       .recipeMultiplierTools button { min-height: 30px; padding: 5px 9px; font-size: 12px; }
-      .renameBtn { min-height: 30px; padding: 5px 10px; font-size: 12px; }
+      .modalActionBtn { min-height: 30px; padding: 5px 10px; font-size: 12px; }
       .recipeCheckLine { grid-template-columns: 30px 1fr; padding: 8px 10px; }
       .modalSub, .modalFoot { font-size: 13px; }
     }
@@ -366,7 +372,8 @@
               <button onclick="resetRecipePreview()">RESET ORIGINAL</button>
               <button onclick="resetRecipeChecks()">RESET TICKS</button>
             </div>
-            <button id="renameRecipeBtn" class="renameBtn" onclick="renameActiveItem()">RENAME</button>
+            <button id="renameRecipeBtn" class="modalActionBtn" onclick="renameActiveItem()">RENAME</button>
+            <button id="moveSectionBtn" class="modalActionBtn moveSectionBtn" onclick="moveActiveItemSection()">MOVE SECTION</button>
           </div>
           <div id="modalSub" class="modalSub">View mode</div>
         </div>
@@ -573,10 +580,31 @@
     }
 
     window.toggleEditMode = function() {
-      editMode = !editMode;
-      if (editMode && deleteMode) { deleteMode = false; updateDeleteModeButton(); }
-      updateEditModeButton(); render();
-      setStatus(editMode ? "Edit mode ON — tap item name to edit recipe" : "Edit mode OFF — tap item name to view recipe");
+      if (!editMode) {
+        const pin = prompt("Enter PIN to turn Edit mode ON:");
+
+        if (pin !== "2535") {
+          setStatus("Wrong PIN ❌");
+          return;
+        }
+
+        editMode = true;
+
+        if (deleteMode) {
+          deleteMode = false;
+          updateDeleteModeButton();
+        }
+
+        updateEditModeButton();
+        render();
+        setStatus("Edit mode ON — tap item name to edit recipe");
+        return;
+      }
+
+      editMode = false;
+      updateEditModeButton();
+      render();
+      setStatus("Edit mode OFF — tap item name to view recipe");
     };
 
     window.toggleDeleteMode = function() {
@@ -603,6 +631,7 @@
 
       const tools = document.getElementById("recipeMultiplierTools");
       const renameBtn = document.getElementById("renameRecipeBtn");
+      const moveBtn = document.getElementById("moveSectionBtn");
 
       if (tools) {
         if (editMode) {
@@ -617,6 +646,14 @@
           renameBtn.classList.add("show");
         } else {
           renameBtn.classList.remove("show");
+        }
+      }
+
+      if (moveBtn) {
+        if (editMode) {
+          moveBtn.classList.add("show");
+        } else {
+          moveBtn.classList.remove("show");
         }
       }
 
@@ -806,6 +843,72 @@
       }
     };
 
+
+    window.moveActiveItemSection = async function() {
+      if (!editMode || !activeRecipeItemId) return;
+
+      const item = items.find(x => x.id === activeRecipeItemId);
+      if (!item) return;
+
+      const sections = getAllSections();
+      const sectionList = sections.join(", ");
+
+      const newSection = normalizeSectionName(
+        prompt(
+          "Move to section:\\n\\nExisting sections: " + sectionList + "\\n\\nType an existing or new section name:",
+          item.section || ""
+        )
+      );
+
+      if (!newSection) {
+        setStatus("Move cancelled");
+        return;
+      }
+
+      if (String(newSection) === String(item.section)) {
+        setStatus("Already in this section");
+        return;
+      }
+
+      if (items.some(x =>
+        x.id !== activeRecipeItemId &&
+        String(x.section).toLowerCase() === newSection.toLowerCase() &&
+        String(x.item).toLowerCase() === String(item.item).toLowerCase()
+      )) {
+        setStatus("Move failed ❌ item already exists in that section");
+        return;
+      }
+
+      setStatus("Moving section...");
+
+      try {
+        item.section = newSection;
+
+        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
+          section: newSection,
+          updatedAt: serverTimestamp()
+        });
+
+        if (!sections.includes(newSection)) {
+          const custom = getStoredCustomSections();
+          custom.push(newSection);
+          custom.sort(compareText);
+          saveCustomSections(custom);
+        }
+
+        sortItemsLocal();
+        updateSectionDropdown();
+        render();
+
+        document.getElementById("modalSub").textContent = "EDIT MODE ON — moved to " + newSection;
+        setStatus("Moved to " + newSection + " ✅");
+      } catch (error) {
+        console.error(error);
+        setStatus("Move failed ❌");
+      }
+    };
+
+
     window.multiplyRecipeCustom = function() {
       if (editMode) return;
 
@@ -849,8 +952,10 @@
 
       const tools = document.getElementById("recipeMultiplierTools");
       const renameBtn = document.getElementById("renameRecipeBtn");
+      const moveBtn = document.getElementById("moveSectionBtn");
       if (tools) tools.classList.remove("show");
       if (renameBtn) renameBtn.classList.remove("show");
+      if (moveBtn) moveBtn.classList.remove("show");
 
       document.getElementById("recipeModal").classList.remove("show");
       activeRecipeItemId = null;
