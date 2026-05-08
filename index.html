@@ -850,64 +850,87 @@
       const item = items.find(x => x.id === activeRecipeItemId);
       if (!item) return;
 
-      const sections = getAllSections();
-      const sectionList = sections.join(", ");
+      const sections = getAllSections().filter(section => section !== item.section);
 
-      const newSection = normalizeSectionName(
-        prompt(
-          "Move to section:\\n\\nExisting sections: " + sectionList + "\\n\\nType an existing or new section name:",
-          item.section || ""
-        )
-      );
-
-      if (!newSection) {
-        setStatus("Move cancelled");
+      if (!sections.length) {
+        setStatus("No other section available ❌");
         return;
       }
 
-      if (String(newSection) === String(item.section)) {
-        setStatus("Already in this section");
-        return;
-      }
+      const oldPicker = document.getElementById("moveSectionPicker");
+      if (oldPicker) oldPicker.remove();
 
-      if (items.some(x =>
-        x.id !== activeRecipeItemId &&
-        String(x.section).toLowerCase() === newSection.toLowerCase() &&
-        String(x.item).toLowerCase() === String(item.item).toLowerCase()
-      )) {
-        setStatus("Move failed ❌ item already exists in that section");
-        return;
-      }
+      const wrapper = document.createElement("div");
+      wrapper.id = "moveSectionPicker";
+      wrapper.style.marginTop = "8px";
+      wrapper.style.display = "grid";
+      wrapper.style.gridTemplateColumns = "1fr auto";
+      wrapper.style.gap = "6px";
 
-      setStatus("Moving section...");
+      const select = document.createElement("select");
+      select.id = "moveSectionSelect";
+      select.style.fontSize = "14px";
+      select.style.fontWeight = "900";
+      select.style.padding = "8px";
+      select.innerHTML = sections.map(section => {
+        return `<option value="${escapeAttr(section)}">${escapeHtml(section)}</option>`;
+      }).join("");
 
-      try {
-        item.section = newSection;
+      const moveBtn = document.createElement("button");
+      moveBtn.textContent = "MOVE";
+      moveBtn.style.background = "#000";
+      moveBtn.style.color = "#fff";
+      moveBtn.style.borderColor = "#000";
+      moveBtn.style.width = "90px";
+      moveBtn.onclick = async function() {
+        const newSection = normalizeSectionName(select.value);
 
-        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
-          section: newSection,
-          updatedAt: serverTimestamp()
-        });
-
-        if (!sections.includes(newSection)) {
-          const custom = getStoredCustomSections();
-          custom.push(newSection);
-          custom.sort(compareText);
-          saveCustomSections(custom);
+        if (!newSection) {
+          setStatus("Select section first");
+          return;
         }
 
-        sortItemsLocal();
-        updateSectionDropdown();
-        render();
+        if (items.some(x =>
+          x.id !== activeRecipeItemId &&
+          String(x.section).toLowerCase() === newSection.toLowerCase() &&
+          String(x.item).toLowerCase() === String(item.item).toLowerCase()
+        )) {
+          setStatus("Move failed ❌ item already exists in that section");
+          return;
+        }
 
-        document.getElementById("modalSub").textContent = "EDIT MODE ON — moved to " + newSection;
-        setStatus("Moved to " + newSection + " ✅");
-      } catch (error) {
-        console.error(error);
-        setStatus("Move failed ❌");
-      }
+        setStatus("Moving section...");
+
+        try {
+          item.section = newSection;
+
+          await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
+            section: newSection,
+            updatedAt: serverTimestamp()
+          });
+
+          sortItemsLocal();
+          updateSectionDropdown();
+          render();
+
+          document.getElementById("modalSub").textContent = "EDIT MODE ON — moved to " + newSection;
+          wrapper.remove();
+
+          setStatus("Moved to " + newSection + " ✅");
+        } catch (error) {
+          console.error(error);
+          setStatus("Move failed ❌");
+        }
+      };
+
+      wrapper.appendChild(select);
+      wrapper.appendChild(moveBtn);
+
+      const modalFoot = document.getElementById("modalFoot");
+      modalFoot.insertAdjacentElement("beforebegin", wrapper);
+
+      setStatus("Choose section from dropdown");
     };
-
 
     window.multiplyRecipeCustom = function() {
       if (editMode) return;
@@ -953,9 +976,11 @@
       const tools = document.getElementById("recipeMultiplierTools");
       const renameBtn = document.getElementById("renameRecipeBtn");
       const moveBtn = document.getElementById("moveSectionBtn");
+      const movePicker = document.getElementById("moveSectionPicker");
       if (tools) tools.classList.remove("show");
       if (renameBtn) renameBtn.classList.remove("show");
       if (moveBtn) moveBtn.classList.remove("show");
+      if (movePicker) movePicker.remove();
 
       document.getElementById("recipeModal").classList.remove("show");
       activeRecipeItemId = null;
