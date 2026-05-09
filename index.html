@@ -1,8 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <title>Prep List</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="icon" type="image/svg+xml" href="app-icon.svg">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-title" content="Prep List">
+  <meta name="application-name" content="Prep List">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f7f7f8">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -39,6 +51,7 @@
       border: 2px solid #000; background: #fff; color: #000;
       font-weight: 900; padding: 8px 4px; font-size: 11px; cursor: pointer;
       min-height: 34px; width: 100%;
+      border-radius: 999px;
     }
 
     button:active { transform: scale(.98); }
@@ -95,7 +108,7 @@
 
     .checkCell {
       display: flex; align-items: center; justify-content: center;
-      border-right: 1.5px solid #000; cursor: pointer; min-height: 31px; padding: 2px;
+      cursor: pointer; min-height: 31px; padding: 2px;
     }
 
     .itemName {
@@ -104,36 +117,57 @@
       cursor: pointer; word-break: break-word; min-width: 0;
     }
 
-    .itemName.hasRecipe::after {
-      content: "\2022"; color: #16a34a; font-size: 14px; margin-left: 4px; line-height: 1;
+    .itemDot {
+      display: inline-block;
+      font-size: 14px;
+      margin-left: 4px;
+      line-height: 1;
+      font-weight: 900;
     }
 
-    .itemName.hasPhoto::before {
-      content: "IMG";
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 22px;
-      height: 14px;
-      margin-right: 4px;
-      padding: 0 3px;
-      border-radius: 7px;
-      background: #111827;
-      color: #fff;
-      font-size: 8px;
-      font-weight: 900;
-      line-height: 1;
+    .itemDot.recipeDot {
+      color: #16a34a;
+    }
+
+    .itemDot.photoDot {
+      color: #dc2626;
     }
 
     .colorCell {
-      display: flex; align-items: center; justify-content: center;
-      border-left: 1.5px solid #000; min-height: 31px; padding: 2px;
+      display: flex; align-items: center; justify-content: flex-end;
+      min-height: 31px; padding: 2px 5px 2px 2px;
     }
 
-    .colorSelect {
-      width: 50px; height: 24px; border: 1.5px solid #000; background: #fff;
-      color: #000; padding: 0 1px; font-size: 9px; font-weight: 900;
-      cursor: pointer; border-radius: 14px;
+    .colorWheelSelect {
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      min-height: 22px;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, #fff 0 47%, transparent 49%),
+        conic-gradient(red, orange, yellow, lime, cyan, blue, purple, magenta, red);
+      cursor: pointer;
+      color: transparent;
+      font-size: 0;
+      line-height: 0;
+      appearance: none;
+      -webkit-appearance: none;
+      box-shadow: none;
+    }
+
+    .colorWheelSelect:focus {
+      outline: 0;
+      box-shadow: none;
+    }
+
+    .colorWheelSelect option {
+      color: #000;
+      font-size: 14px;
+      font-weight: 900;
     }
 
     .deleteBtn {
@@ -200,12 +234,13 @@
     .recipeMultiplierTools button {
       width: auto;
       min-height: 28px;
-      padding: 4px 7px;
+      padding: 4px 9px;
       font-size: 11px;
-      background: #000;
-      color: #fff;
-      border-color: #000;
+      background: #d1d5db;
+      color: #000;
+      border-color: #9ca3af;
       line-height: 1;
+      border-radius: 999px;
     }
 
     .modalActionBtn {
@@ -214,11 +249,11 @@
       min-height: 28px;
       padding: 4px 10px;
       font-size: 11px;
-      background: #000;
-      color: #fff;
-      border-color: #000;
+      background: #d1d5db;
+      color: #000;
+      border-color: #9ca3af;
       line-height: 1;
-      border-radius: 16px;
+      border-radius: 999px;
     }
 
     .modalActionBtn.show {
@@ -232,9 +267,10 @@
       padding: 4px 8px;
       font-size: 11px;
       font-weight: 900;
-      background: #111827;
-      color: #fff;
-      border: 2px solid #111827;
+      background: #d1d5db;
+      color: #000;
+      border: 2px solid #9ca3af;
+      border-radius: 999px;
       line-height: 1;
       cursor: pointer;
       font-family: Arial, Helvetica, sans-serif;
@@ -245,21 +281,16 @@
     }
 
     .moveSectionBtn {
-      background: #111827;
-      color: #fff;
-      border-color: #111827;
+      background: #d1d5db;
+      color: #000;
+      border-color: #9ca3af;
     }
 
-    .photoBtn {
-      background: #075985;
-      color: #fff;
-      border-color: #075985;
-    }
-
+    .photoBtn,
     .photoDangerBtn {
-      background: #dc2626;
-      color: #fff;
-      border-color: #dc2626;
+      background: #d1d5db;
+      color: #000;
+      border-color: #9ca3af;
     }
 
     .photoModalOverlay {
@@ -329,15 +360,16 @@
       height: 42px;
       min-height: 42px;
       padding: 0;
-      background: #000;
-      color: #fff;
-      border-color: #000;
+      background: transparent;
+      color: #dc2626;
+      border: 0;
       border-radius: 50%;
-      font-size: 22px;
+      font-size: 34px;
       line-height: 1;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: none;
     }
 
     .recipeTextarea {
@@ -447,10 +479,11 @@
       .row { grid-template-columns: 58px 1fr 106px; min-height: 40px; }
       .checkCell, .colorCell { min-height: 40px; padding: 4px; }
       .itemName { font-size: 20px; padding: 4px 14px; line-height: 1.1; }
-      .itemName.hasRecipe::after { font-size: 20px; margin-left: 8px; }
-      .itemName.hasPhoto::before { min-width: 28px; height: 16px; margin-right: 8px; font-size: 9px; }
+      .itemDot { font-size: 20px; margin-left: 8px; }
       .photoModalTitle { font-size: 26px; }
-      .colorSelect, .deleteBtn { width: 96px; height: 32px; font-size: 13px; padding: 1px 2px; }
+      .colorWheelSelect { width: 24px; height: 24px; min-width: 24px; min-height: 24px; }
+      .colorCell { justify-content: flex-end; padding-right: 12px; }
+      .deleteBtn { width: 96px; height: 32px; font-size: 13px; padding: 1px 2px; }
       .customCheck { width: 28px; height: 28px; font-size: 28px; }
       .modalTitle { font-size: 26px; }
       .recipeMultiplierTools button { min-height: 30px; padding: 5px 9px; font-size: 12px; }
@@ -459,6 +492,288 @@
       .recipeCheckLine { grid-template-columns: 30px 1fr; padding: 8px 10px; }
       .modalSub, .modalFoot { font-size: 13px; }
     }
+
+
+    /* ===== GREY PROFESSIONAL PILL THEME OVERRIDES ===== */
+    :root {
+      --ink: #1f2937;
+      --muted-ink: #6b7280;
+      --line-soft: #d1d5db;
+      --cream: #f7f7f8;
+      --paper: #ffffff;
+      --sage: #eeeeef;
+      --olive: #4b5563;
+      --olive-dark: #111827;
+      --warm-grey: #e5e7eb;
+      --danger: #dc2626;
+      --recipe-dot: #16a34a;
+      --photo-dot: #dc2626;
+      --blue-soft: #e5e7eb;
+      --yellow-soft: #f3f4f6;
+      --red-soft: #f4eeee;
+      --green-soft: #edf4ef;
+      --shadow-soft: 0 8px 22px rgba(17, 24, 39, .08);
+    }
+
+    html, body {
+      background: linear-gradient(180deg, #f7f7f8 0%, #ececef 100%) !important;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Arial, Helvetica, sans-serif;
+      letter-spacing: -.01em;
+    }
+
+    .title {
+      color: #111827 !important;
+      text-shadow: none !important;
+    }
+
+    .controls,
+    .addPanel,
+    .box,
+    .modalBox,
+    .photoModalBox {
+      background: rgba(255, 255, 255, .92) !important;
+      border: 1.5px solid var(--line-soft) !important;
+      box-shadow: var(--shadow-soft) !important;
+    }
+
+    .status,
+    .boxTitle,
+    .modalHeader,
+    .photoModalHeader {
+      background: linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+      color: #111827 !important;
+      border: 1px solid #d1d5db !important;
+    }
+
+    .box {
+      border-radius: 28px !important;
+      padding: 6px;
+      overflow: hidden;
+    }
+
+    .boxTitle {
+      border-radius: 999px !important;
+      margin: 4px 4px 8px !important;
+      padding: 7px 10px !important;
+      letter-spacing: -.02em;
+    }
+
+    .leftCol,
+    .rightCol {
+      border-radius: 28px;
+    }
+
+    .controls button,
+    .addPanel button,
+    .recipeMultiplierTools button,
+    .modalActionBtn,
+    .modalActionSelect,
+    .photoBtn,
+    .photoDangerBtn {
+      background: #e5e7eb !important;
+      color: #111827 !important;
+      border-color: #c7cbd1 !important;
+      box-shadow: 0 2px 6px rgba(17, 24, 39, .05) !important;
+    }
+
+    #editModeBtn,
+    #deleteModeBtn {
+      background: #374151 !important;
+      color: #fff !important;
+      border-color: #374151 !important;
+    }
+
+    #editModeBtn.editOn {
+      background: #4b5563 !important;
+      color: #fff !important;
+      border-color: #4b5563 !important;
+    }
+
+    #deleteModeBtn.deleteOn,
+    .deleteBtn {
+      background: #dc2626 !important;
+      color: #fff !important;
+      border-color: #dc2626 !important;
+    }
+
+    select,
+    input,
+    textarea {
+      border-color: #d1d5db !important;
+      color: #111827 !important;
+      background: #fff !important;
+    }
+
+    #newSection {
+      background: #f3f4f6 !important;
+      color: #111827 !important;
+      border-color: #c7cbd1 !important;
+      border-radius: 999px !important;
+    }
+
+    .row {
+      background: #fff !important;
+      border: 1.2px solid #d1d5db !important;
+      border-radius: 999px !important;
+      box-shadow: 0 1px 4px rgba(17, 24, 39, .04) !important;
+    }
+
+    .itemName {
+      color: #111827 !important;
+      font-weight: 850;
+    }
+
+    .customCheck {
+      border-color: #6b7280 !important;
+      border-radius: 999px !important;
+    }
+
+    .customCheck.checked {
+      color: #dc2626 !important;
+      border-color: #dc2626 !important;
+      background: #fff !important;
+    }
+
+    .row.row-red {
+      background: #f3e9e9 !important;
+      border-color: #e5caca !important;
+    }
+
+    .row.row-green {
+      background: #eef3ee !important;
+      border-color: #d0ddd0 !important;
+    }
+
+    .row.row-yellow {
+      background: #f5f1e5 !important;
+      border-color: #e6dcc3 !important;
+    }
+
+    .row.row-blue {
+      background: #e9eef5 !important;
+      border-color: #ccd7e6 !important;
+    }
+
+    .modalOverlay,
+    .photoModalOverlay {
+      background: rgba(17, 24, 39, .48) !important;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .recipeTextarea,
+    .recipeTextView,
+    .recipeCheckList,
+    .photoImage,
+    .photoEmpty {
+      background: #fff !important;
+      border: 1.5px solid #d1d5db !important;
+      color: #111827 !important;
+    }
+
+    .recipeCheckLine {
+      background: #fff !important;
+      border: 1.2px solid #d1d5db !important;
+      border-radius: 18px !important;
+    }
+
+    .closeBtn {
+      color: #dc2626 !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+
+    /* ===== ADD ITEM POPUP ===== */
+    .legacyAddPanel {
+      display: none !important;
+    }
+
+    .addModalOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1300;
+      background: rgba(17, 24, 39, .48);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .addModalOverlay.show {
+      display: flex;
+    }
+
+    .addModalBox {
+      width: min(440px, 100%);
+      background: #fff;
+      border: 1.5px solid #d1d5db;
+      border-radius: 28px;
+      padding: 10px;
+      box-shadow: 0 12px 32px rgba(17, 24, 39, .16);
+    }
+
+    .addModalHeader {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 100%);
+      border: 1px solid #d1d5db;
+      border-radius: 24px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+    }
+
+    .addModalTitle {
+      font-size: 22px;
+      font-weight: 950;
+      color: #111827;
+      line-height: 1;
+    }
+
+    .addModalBody {
+      display: grid;
+      gap: 8px;
+      padding: 4px;
+    }
+
+    .addLabel {
+      font-size: 12px;
+      font-weight: 900;
+      color: #374151;
+      padding-left: 4px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .popupInput {
+      width: 100%;
+      min-height: 44px;
+      border-radius: 999px !important;
+      border: 1.5px solid #d1d5db !important;
+      background: #fff !important;
+      color: #111827 !important;
+      padding: 10px 14px !important;
+      font-size: 16px !important;
+      font-weight: 850 !important;
+    }
+
+    .popupAddBtn {
+      margin-top: 4px;
+      min-height: 46px;
+      border-radius: 999px !important;
+      background: #374151 !important;
+      color: #fff !important;
+      border-color: #374151 !important;
+      font-size: 15px !important;
+      font-weight: 950 !important;
+    }
+
   </style>
 </head>
 
@@ -468,17 +783,52 @@
 
     <div class="controls">
       <div id="status" class="status">Loading...</div>
-      <button onclick="toggleAddPanel()">ADD</button>
-      <button onclick="addSection()">ADD SECTION</button>
+      <button onclick="openAddModal()">ADD</button>
+      <button onclick="openSectionModal()">ADD SECTION</button>
       <button id="editModeBtn" onclick="toggleEditMode()">EDIT MODE OFF</button>
       <button id="deleteModeBtn" onclick="toggleDeleteMode()">DELETE MODE</button>
     </div>
 
-    <div id="addPanel" class="addPanel">
+    <div id="addPanel" class="addPanel legacyAddPanel">
       <select id="newSection"></select>
       <input id="newItem" placeholder="New item name">
       <button onclick="addNewItem()">ADD ITEM</button>
     </div>
+
+  <div id="addModal" class="addModalOverlay" onclick="addOverlayClose(event)">
+    <div class="addModalBox">
+      <div class="addModalHeader">
+        <div class="addModalTitle">Add item</div>
+        <button class="closeBtn" onclick="closeAddModal()" aria-label="Close">×</button>
+      </div>
+
+      <div class="addModalBody">
+        <label class="addLabel">Section</label>
+        <select id="popupNewSection" class="popupInput"></select>
+
+        <label class="addLabel">Item name</label>
+        <input id="popupNewItem" class="popupInput" placeholder="New item name">
+
+        <button class="popupAddBtn" onclick="addNewItemFromPopup()">ADD ITEM</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sectionModal" class="addModalOverlay" onclick="sectionOverlayClose(event)">
+    <div class="addModalBox">
+      <div class="addModalHeader">
+        <div class="addModalTitle">Add section</div>
+        <button class="closeBtn" onclick="closeSectionModal()" aria-label="Close">×</button>
+      </div>
+
+      <div class="addModalBody">
+        <label class="addLabel">Section name</label>
+        <input id="popupSectionName" class="popupInput" placeholder="New section name">
+
+        <button class="popupAddBtn" onclick="addSectionFromPopup()">ADD SECTION</button>
+      </div>
+    </div>
+  </div>
 
     <div id="content"><div class="loading">Loading...</div></div>
   </div>
@@ -508,7 +858,7 @@
           </div>
           <div id="modalSub" class="modalSub">View mode</div>
         </div>
-        <button class="closeBtn" onclick="closeRecipeModal()" aria-label="Close">&times;</button>
+        <button class="closeBtn" onclick="closeRecipeModal()" aria-label="Close">×</button>
       </div>
       <div id="modalBody"></div>
       <div id="modalFoot" class="modalFoot"></div>
@@ -519,7 +869,7 @@
     <div class="photoModalBox">
       <div class="photoModalHeader">
         <div id="photoModalTitle" class="photoModalTitle">Photo</div>
-        <button class="closeBtn" onclick="closePhotoViewer()" aria-label="Close">&times;</button>
+        <button class="closeBtn" onclick="closePhotoViewer()" aria-label="Close">×</button>
       </div>
       <div id="photoModalBody"></div>
     </div>
@@ -587,14 +937,26 @@
     }
 
     function updateSectionDropdown() {
-      const select = document.getElementById("newSection");
-      const current = select.value;
+      const selects = [
+        document.getElementById("newSection"),
+        document.getElementById("popupNewSection")
+      ].filter(Boolean);
+
       const sections = getAllSections();
-      select.innerHTML = sections.map(section => {
-        const safe = escapeAttr(section);
-        return `<option value="${safe}">${escapeHtml(section)}</option>`;
-      }).join("");
-      if (sections.includes(current)) select.value = current;
+
+      selects.forEach(select => {
+        const current = select.value;
+        select.innerHTML = sections.map(section => {
+          const safe = escapeAttr(section);
+          return `<option value="${safe}">${escapeHtml(section)}</option>`;
+        }).join("");
+
+        if (sections.includes(current)) {
+          select.value = current;
+        } else if (sections.length) {
+          select.value = sections[0];
+        }
+      });
     }
 
     function updateDeleteModeButton() {
@@ -676,7 +1038,7 @@
           rightControl = `<button class="deleteBtn" onclick="confirmDelete('${safeId}', '${safeName}'); event.stopPropagation();">DELETE</button>`;
         } else {
           rightControl = `
-            <select class="colorSelect" onchange="changeColor('${safeId}', this.value)" onclick="event.stopPropagation()">
+            <select class="colorWheelSelect" title="Change colour" aria-label="Change colour" onchange="changeColor('${safeId}', this.value)" onclick="event.stopPropagation()">
               <option value="none" ${item.color === "none" ? "selected" : ""}>None</option>
               <option value="red" ${item.color === "red" ? "selected" : ""}>Red</option>
               <option value="green" ${item.color === "green" ? "selected" : ""}>Green</option>
@@ -688,7 +1050,11 @@
         html += `
           <div class="row ${rowColor}">
             <div class="checkCell" onclick="toggleCheck('${safeId}')"><div class="customCheck ${checkedClass}">✓</div></div>
-            <div class="itemName ${hasRecipe} ${hasPhoto}" onclick="openRecipeModal('${safeId}')">${escapeHtml(item.item)}</div>
+            <div class="itemName" onclick="openRecipeModal('${safeId}')">
+              ${escapeHtml(item.item)}
+              ${hasRecipe ? '<span class="itemDot recipeDot">•</span>' : ''}
+              ${hasPhoto ? '<span class="itemDot photoDot">•</span>' : ''}
+            </div>
             <div class="colorCell">${rightControl}</div>
           </div>`;
       });
@@ -709,6 +1075,7 @@
       item.color = color || "none"; render(); await saveItemChange(item);
     };
 
+
     async function saveItemChange(item) {
       setSavingState(true); setStatus("Saving...");
       try {
@@ -723,31 +1090,16 @@
     }
 
     window.toggleEditMode = function() {
-      if (!editMode) {
-        const pin = prompt("Enter PIN to turn Edit mode ON:");
+      editMode = !editMode;
 
-        if (pin !== "2535") {
-          setStatus("Wrong PIN ERROR");
-          return;
-        }
-
-        editMode = true;
-
-        if (deleteMode) {
-          deleteMode = false;
-          updateDeleteModeButton();
-        }
-
-        updateEditModeButton();
-        render();
-        setStatus("Edit mode ON - tap item name to edit recipe");
-        return;
+      if (editMode && deleteMode) {
+        deleteMode = false;
+        updateDeleteModeButton();
       }
 
-      editMode = false;
       updateEditModeButton();
       render();
-      setStatus("Edit mode OFF - tap item name to view recipe");
+      setStatus(editMode ? "Edit mode ON - tap item name to edit recipe" : "Edit mode OFF - tap item name to view recipe");
     };
 
     window.toggleDeleteMode = function() {
@@ -1367,19 +1719,132 @@
       finally { setSavingState(false); }
     };
 
+
+    window.openAddModal = function() {
+      updateSectionDropdown();
+
+      const modal = document.getElementById("addModal");
+      const input = document.getElementById("popupNewItem");
+
+      if (modal) modal.classList.add("show");
+
+      setTimeout(() => {
+        if (input) {
+          input.value = "";
+          input.focus();
+        }
+      }, 0);
+    };
+
+    window.closeAddModal = function() {
+      const modal = document.getElementById("addModal");
+      if (modal) modal.classList.remove("show");
+    };
+
+    window.addOverlayClose = function(event) {
+      if (event.target && event.target.id === "addModal") closeAddModal();
+    };
+
+    window.addNewItemFromPopup = async function() {
+      const sectionEl = document.getElementById("popupNewSection");
+      const itemEl = document.getElementById("popupNewItem");
+
+      const section = sectionEl ? sectionEl.value : "";
+      const itemName = itemEl ? itemEl.value.trim() : "";
+
+      if (!itemName) {
+        setStatus("Enter an item name first");
+        if (itemEl) itemEl.focus();
+        return;
+      }
+
+      await addItemCore(section, itemName, true);
+    };
+
+
     window.toggleAddPanel = function() {
       const panel = document.getElementById("addPanel");
       panel.style.display = panel.style.display === "none" ? "grid" : "none";
     };
 
+
+    window.openSectionModal = function() {
+      const modal = document.getElementById("sectionModal");
+      const input = document.getElementById("popupSectionName");
+
+      if (modal) modal.classList.add("show");
+
+      setTimeout(() => {
+        if (input) {
+          input.value = "";
+          input.focus();
+        }
+      }, 0);
+    };
+
+    window.closeSectionModal = function() {
+      const modal = document.getElementById("sectionModal");
+      if (modal) modal.classList.remove("show");
+    };
+
+    window.sectionOverlayClose = function(event) {
+      if (event.target && event.target.id === "sectionModal") closeSectionModal();
+    };
+
+    window.addSectionFromPopup = function() {
+      const input = document.getElementById("popupSectionName");
+      const name = normalizeSectionName(input ? input.value : "");
+
+      addSectionCore(name, true);
+    };
+
+    function addSectionCore(name, fromPopup) {
+      name = normalizeSectionName(name);
+
+      if (!name) {
+        setStatus("Section name required");
+        const input = document.getElementById("popupSectionName");
+        if (fromPopup && input) input.focus();
+        return;
+      }
+
+      const sections = getAllSections();
+
+      if (sections.includes(name)) {
+        setStatus("Section already exists ERROR");
+
+        const inlineSelect = document.getElementById("newSection");
+        const popupSelect = document.getElementById("popupNewSection");
+
+        if (inlineSelect) inlineSelect.value = name;
+        if (popupSelect) popupSelect.value = name;
+
+        if (fromPopup) closeSectionModal();
+        return;
+      }
+
+      const custom = getStoredCustomSections();
+      custom.push(name);
+      custom.sort(compareText);
+      saveCustomSections(custom);
+
+      updateSectionDropdown();
+
+      const inlineSelect = document.getElementById("newSection");
+      const popupSelect = document.getElementById("popupNewSection");
+
+      if (inlineSelect) inlineSelect.value = name;
+      if (popupSelect) popupSelect.value = name;
+
+      if (fromPopup) closeSectionModal();
+
+      setStatus("Section added OK " + name);
+    };
+
+
     window.addSection = function() {
       const name = normalizeSectionName(prompt("New section name:"));
-      if (!name) { setStatus("Section name required"); return; }
-      const sections = getAllSections();
-      if (sections.includes(name)) { setStatus("Section already exists ERROR"); document.getElementById("newSection").value = name; return; }
-      const custom = getStoredCustomSections(); custom.push(name); custom.sort(compareText); saveCustomSections(custom);
-      updateSectionDropdown(); document.getElementById("newSection").value = name;
-      setStatus("Section added OK " + name);
+      addSectionCore(name, false);
     };
 
     window.addNewItem = async function() {
@@ -1423,6 +1888,26 @@
     }
 
     updateSectionDropdown();
+
+    const popupInputReady = setInterval(() => {
+      const popupInput = document.getElementById("popupNewItem");
+      if (!popupInput) return;
+      clearInterval(popupInputReady);
+      popupInput.addEventListener("keydown", event => {
+        if (event.key === "Enter") addNewItemFromPopup();
+      });
+    }, 100);
+
+
+    const popupSectionReady = setInterval(() => {
+      const sectionInput = document.getElementById("popupSectionName");
+      if (!sectionInput) return;
+      clearInterval(popupSectionReady);
+      sectionInput.addEventListener("keydown", event => {
+        if (event.key === "Enter") addSectionFromPopup();
+      });
+    }, 100);
+
     loadRealtime();
   </script>
 </body>
