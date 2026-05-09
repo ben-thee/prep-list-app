@@ -818,7 +818,7 @@
     }
 
 
-    /* ===== DELETE MODE INSIDE EDIT MODE ===== */
+    /* ===== DELETE MODE INSIDE EDIT MODE - SAFE FIX ===== */
     #deleteModeBtn {
       display: none !important;
     }
@@ -1020,6 +1020,7 @@
 
     function updateEditModeButton() {
       document.body.classList.toggle("edit-mode-active", editMode);
+
       const btn = document.getElementById("editModeBtn");
       if (editMode) { btn.classList.add("editOn"); btn.textContent = "EDIT MODE ON"; }
       else { btn.classList.remove("editOn"); btn.textContent = "EDIT MODE OFF"; }
@@ -1172,7 +1173,618 @@
       setStatus(deleteMode ? "Delete mode ON - tap DELETE to remove item" : "Delete mode OFF");
     };
 
-        window.openAddModal = function() {
+    window.openRecipeModal = function(id) {
+      const item = items.find(x => x.id === id); if (!item) return;
+      activeRecipeItemId = id;
+      const recipe = String(item.recipe || item.note || "");
+      originalRecipePreview = recipe;
+      currentRecipePreview = recipe;
+
+      document.getElementById("modalTitle").textContent = item.item;
+      document.getElementById("modalSub").textContent = editMode
+        ? "EDIT MODE ON - recipe auto save"
+        : "VIEW MODE - read only / multiplier preview only";
+      document.getElementById("modalFoot").textContent = editMode
+        ? "Typing auto-saves"
+        : "Checkboxes appear only on lines that contain numbers. Multiplier buttons are temporary previews only and are not saved.";
+
+      const tools = document.getElementById("recipeMultiplierTools");
+      const renameBtn = document.getElementById("renameRecipeBtn");
+      const moveSelect = document.getElementById("moveSectionSelectBtn");
+
+      if (tools) {
+        if (editMode) {
+          tools.classList.remove("show");
+        } else {
+          tools.classList.add("show");
+        }
+      }
+
+      if (renameBtn) {
+        if (editMode) {
+          renameBtn.classList.add("show");
+        } else {
+          renameBtn.classList.remove("show");
+        }
+      }
+
+      if (moveSelect) {
+        if (editMode) {
+          populateMoveSectionSelect(item.section);
+          moveSelect.classList.add("show");
+        } else {
+          moveSelect.classList.remove("show");
+        }
+      }
+
+      updatePhotoButtons(item);
+
+      if (editMode) {
+        document.getElementById("modalBody").innerHTML = `<textarea id="recipeInput" class="recipeTextarea" placeholder="Add ingredients / recipe / notes here...">${escapeHtml(recipe)}</textarea>`;
+        setTimeout(() => {
+          const textarea = document.getElementById("recipeInput");
+          if (!textarea) return;
+          textarea.focus();
+          textarea.addEventListener("input", () => scheduleRecipeSave(textarea.value));
+        }, 0);
+      } else {
+        renderRecipePreview(currentRecipePreview);
+      }
+
+      document.getElementById("recipeModal").classList.add("show");
+    };
+
+
+    function updatePhotoButtons(item) {
+      const photoViewBtn = document.getElementById("photoViewBtn");
+      const photoUploadBtn = document.getElementById("photoUploadBtn");
+      const photoDeleteBtn = document.getElementById("photoDeleteBtn");
+
+      const hasPhoto = !!(item && item.photoData);
+
+      if (photoViewBtn) {
+        if (hasPhoto || editMode) {
+          photoViewBtn.classList.add("show");
+          photoViewBtn.textContent = hasPhoto ? "PHOTO" : "NO PHOTO";
+          photoViewBtn.disabled = false;
+        } else {
+          photoViewBtn.classList.remove("show");
+          photoViewBtn.disabled = false;
+        }
+      }
+
+      if (photoUploadBtn) {
+        if (editMode) {
+          photoUploadBtn.classList.add("show");
+          photoUploadBtn.textContent = hasPhoto ? "CHANGE PHOTO" : "UPLOAD PHOTO";
+        } else {
+          photoUploadBtn.classList.remove("show");
+        }
+      }
+
+      if (photoDeleteBtn) {
+        if (editMode && hasPhoto) {
+          photoDeleteBtn.classList.add("show");
+        } else {
+          photoDeleteBtn.classList.remove("show");
+        }
+      }
+    }
+
+    window.openPhotoViewer = function() {
+      const item = items.find(x => x.id === activeRecipeItemId);
+      if (!item) return;
+
+      activePhotoItemId = item.id;
+      document.getElementById("photoModalTitle").textContent = item.item + " - Photo";
+
+      if (item.photoData) {
+        document.getElementById("photoModalBody").innerHTML =
+          `<img class="photoImage" src="${item.photoData}" alt="${escapeAttr(item.item)} photo">`;
+      } else {
+        document.getElementById("photoModalBody").innerHTML =
+          `<div class="photoEmpty">No photo for this item yet</div>`;
+      }
+
+      document.getElementById("photoModal").classList.add("show");
+    };
+
+    window.photoOverlayClose = function(event) {
+      if (event.target && event.target.id === "photoModal") closePhotoViewer();
+    };
+
+    window.closePhotoViewer = function() {
+      document.getElementById("photoModal").classList.remove("show");
+      activePhotoItemId = null;
+    };
+
+    window.choosePhoto = function() {
+      if (!editMode || !activeRecipeItemId) return;
+
+      const input = document.getElementById("photoInput");
+      if (!input) return;
+
+      input.value = "";
+      input.click();
+    };
+
+    window.handlePhotoSelected = async function(event) {
+      if (!editMode || !activeRecipeItemId) return;
+
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (!file.type || !file.type.startsWith("image/")) {
+        setStatus("Please choose an image file");
+        return;
+      }
+
+      setStatus("Compressing photo...");
+
+      try {
+        const photoData = await compressImageFile(file);
+
+        if (photoData.length > 850000) {
+          setStatus("Photo too large after compression ERROR");
+          alert("Photo is still too large. Please choose a smaller image.");
+          return;
+        }
+
+        setStatus("Saving photo...");
+
+        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
+          photoData,
+          photoName: file.name || "photo.jpg",
+          photoUpdatedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        const item = items.find(x => x.id === activeRecipeItemId);
+        if (item) {
+          item.photoData = photoData;
+          item.photoName = file.name || "photo.jpg";
+        }
+
+        updatePhotoButtons(item);
+        render();
+
+        setStatus("Photo saved OK");
+      } catch (error) {
+        console.error(error);
+        setStatus("Photo save failed ERROR");
+        alert("Photo upload failed. Try a smaller photo.");
+      }
+    };
+
+    function compressImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          const img = new Image();
+
+          img.onload = () => {
+            const maxSize = 850;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height && width > maxSize) {
+              height = Math.round(height * (maxSize / width));
+              width = maxSize;
+            } else if (height >= width && height > maxSize) {
+              width = Math.round(width * (maxSize / height));
+              height = maxSize;
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            let quality = 0.62;
+            let dataUrl = canvas.toDataURL("image/jpeg", quality);
+
+            while (dataUrl.length > 650000 && quality > 0.35) {
+              quality -= 0.08;
+              dataUrl = canvas.toDataURL("image/jpeg", quality);
+            }
+
+            resolve(dataUrl);
+          };
+
+          img.onerror = () => reject(new Error("Could not load image"));
+          img.src = reader.result;
+        };
+
+        reader.onerror = () => reject(new Error("Could not read image"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    window.deletePhoto = async function() {
+      if (!editMode || !activeRecipeItemId) return;
+
+      const item = items.find(x => x.id === activeRecipeItemId);
+      if (!item || !item.photoData) return;
+
+      const ok = confirm("Delete photo for " + item.item + "?");
+      if (!ok) return;
+
+      setStatus("Deleting photo...");
+
+      try {
+        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
+          photoData: deleteField(),
+          photoName: deleteField(),
+          photoUpdatedAt: deleteField(),
+          updatedAt: serverTimestamp()
+        });
+
+        delete item.photoData;
+        delete item.photoName;
+
+        updatePhotoButtons(item);
+        closePhotoViewer();
+        render();
+
+        setStatus("Photo deleted OK");
+      } catch (error) {
+        console.error(error);
+        setStatus("Photo delete failed ERROR");
+      }
+    };
+
+
+    function renderRecipePreview(recipeText) {
+      const lines = recipeLines(recipeText);
+
+      if (!lines.length) {
+        document.getElementById("modalBody").innerHTML =
+          `<div class="recipeTextView"><span class="recipeEmpty">No recipe/note for this item yet</span></div>`;
+        return;
+      }
+
+      const item = items.find(x => x.id === activeRecipeItemId);
+      const checks = getRecipeChecks(item);
+
+      const rows = lines.map((line, index) => {
+        const key = String(index);
+        const hasNumber = /-?\d+(?:\.\d+)?/.test(line);
+        const checked = hasNumber && !!checks[key];
+
+        if (!hasNumber) {
+          return `
+            <div class="recipeCheckLine noCheck">
+              <span class="recipeCheckSpacer"></span>
+              <span class="recipeCheckText">${escapeHtml(line)}</span>
+            </div>
+          `;
+        }
+
+        return `
+          <label class="recipeCheckLine ${checked ? "done" : ""}">
+            <input type="checkbox" ${checked ? "checked" : ""} onchange="toggleRecipeCheck('${key}', this.checked)">
+            <span class="recipeCheckText">${escapeHtml(line)}</span>
+          </label>
+        `;
+      }).join("");
+
+      document.getElementById("modalBody").innerHTML = `<div class="recipeCheckList">${rows}</div>`;
+    }
+
+    function recipeLines(recipeText) {
+      return String(recipeText || "")
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean);
+    }
+
+    function getRecipeChecks(item) {
+      if (!item || !item.recipeChecks || typeof item.recipeChecks !== "object") return {};
+      return { ...item.recipeChecks };
+    }
+
+    window.toggleRecipeCheck = function(key, checked) {
+      if (editMode || !activeRecipeItemId) return;
+
+      const item = items.find(x => x.id === activeRecipeItemId);
+      if (!item) return;
+
+      const checks = getRecipeChecks(item);
+      checks[key] = checked;
+      item.recipeChecks = checks;
+
+      renderRecipePreview(currentRecipePreview || originalRecipePreview);
+      scheduleRecipeCheckSave(item.id, checks);
+    };
+
+    function scheduleRecipeCheckSave(id, checks) {
+      if (recipeCheckSaveTimer) clearTimeout(recipeCheckSaveTimer);
+
+      setStatus("Checklist saving...");
+
+      recipeCheckSaveTimer = setTimeout(async () => {
+        try {
+          await updateDoc(doc(db, "prepItems", id), {
+            recipeChecks: checks,
+            updatedAt: serverTimestamp()
+          });
+
+          setStatus("Checklist saved OK");
+        } catch (error) {
+          console.error(error);
+          setStatus("Checklist save failed ERROR");
+        }
+      }, 300);
+    }
+
+    window.multiplyRecipePreview = function(multiplier) {
+      if (editMode) return;
+
+      currentRecipePreview = multiplyNumbersInText(currentRecipePreview || originalRecipePreview, multiplier);
+      renderRecipePreview(currentRecipePreview);
+
+      const label = formatNumber(multiplier);
+      document.getElementById("modalSub").textContent = `VIEW MODE - preview ×${label} only`;
+      setStatus(`Recipe preview ×${label} - not saved`);
+    };
+
+    
+    window.resetRecipePreview = function() {
+      if (editMode) return;
+
+      currentRecipePreview = originalRecipePreview;
+      renderRecipePreview(currentRecipePreview);
+      document.getElementById("modalSub").textContent = "VIEW MODE - read only / multiplier preview only";
+      setStatus("Recipe preview reset OK not saved");
+    };
+
+
+    window.resetRecipeChecks = async function() {
+      if (editMode || !activeRecipeItemId) return;
+
+      const item = items.find(x => x.id === activeRecipeItemId);
+      if (!item) return;
+
+      const ok = confirm("Reset all recipe ticks?");
+      if (!ok) return;
+
+      item.recipeChecks = {};
+      renderRecipePreview(currentRecipePreview || originalRecipePreview);
+
+      setStatus("Resetting checklist...");
+
+      try {
+        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
+          recipeChecks: {},
+          updatedAt: serverTimestamp()
+        });
+
+        setStatus("Checklist reset OK");
+      } catch (error) {
+        console.error(error);
+        setStatus("Checklist reset failed ERROR");
+      }
+    };
+
+        window.renameActiveItem = async function() {
+      if (!editMode || !activeRecipeItemId) return;
+
+      const item = items.find(x => x.id === activeRecipeItemId);
+      if (!item) return;
+
+      const newName = String(prompt("Rename item:", item.item || "") || "").trim();
+
+      if (!newName) {
+        setStatus("Rename cancelled");
+        return;
+      }
+
+      if (items.some(x => x.id !== activeRecipeItemId && String(x.section) === String(item.section) && String(x.item).toLowerCase() === newName.toLowerCase())) {
+        setStatus("Rename failed ERROR item already exists");
+        return;
+      }
+
+      setStatus("Renaming...");
+
+      try {
+        item.item = newName;
+
+        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
+          item: newName,
+          updatedAt: serverTimestamp()
+        });
+
+        document.getElementById("modalTitle").textContent = newName;
+        sortItemsLocal();
+        render();
+
+        setStatus("Renamed OK");
+      } catch (error) {
+        console.error(error);
+        setStatus("Rename failed ERROR");
+      }
+    };
+
+
+    function populateMoveSectionSelect(currentSection) {
+      const select = document.getElementById("moveSectionSelectBtn");
+      if (!select) return;
+
+      const sections = getAllSections().filter(section => section !== currentSection);
+
+      if (!sections.length) {
+        select.innerHTML = `<option value="">NO SECTION</option>`;
+        select.disabled = true;
+        return;
+      }
+
+      select.disabled = false;
+      select.innerHTML = `
+        <option value="">MOVE SECTION</option>
+        ${sections.map(section => `<option value="${escapeAttr(section)}">${escapeHtml(section)}</option>`).join("")}
+      `;
+      select.value = "";
+    }
+
+    window.moveActiveItemSectionFromSelect = async function(select) {
+      if (!editMode || !activeRecipeItemId) {
+        if (select) select.value = "";
+        return;
+      }
+
+      const item = items.find(x => x.id === activeRecipeItemId);
+      if (!item) {
+        if (select) select.value = "";
+        return;
+      }
+
+      const newSection = normalizeSectionName(select.value);
+
+      if (!newSection) return;
+
+      if (String(newSection) === String(item.section)) {
+        setStatus("Already in this section");
+        select.value = "";
+        return;
+      }
+
+      if (items.some(x =>
+        x.id !== activeRecipeItemId &&
+        String(x.section).toLowerCase() === newSection.toLowerCase() &&
+        String(x.item).toLowerCase() === String(item.item).toLowerCase()
+      )) {
+        setStatus("Move failed ERROR item already exists in that section");
+        select.value = "";
+        return;
+      }
+
+      setStatus("Moving section...");
+
+      try {
+        item.section = newSection;
+
+        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
+          section: newSection,
+          updatedAt: serverTimestamp()
+        });
+
+        sortItemsLocal();
+        updateSectionDropdown();
+        render();
+        populateMoveSectionSelect(newSection);
+
+        document.getElementById("modalSub").textContent = "EDIT MODE ON - moved to " + newSection;
+        setStatus("Moved to " + newSection + " OK");
+      } catch (error) {
+        console.error(error);
+        setStatus("Move failed ERROR");
+      } finally {
+        select.value = "";
+      }
+    };
+
+    window.multiplyRecipeCustom = function() {
+      if (editMode) return;
+
+      const raw = prompt("Multiply by what? Example: 2 or 0.5");
+      if (raw === null) return;
+
+      const multiplier = Number(String(raw).trim());
+
+      if (!Number.isFinite(multiplier)) {
+        setStatus("Multiplier invalid ERROR");
+        return;
+      }
+
+      multiplyRecipePreview(multiplier);
+    };
+
+    function multiplyNumbersInText(text, multiplier) {
+      return String(text || "").replace(/-?\d+(?:\.\d+)?/g, match => {
+        const original = Number(match);
+        if (!Number.isFinite(original)) return match;
+
+        const result = original * multiplier;
+        return formatNumber(result);
+      });
+    }
+
+    function formatNumber(value) {
+      if (Number.isInteger(value)) return String(value);
+
+      const rounded = Math.round(value * 1000) / 1000;
+      return String(rounded).replace(/\.?0+$/, "");
+    }
+
+    window.overlayClose = function(event) {
+      if (event.target && event.target.id === "recipeModal") closeRecipeModal();
+    };
+
+    window.closeRecipeModal = function() {
+      if (recipeSaveTimer) { clearTimeout(recipeSaveTimer); recipeSaveTimer = null; }
+      if (recipeCheckSaveTimer) { clearTimeout(recipeCheckSaveTimer); recipeCheckSaveTimer = null; }
+
+      const tools = document.getElementById("recipeMultiplierTools");
+      const renameBtn = document.getElementById("renameRecipeBtn");
+      const moveSelect = document.getElementById("moveSectionSelectBtn");
+      const photoViewBtn = document.getElementById("photoViewBtn");
+      const photoUploadBtn = document.getElementById("photoUploadBtn");
+      const photoDeleteBtn = document.getElementById("photoDeleteBtn");
+      const photoInput = document.getElementById("photoInput");
+
+      if (tools) tools.classList.remove("show");
+      if (renameBtn) renameBtn.classList.remove("show");
+      if (moveSelect) {
+        moveSelect.classList.remove("show");
+        moveSelect.value = "";
+      }
+      if (photoViewBtn) photoViewBtn.classList.remove("show");
+      if (photoUploadBtn) photoUploadBtn.classList.remove("show");
+      if (photoDeleteBtn) photoDeleteBtn.classList.remove("show");
+      if (photoInput) photoInput.value = "";
+
+      closePhotoViewer();
+      document.getElementById("recipeModal").classList.remove("show");
+      activeRecipeItemId = null;
+      originalRecipePreview = "";
+      currentRecipePreview = "";
+    };
+
+    function scheduleRecipeSave(value) {
+      if (!activeRecipeItemId) return;
+      const item = items.find(x => x.id === activeRecipeItemId); if (item) item.recipe = value;
+      if (recipeSaveTimer) clearTimeout(recipeSaveTimer);
+      setStatus("Recipe saving...");
+      recipeSaveTimer = setTimeout(() => saveRecipeNow(activeRecipeItemId, value), 550);
+    }
+
+    async function saveRecipeNow(id, value) {
+      try {
+        await updateDoc(doc(db, "prepItems", id), {
+          recipe: value,
+          updatedAt: serverTimestamp()
+        });
+        setStatus("Recipe saved OK");
+      } catch (error) {
+        console.error(error);
+        setStatus("Recipe save failed ERROR");
+      }
+    }
+
+    window.confirmDelete = async function(id, itemName) {
+      if (!deleteMode || isSaving) return;
+      const ok = confirm("Delete this item?\n\n" + itemName); if (!ok) return;
+      setSavingState(true); setStatus("Deleting " + itemName + "...");
+      try { await deleteDoc(doc(db, "prepItems", id)); setStatus("Deleted OK"); }
+      catch (error) { console.error(error); setStatus("Delete failed ERROR"); }
+      finally { setSavingState(false); }
+    };
+
+
+    window.openAddModal = function() {
       updateSectionDropdown();
 
       const modal = document.getElementById("addModal");
@@ -1360,7 +1972,6 @@
       });
     }, 100);
 
-    document.body.classList.toggle("edit-mode-active", editMode);
     loadRealtime();
   </script>
 </body>
