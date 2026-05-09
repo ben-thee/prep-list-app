@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
   <style>
@@ -104,7 +105,24 @@
     }
 
     .itemName.hasRecipe::after {
-      content: "•"; color: #16a34a; font-size: 14px; margin-left: 4px; line-height: 1;
+      content: "\2022"; color: #16a34a; font-size: 14px; margin-left: 4px; line-height: 1;
+    }
+
+    .itemName.hasPhoto::before {
+      content: "IMG";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 14px;
+      margin-right: 4px;
+      padding: 0 3px;
+      border-radius: 7px;
+      background: #111827;
+      color: #fff;
+      font-size: 8px;
+      font-weight: 900;
+      line-height: 1;
     }
 
     .colorCell {
@@ -230,6 +248,77 @@
       background: #111827;
       color: #fff;
       border-color: #111827;
+    }
+
+    .photoBtn {
+      background: #075985;
+      color: #fff;
+      border-color: #075985;
+    }
+
+    .photoDangerBtn {
+      background: #dc2626;
+      color: #fff;
+      border-color: #dc2626;
+    }
+
+    .photoModalOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      background: rgba(0,0,0,.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+
+    .photoModalOverlay.show {
+      display: flex;
+    }
+
+    .photoModalBox {
+      width: min(760px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+      background: #fff;
+      border: 3px solid #000;
+      padding: 10px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+    }
+
+    .photoModalHeader {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      border-bottom: 2px solid #000;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+    }
+
+    .photoModalTitle {
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .photoImage {
+      display: block;
+      width: 100%;
+      max-height: 70vh;
+      object-fit: contain;
+      border: 2px solid #000;
+      background: #fff;
+    }
+
+    .photoEmpty {
+      border: 2px solid #000;
+      padding: 18px;
+      font-size: 18px;
+      font-weight: 900;
+      text-align: center;
+      color: #555;
     }
 
     .modalSub { font-size: 11px; font-weight: 800; margin-top: 4px; color: #333; }
@@ -359,6 +448,8 @@
       .checkCell, .colorCell { min-height: 40px; padding: 4px; }
       .itemName { font-size: 20px; padding: 4px 14px; line-height: 1.1; }
       .itemName.hasRecipe::after { font-size: 20px; margin-left: 8px; }
+      .itemName.hasPhoto::before { min-width: 28px; height: 16px; margin-right: 8px; font-size: 9px; }
+      .photoModalTitle { font-size: 26px; }
       .colorSelect, .deleteBtn { width: 96px; height: 32px; font-size: 13px; padding: 1px 2px; }
       .customCheck { width: 28px; height: 28px; font-size: 28px; }
       .modalTitle { font-size: 26px; }
@@ -399,10 +490,10 @@
           <div class="modalTitleRow">
             <div id="modalTitle" class="modalTitle">Recipe</div>
             <div id="recipeMultiplierTools" class="recipeMultiplierTools">
-              <button onclick="multiplyRecipePreview(0.5)">×0.5</button>
-              <button onclick="multiplyRecipePreview(2)">×2</button>
-              <button onclick="multiplyRecipePreview(3)">×3</button>
-              <button onclick="multiplyRecipeCustom()">×?</button>
+              <button onclick="multiplyRecipePreview(0.5)">x0.5</button>
+              <button onclick="multiplyRecipePreview(2)">x2</button>
+              <button onclick="multiplyRecipePreview(3)">x3</button>
+              <button onclick="multiplyRecipeCustom()">x?</button>
               <button onclick="resetRecipePreview()">RESET ORIGINAL</button>
               <button onclick="resetRecipeChecks()">RESET TICKS</button>
             </div>
@@ -410,20 +501,34 @@
             <select id="moveSectionSelectBtn" class="modalActionSelect moveSectionBtn" onchange="moveActiveItemSectionFromSelect(this)">
               <option value="">MOVE SECTION</option>
             </select>
+            <button id="photoViewBtn" class="modalActionBtn photoBtn" onclick="openPhotoViewer()">PHOTO</button>
+            <button id="photoUploadBtn" class="modalActionBtn photoBtn" onclick="choosePhoto()">UPLOAD PHOTO</button>
+            <button id="photoDeleteBtn" class="modalActionBtn photoDangerBtn" onclick="deletePhoto()">DELETE PHOTO</button>
+            <input id="photoInput" type="file" accept="image/*" onchange="handlePhotoSelected(event)" style="display:none">
           </div>
           <div id="modalSub" class="modalSub">View mode</div>
         </div>
-        <button class="closeBtn" onclick="closeRecipeModal()" aria-label="Close">❌</button>
+        <button class="closeBtn" onclick="closeRecipeModal()" aria-label="Close">&times;</button>
       </div>
       <div id="modalBody"></div>
       <div id="modalFoot" class="modalFoot"></div>
     </div>
   </div>
 
+  <div id="photoModal" class="photoModalOverlay" onclick="photoOverlayClose(event)">
+    <div class="photoModalBox">
+      <div class="photoModalHeader">
+        <div id="photoModalTitle" class="photoModalTitle">Photo</div>
+        <button class="closeBtn" onclick="closePhotoViewer()" aria-label="Close">&times;</button>
+      </div>
+      <div id="photoModalBody"></div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import {
-      getFirestore, collection, doc, setDoc, updateDoc, deleteDoc,
+      getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, deleteField,
       onSnapshot, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -448,7 +553,8 @@
     let recipeSaveTimer = null;
     let recipeCheckSaveTimer = null;
     let originalRecipePreview = "";
-    let currentRecipePreview = ""; 
+    let currentRecipePreview = "";
+    let activePhotoItemId = null; 
 
     const BASE_SECTIONS = ["Prep", "Sauce", "Bakery", "Cookie"];
     const CUSTOM_SECTIONS_KEY = "prep_custom_sections_v1";
@@ -522,10 +628,10 @@
       onSnapshot(prepRef, snapshot => {
         items = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
         sortItemsLocal(); updateSectionDropdown(); render(); updateDeleteModeButton(); updateEditModeButton();
-        setStatus("Loaded ✅ Auto save / real-time sync");
+        setStatus("Loaded OK Auto save / real-time sync");
       }, error => {
         console.error(error);
-        setStatus("Firebase error ❌ Check Firestore Rules");
+        setStatus("Firebase error ERROR Check Firestore Rules");
         document.getElementById("content").innerHTML = `<div class="loading">Cannot connect to Firebase</div>`;
       });
     }
@@ -561,6 +667,7 @@
         const checkedClass = item.checked ? "checked" : "";
         const rowColor = item.color && item.color !== "none" ? `row-${item.color}` : "";
         const hasRecipe = String(item.recipe || item.note || "").trim() ? "hasRecipe" : "";
+        const hasPhoto = String(item.photoData || "").trim() ? "hasPhoto" : "";
         const safeId = escapeAttr(item.id);
         const safeName = escapeAttr(item.item);
 
@@ -581,7 +688,7 @@
         html += `
           <div class="row ${rowColor}">
             <div class="checkCell" onclick="toggleCheck('${safeId}')"><div class="customCheck ${checkedClass}">✓</div></div>
-            <div class="itemName ${hasRecipe}" onclick="openRecipeModal('${safeId}')">${escapeHtml(item.item)}</div>
+            <div class="itemName ${hasRecipe} ${hasPhoto}" onclick="openRecipeModal('${safeId}')">${escapeHtml(item.item)}</div>
             <div class="colorCell">${rightControl}</div>
           </div>`;
       });
@@ -610,8 +717,8 @@
           color: item.color || "none",
           updatedAt: serverTimestamp()
         });
-        setStatus("Saved ✅ Auto save / real-time sync");
-      } catch (error) { console.error(error); setStatus("Save failed ❌"); }
+        setStatus("Saved OK Auto save / real-time sync");
+      } catch (error) { console.error(error); setStatus("Save failed ERROR"); }
       finally { setSavingState(false); }
     }
 
@@ -620,7 +727,7 @@
         const pin = prompt("Enter PIN to turn Edit mode ON:");
 
         if (pin !== "2535") {
-          setStatus("Wrong PIN ❌");
+          setStatus("Wrong PIN ERROR");
           return;
         }
 
@@ -633,21 +740,21 @@
 
         updateEditModeButton();
         render();
-        setStatus("Edit mode ON — tap item name to edit recipe");
+        setStatus("Edit mode ON - tap item name to edit recipe");
         return;
       }
 
       editMode = false;
       updateEditModeButton();
       render();
-      setStatus("Edit mode OFF — tap item name to view recipe");
+      setStatus("Edit mode OFF - tap item name to view recipe");
     };
 
     window.toggleDeleteMode = function() {
       deleteMode = !deleteMode;
       if (deleteMode && editMode) { editMode = false; updateEditModeButton(); }
       updateDeleteModeButton(); render();
-      setStatus(deleteMode ? "Delete mode ON" : "Loaded ✅ Auto save / real-time sync");
+      setStatus(deleteMode ? "Delete mode ON" : "Loaded OK Auto save / real-time sync");
     };
 
     window.openRecipeModal = function(id) {
@@ -659,8 +766,8 @@
 
       document.getElementById("modalTitle").textContent = item.item;
       document.getElementById("modalSub").textContent = editMode
-        ? "EDIT MODE ON — recipe auto save"
-        : "VIEW MODE — read only / multiplier preview only";
+        ? "EDIT MODE ON - recipe auto save"
+        : "VIEW MODE - read only / multiplier preview only";
       document.getElementById("modalFoot").textContent = editMode
         ? "Typing auto-saves"
         : "Checkboxes appear only on lines that contain numbers. Multiplier buttons are temporary previews only and are not saved.";
@@ -694,6 +801,8 @@
         }
       }
 
+      updatePhotoButtons(item);
+
       if (editMode) {
         document.getElementById("modalBody").innerHTML = `<textarea id="recipeInput" class="recipeTextarea" placeholder="Add ingredients / recipe / notes here...">${escapeHtml(recipe)}</textarea>`;
         setTimeout(() => {
@@ -708,6 +817,209 @@
 
       document.getElementById("recipeModal").classList.add("show");
     };
+
+
+    function updatePhotoButtons(item) {
+      const photoViewBtn = document.getElementById("photoViewBtn");
+      const photoUploadBtn = document.getElementById("photoUploadBtn");
+      const photoDeleteBtn = document.getElementById("photoDeleteBtn");
+
+      const hasPhoto = !!(item && item.photoData);
+
+      if (photoViewBtn) {
+        if (hasPhoto || editMode) {
+          photoViewBtn.classList.add("show");
+          photoViewBtn.textContent = hasPhoto ? "PHOTO" : "NO PHOTO";
+          photoViewBtn.disabled = false;
+        } else {
+          photoViewBtn.classList.remove("show");
+          photoViewBtn.disabled = false;
+        }
+      }
+
+      if (photoUploadBtn) {
+        if (editMode) {
+          photoUploadBtn.classList.add("show");
+          photoUploadBtn.textContent = hasPhoto ? "CHANGE PHOTO" : "UPLOAD PHOTO";
+        } else {
+          photoUploadBtn.classList.remove("show");
+        }
+      }
+
+      if (photoDeleteBtn) {
+        if (editMode && hasPhoto) {
+          photoDeleteBtn.classList.add("show");
+        } else {
+          photoDeleteBtn.classList.remove("show");
+        }
+      }
+    }
+
+    window.openPhotoViewer = function() {
+      const item = items.find(x => x.id === activeRecipeItemId);
+      if (!item) return;
+
+      activePhotoItemId = item.id;
+      document.getElementById("photoModalTitle").textContent = item.item + " - Photo";
+
+      if (item.photoData) {
+        document.getElementById("photoModalBody").innerHTML =
+          `<img class="photoImage" src="${item.photoData}" alt="${escapeAttr(item.item)} photo">`;
+      } else {
+        document.getElementById("photoModalBody").innerHTML =
+          `<div class="photoEmpty">No photo for this item yet</div>`;
+      }
+
+      document.getElementById("photoModal").classList.add("show");
+    };
+
+    window.photoOverlayClose = function(event) {
+      if (event.target && event.target.id === "photoModal") closePhotoViewer();
+    };
+
+    window.closePhotoViewer = function() {
+      document.getElementById("photoModal").classList.remove("show");
+      activePhotoItemId = null;
+    };
+
+    window.choosePhoto = function() {
+      if (!editMode || !activeRecipeItemId) return;
+
+      const input = document.getElementById("photoInput");
+      if (!input) return;
+
+      input.value = "";
+      input.click();
+    };
+
+    window.handlePhotoSelected = async function(event) {
+      if (!editMode || !activeRecipeItemId) return;
+
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (!file.type || !file.type.startsWith("image/")) {
+        setStatus("Please choose an image file");
+        return;
+      }
+
+      setStatus("Compressing photo...");
+
+      try {
+        const photoData = await compressImageFile(file);
+
+        if (photoData.length > 850000) {
+          setStatus("Photo too large after compression ERROR");
+          alert("Photo is still too large. Please choose a smaller image.");
+          return;
+        }
+
+        setStatus("Saving photo...");
+
+        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
+          photoData,
+          photoName: file.name || "photo.jpg",
+          photoUpdatedAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        const item = items.find(x => x.id === activeRecipeItemId);
+        if (item) {
+          item.photoData = photoData;
+          item.photoName = file.name || "photo.jpg";
+        }
+
+        updatePhotoButtons(item);
+        render();
+
+        setStatus("Photo saved OK");
+      } catch (error) {
+        console.error(error);
+        setStatus("Photo save failed ERROR");
+        alert("Photo upload failed. Try a smaller photo.");
+      }
+    };
+
+    function compressImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          const img = new Image();
+
+          img.onload = () => {
+            const maxSize = 850;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height && width > maxSize) {
+              height = Math.round(height * (maxSize / width));
+              width = maxSize;
+            } else if (height >= width && height > maxSize) {
+              width = Math.round(width * (maxSize / height));
+              height = maxSize;
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            let quality = 0.62;
+            let dataUrl = canvas.toDataURL("image/jpeg", quality);
+
+            while (dataUrl.length > 650000 && quality > 0.35) {
+              quality -= 0.08;
+              dataUrl = canvas.toDataURL("image/jpeg", quality);
+            }
+
+            resolve(dataUrl);
+          };
+
+          img.onerror = () => reject(new Error("Could not load image"));
+          img.src = reader.result;
+        };
+
+        reader.onerror = () => reject(new Error("Could not read image"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    window.deletePhoto = async function() {
+      if (!editMode || !activeRecipeItemId) return;
+
+      const item = items.find(x => x.id === activeRecipeItemId);
+      if (!item || !item.photoData) return;
+
+      const ok = confirm("Delete photo for " + item.item + "?");
+      if (!ok) return;
+
+      setStatus("Deleting photo...");
+
+      try {
+        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
+          photoData: deleteField(),
+          photoName: deleteField(),
+          photoUpdatedAt: deleteField(),
+          updatedAt: serverTimestamp()
+        });
+
+        delete item.photoData;
+        delete item.photoName;
+
+        updatePhotoButtons(item);
+        closePhotoViewer();
+        render();
+
+        setStatus("Photo deleted OK");
+      } catch (error) {
+        console.error(error);
+        setStatus("Photo delete failed ERROR");
+      }
+    };
+
 
     function renderRecipePreview(recipeText) {
       const lines = recipeLines(recipeText);
@@ -784,10 +1096,10 @@
             updatedAt: serverTimestamp()
           });
 
-          setStatus("Checklist saved ✅");
+          setStatus("Checklist saved OK");
         } catch (error) {
           console.error(error);
-          setStatus("Checklist save failed ❌");
+          setStatus("Checklist save failed ERROR");
         }
       }, 300);
     }
@@ -799,8 +1111,8 @@
       renderRecipePreview(currentRecipePreview);
 
       const label = formatNumber(multiplier);
-      document.getElementById("modalSub").textContent = `VIEW MODE — preview ×${label} only`;
-      setStatus(`Recipe preview ×${label} — not saved`);
+      document.getElementById("modalSub").textContent = `VIEW MODE - preview ×${label} only`;
+      setStatus(`Recipe preview ×${label} - not saved`);
     };
 
     
@@ -809,8 +1121,8 @@
 
       currentRecipePreview = originalRecipePreview;
       renderRecipePreview(currentRecipePreview);
-      document.getElementById("modalSub").textContent = "VIEW MODE — read only / multiplier preview only";
-      setStatus("Recipe preview reset ✅ not saved");
+      document.getElementById("modalSub").textContent = "VIEW MODE - read only / multiplier preview only";
+      setStatus("Recipe preview reset OK not saved");
     };
 
 
@@ -834,10 +1146,10 @@
           updatedAt: serverTimestamp()
         });
 
-        setStatus("Checklist reset ✅");
+        setStatus("Checklist reset OK");
       } catch (error) {
         console.error(error);
-        setStatus("Checklist reset failed ❌");
+        setStatus("Checklist reset failed ERROR");
       }
     };
 
@@ -855,7 +1167,7 @@
       }
 
       if (items.some(x => x.id !== activeRecipeItemId && String(x.section) === String(item.section) && String(x.item).toLowerCase() === newName.toLowerCase())) {
-        setStatus("Rename failed ❌ item already exists");
+        setStatus("Rename failed ERROR item already exists");
         return;
       }
 
@@ -873,10 +1185,10 @@
         sortItemsLocal();
         render();
 
-        setStatus("Renamed ✅");
+        setStatus("Renamed OK");
       } catch (error) {
         console.error(error);
-        setStatus("Rename failed ❌");
+        setStatus("Rename failed ERROR");
       }
     };
 
@@ -928,7 +1240,7 @@
         String(x.section).toLowerCase() === newSection.toLowerCase() &&
         String(x.item).toLowerCase() === String(item.item).toLowerCase()
       )) {
-        setStatus("Move failed ❌ item already exists in that section");
+        setStatus("Move failed ERROR item already exists in that section");
         select.value = "";
         return;
       }
@@ -948,11 +1260,11 @@
         render();
         populateMoveSectionSelect(newSection);
 
-        document.getElementById("modalSub").textContent = "EDIT MODE ON — moved to " + newSection;
-        setStatus("Moved to " + newSection + " ✅");
+        document.getElementById("modalSub").textContent = "EDIT MODE ON - moved to " + newSection;
+        setStatus("Moved to " + newSection + " OK");
       } catch (error) {
         console.error(error);
-        setStatus("Move failed ❌");
+        setStatus("Move failed ERROR");
       } finally {
         select.value = "";
       }
@@ -967,7 +1279,7 @@
       const multiplier = Number(String(raw).trim());
 
       if (!Number.isFinite(multiplier)) {
-        setStatus("Multiplier invalid ❌");
+        setStatus("Multiplier invalid ERROR");
         return;
       }
 
@@ -1002,13 +1314,23 @@
       const tools = document.getElementById("recipeMultiplierTools");
       const renameBtn = document.getElementById("renameRecipeBtn");
       const moveSelect = document.getElementById("moveSectionSelectBtn");
+      const photoViewBtn = document.getElementById("photoViewBtn");
+      const photoUploadBtn = document.getElementById("photoUploadBtn");
+      const photoDeleteBtn = document.getElementById("photoDeleteBtn");
+      const photoInput = document.getElementById("photoInput");
+
       if (tools) tools.classList.remove("show");
       if (renameBtn) renameBtn.classList.remove("show");
       if (moveSelect) {
         moveSelect.classList.remove("show");
         moveSelect.value = "";
       }
+      if (photoViewBtn) photoViewBtn.classList.remove("show");
+      if (photoUploadBtn) photoUploadBtn.classList.remove("show");
+      if (photoDeleteBtn) photoDeleteBtn.classList.remove("show");
+      if (photoInput) photoInput.value = "";
 
+      closePhotoViewer();
       document.getElementById("recipeModal").classList.remove("show");
       activeRecipeItemId = null;
       originalRecipePreview = "";
@@ -1029,10 +1351,10 @@
           recipe: value,
           updatedAt: serverTimestamp()
         });
-        setStatus("Recipe saved ✅");
+        setStatus("Recipe saved OK");
       } catch (error) {
         console.error(error);
-        setStatus("Recipe save failed ❌");
+        setStatus("Recipe save failed ERROR");
       }
     }
 
@@ -1040,8 +1362,8 @@
       if (!deleteMode || isSaving) return;
       const ok = confirm("Delete this item?\n\n" + itemName); if (!ok) return;
       setSavingState(true); setStatus("Deleting " + itemName + "...");
-      try { await deleteDoc(doc(db, "prepItems", id)); setStatus("Deleted ✅"); }
-      catch (error) { console.error(error); setStatus("Delete failed ❌"); }
+      try { await deleteDoc(doc(db, "prepItems", id)); setStatus("Deleted OK"); }
+      catch (error) { console.error(error); setStatus("Delete failed ERROR"); }
       finally { setSavingState(false); }
     };
 
@@ -1054,10 +1376,10 @@
       const name = normalizeSectionName(prompt("New section name:"));
       if (!name) { setStatus("Section name required"); return; }
       const sections = getAllSections();
-      if (sections.includes(name)) { setStatus("Section already exists ❌"); document.getElementById("newSection").value = name; return; }
+      if (sections.includes(name)) { setStatus("Section already exists ERROR"); document.getElementById("newSection").value = name; return; }
       const custom = getStoredCustomSections(); custom.push(name); custom.sort(compareText); saveCustomSections(custom);
       updateSectionDropdown(); document.getElementById("newSection").value = name;
-      setStatus("Section added ✅ " + name);
+      setStatus("Section added OK " + name);
     };
 
     window.addNewItem = async function() {
@@ -1068,13 +1390,13 @@
       setSavingState(true); setStatus("Adding item...");
       try {
         const id = makeId(section, itemName);
-        if (items.some(x => x.id === id)) { setStatus("Item already exists ❌"); setSavingState(false); return; }
+        if (items.some(x => x.id === id)) { setStatus("Item already exists ERROR"); setSavingState(false); return; }
         await setDoc(doc(db, "prepItems", id), {
           id, section, item: itemName, checked: false, color: "none", recipe: "", recipeChecks: {}, sort: 9999, updatedAt: serverTimestamp()
         });
         document.getElementById("newItem").value = "";
-        setStatus("Added ✅ sorted alphabetically");
-      } catch (error) { console.error(error); setStatus("Add failed ❌"); }
+        setStatus("Added OK sorted alphabetically");
+      } catch (error) { console.error(error); setStatus("Add failed ERROR"); }
       finally { setSavingState(false); }
     };
 
