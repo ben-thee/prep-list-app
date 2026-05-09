@@ -989,6 +989,121 @@
       }
     }
 
+
+    /* ===== CLEAN EDIT MODE TOP BUTTON LAYOUT ===== */
+    body.edit-mode-active .controls {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 8px !important;
+      width: min(720px, calc(100% - 24px)) !important;
+      margin: 8px auto 14px !important;
+      padding: 8px !important;
+      border-radius: 22px !important;
+      border: 1.5px solid #d1d5db !important;
+      background: rgba(255, 255, 255, .92) !important;
+      box-shadow: 0 6px 18px rgba(17, 24, 39, .07) !important;
+      align-items: center !important;
+    }
+
+    body.edit-mode-active .controls .editOnlyBtn,
+    body.edit-mode-active #addBtn,
+    body.edit-mode-active #addSectionBtn,
+    body.edit-mode-active #deleteModeBtn {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      min-height: 42px !important;
+      height: 42px !important;
+      padding: 0 12px !important;
+      margin: 0 !important;
+      border-radius: 999px !important;
+      font-size: 14px !important;
+      font-weight: 950 !important;
+      letter-spacing: .01em !important;
+      white-space: nowrap !important;
+    }
+
+    body.edit-mode-active #addBtn,
+    body.edit-mode-active #addSectionBtn {
+      background: #e5e7eb !important;
+      color: #111827 !important;
+      border-color: #c7cbd1 !important;
+    }
+
+    body.edit-mode-active #deleteModeBtn {
+      grid-column: auto !important;
+      background: #374151 !important;
+      color: #fff !important;
+      border-color: #374151 !important;
+    }
+
+    body.edit-mode-active #deleteModeBtn.deleteOn {
+      background: #dc2626 !important;
+      color: #fff !important;
+      border-color: #dc2626 !important;
+    }
+
+    @media (max-width: 520px) {
+      body.edit-mode-active .controls {
+        grid-template-columns: 1fr 1fr !important;
+        width: calc(100% - 12px) !important;
+        gap: 7px !important;
+        padding: 7px !important;
+        margin: 6px auto 10px !important;
+      }
+
+      body.edit-mode-active #deleteModeBtn {
+        grid-column: 1 / -1 !important;
+      }
+    }
+
+    @media (min-width: 780px) {
+      body.edit-mode-active .controls {
+        grid-template-columns: repeat(3, 1fr) !important;
+        max-width: 620px !important;
+        width: 620px !important;
+        margin: 10px auto 16px !important;
+      }
+
+      body.edit-mode-active .controls .editOnlyBtn,
+      body.edit-mode-active #addBtn,
+      body.edit-mode-active #addSectionBtn,
+      body.edit-mode-active #deleteModeBtn {
+        min-height: 44px !important;
+        height: 44px !important;
+        font-size: 14px !important;
+      }
+    }
+
+
+    /* ===== IPHONE EDIT BUTTONS ONE ROW ===== */
+    @media (max-width: 520px) {
+      body.edit-mode-active .controls {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        width: calc(100% - 10px) !important;
+        gap: 5px !important;
+        padding: 6px !important;
+        margin: 6px auto 10px !important;
+      }
+
+      body.edit-mode-active #deleteModeBtn {
+        grid-column: auto !important;
+      }
+
+      body.edit-mode-active .controls .editOnlyBtn,
+      body.edit-mode-active #addBtn,
+      body.edit-mode-active #addSectionBtn,
+      body.edit-mode-active #deleteModeBtn {
+        min-height: 38px !important;
+        height: 38px !important;
+        padding: 0 4px !important;
+        font-size: 10px !important;
+        letter-spacing: 0 !important;
+        white-space: nowrap !important;
+      }
+    }
+
   </style>
 </head>
 
