@@ -1758,6 +1758,288 @@
       transition: opacity .85s cubic-bezier(.22,.61,.36,1) !important;
     }
 
+
+    /* ===== SEARCH / PIN / ORDER / OFFLINE FEATURES ===== */
+    .searchPickupBar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin: 0 0 10px;
+      align-items: center;
+    }
+
+    .searchInput {
+      width: 100%;
+      min-height: 42px;
+      border-radius: 999px !important;
+      border: 1.5px solid #d1d5db !important;
+      background: #fff !important;
+      color: #111827 !important;
+      padding: 10px 14px !important;
+      font-size: 16px !important;
+      font-weight: 850 !important;
+      box-shadow: 0 2px 8px rgba(17,24,39,.05);
+    }
+
+    .pickupAllBtn,
+    .pickupSectionBtn,
+    .sectionOrderToggleBtn,
+    .pinBtn {
+      border-radius: 999px !important;
+      border: 1.5px solid #c7cbd1 !important;
+      background: #e5e7eb !important;
+      color: #111827 !important;
+      box-shadow: 0 2px 6px rgba(17,24,39,.05) !important;
+    }
+
+    .pickupAllBtn {
+      width: auto;
+      min-width: 92px;
+      padding-inline: 12px;
+      white-space: nowrap;
+    }
+
+    .boxTitle {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 6px !important;
+      flex-wrap: wrap !important;
+    }
+
+    .boxTitleText {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    .sectionTools {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    body.edit-mode-active .sectionTools,
+    .sectionTools.orderOn {
+      display: inline-flex;
+    }
+
+    .sectionOrderToggleBtn,
+    .pickupSectionBtn {
+      width: auto !important;
+      min-height: 25px !important;
+      padding: 4px 8px !important;
+      font-size: 10px !important;
+      line-height: 1 !important;
+    }
+
+    .sectionOrderToggleBtn.orderOn {
+      background: #374151 !important;
+      color: #fff !important;
+      border-color: #374151 !important;
+    }
+
+    .pinBtn {
+      width: 24px !important;
+      min-width: 24px !important;
+      height: 24px !important;
+      min-height: 24px !important;
+      padding: 0 !important;
+      margin-right: 5px;
+      font-size: 14px !important;
+      line-height: 1 !important;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      opacity: .45;
+    }
+
+    body.edit-mode-active .pinBtn {
+      display: inline-flex;
+    }
+
+    .pinBtn.pinned {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+
+    .colorCell {
+      gap: 4px;
+    }
+
+    .orderQtyInput {
+      width: 42px !important;
+      min-width: 42px !important;
+      height: 28px !important;
+      min-height: 28px !important;
+      margin-left: 6px;
+      padding: 2px 5px !important;
+      border-radius: 999px !important;
+      border: 1.5px solid #c7cbd1 !important;
+      text-align: center;
+      font-size: 13px !important;
+      font-weight: 950 !important;
+      background: #f9fafb !important;
+    }
+
+    .pinDot {
+      color: #f59e0b;
+      font-size: 13px;
+      margin-right: 4px;
+    }
+
+    .offlineBadge {
+      grid-column: 1 / -1;
+      display: none;
+      border-radius: 999px;
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1.5px solid #fed7aa;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 950;
+      text-align: center;
+    }
+
+    .offlineBadge.show {
+      display: block;
+    }
+
+    @media (min-width: 780px) {
+      .searchPickupBar {
+        margin-bottom: 14px;
+      }
+
+      .searchInput {
+        min-height: 48px;
+        font-size: 18px !important;
+      }
+
+      .pickupAllBtn {
+        min-height: 48px;
+        font-size: 14px !important;
+        min-width: 126px;
+      }
+
+      .sectionOrderToggleBtn,
+      .pickupSectionBtn {
+        min-height: 28px !important;
+        font-size: 11px !important;
+      }
+
+      .pinBtn {
+        width: 28px !important;
+        min-width: 28px !important;
+        height: 28px !important;
+        min-height: 28px !important;
+        font-size: 17px !important;
+      }
+
+      .orderQtyInput {
+        width: 54px !important;
+        min-width: 54px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        font-size: 15px !important;
+      }
+    }
+
+
+    /* ===== REQUEST FIX: REMOVE TOP PICKUP ALL / EDIT-OFF 123 / PICKUP ICON PRESS ===== */
+    .searchPickupBar {
+      grid-template-columns: 1fr !important;
+    }
+
+    .pickupAllBtn {
+      display: none !important;
+    }
+
+    .sectionTools {
+      display: none !important;
+    }
+
+    body.edit-mode-active .sectionTools {
+      display: inline-flex !important;
+    }
+
+    .pickupSectionBtn {
+      width: 30px !important;
+      min-width: 30px !important;
+      height: 28px !important;
+      min-height: 28px !important;
+      padding: 0 !important;
+      font-size: 17px !important;
+      line-height: 1 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      transition: transform .16s cubic-bezier(.2,.8,.2,1), box-shadow .16s ease, background-color .16s ease !important;
+      transform: translateY(0) scale(1) !important;
+    }
+
+    .pickupSectionBtn:active,
+    .pickupSectionBtn.pickupPressed {
+      transform: translateY(2px) scale(.90) !important;
+      box-shadow: inset 0 3px 7px rgba(17,24,39,.18) !important;
+      background: #d1d5db !important;
+    }
+
+    @keyframes pickupPillBounce {
+      0% {
+        transform: translateY(0) scale(1);
+      }
+      38% {
+        transform: translateY(2px) scale(.90);
+        box-shadow: inset 0 3px 7px rgba(17,24,39,.18);
+      }
+      72% {
+        transform: translateY(-1px) scale(1.04);
+      }
+      100% {
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .pickupSectionBtn.pickupBounce {
+      animation: pickupPillBounce .34s cubic-bezier(.2,.8,.2,1) both !important;
+    }
+
+
+    /* ===== FIX: SHOW PICKUP ICON IN EDIT OFF, HIDE ONLY 123 ===== */
+    .sectionTools.orderOn {
+      display: inline-flex !important;
+    }
+
+    body:not(.edit-mode-active) .sectionTools.orderOn {
+      display: inline-flex !important;
+    }
+
+    body:not(.edit-mode-active) .sectionTools:not(.orderOn) {
+      display: none !important;
+    }
+
+    body:not(.edit-mode-active) .sectionOrderToggleBtn {
+      display: none !important;
+    }
+
+    body.edit-mode-active .sectionOrderToggleBtn {
+      display: inline-flex !important;
+    }
+
+    body.edit-mode-active .sectionTools {
+      display: inline-flex !important;
+    }
+
+    .pickupSectionBtn {
+      display: inline-flex !important;
+    }
+
   </style>
 </head>
 
@@ -1780,6 +2062,7 @@
 
     <div class="controls">
       <div id="status" class="status">Loading...</div>
+      <div id="offlineBadge" class="offlineBadge"></div>
       <button id="addBtn" class="editOnlyBtn" onclick="openAddModal()">ADD</button>
       <button id="addSectionBtn" class="editOnlyBtn" onclick="openSectionModal()">ADD SECTION</button>
       <button id="deleteModeBtn" class="editOnlyBtn" onclick="toggleDeleteMode()">DELETE MODE</button>
@@ -1825,6 +2108,11 @@
       </div>
     </div>
   </div>
+
+
+    <div class="searchPickupBar">
+      <input id="searchInput" class="searchInput" placeholder="Search item..." oninput="handleSearchInput(this.value)">
+    </div>
 
     <div id="content"><div class="loading">Loading...</div></div>
   </div>
@@ -1902,6 +2190,190 @@
     let originalRecipePreview = "";
     let currentRecipePreview = "";
     let activePhotoItemId = null; 
+
+    let searchQuery = "";
+    let isOffline = !navigator.onLine;
+
+    const PENDING_WRITES_KEY = "prep_pending_writes_v2";
+    const SECTION_ORDER_CONFIG_KEY = "prep_section_order_config_v1";
+
+    function getPendingWrites() {
+      try {
+        const raw = localStorage.getItem(PENDING_WRITES_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function savePendingWrites(queue) {
+      localStorage.setItem(PENDING_WRITES_KEY, JSON.stringify(queue));
+      updateOfflineBadge();
+    }
+
+    function queueWrite(entry) {
+      const queue = getPendingWrites();
+      queue.push({ ...entry, queuedAt: Date.now() });
+      savePendingWrites(queue);
+      setStatus("Offline saved locally - will sync when online");
+    }
+
+    function getSectionOrderConfig() {
+      try {
+        const raw = localStorage.getItem(SECTION_ORDER_CONFIG_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveSectionOrderConfig(config) {
+      localStorage.setItem(SECTION_ORDER_CONFIG_KEY, JSON.stringify(config || {}));
+    }
+
+    function isOrderSection(section) {
+      const config = getSectionOrderConfig();
+      return !!config[normalizeSectionName(section)];
+    }
+
+    function updateOfflineBadge() {
+      const count = getPendingWrites().length;
+      const existing = document.getElementById("offlineBadge");
+      if (!existing) return;
+
+      if (!navigator.onLine || count > 0) {
+        existing.classList.add("show");
+        existing.textContent = !navigator.onLine
+          ? `OFFLINE MODE - ${count} change(s) saved on this iPhone`
+          : `SYNCING - ${count} offline change(s) waiting`;
+      } else {
+        existing.classList.remove("show");
+        existing.textContent = "";
+      }
+    }
+
+    async function savePatch(id, patch, options = {}) {
+      const localItem = items.find(x => x.id === id);
+      if (localItem && patch) Object.assign(localItem, patch);
+
+      const cleanPatch = { ...(patch || {}) };
+      delete cleanPatch.updatedAt;
+
+      if (!navigator.onLine) {
+        queueWrite({ type: "update", id, patch: cleanPatch });
+        return;
+      }
+
+      try {
+        await updateDoc(doc(db, "prepItems", id), {
+          ...cleanPatch,
+          updatedAt: serverTimestamp()
+        });
+        if (!options.silent) setStatus("Saved OK / real-time sync");
+      } catch (error) {
+        console.error(error);
+        queueWrite({ type: "update", id, patch: cleanPatch });
+      }
+    }
+
+    async function createItemOfflineSafe(id, data) {
+      const cleanData = { ...(data || {}) };
+      delete cleanData.updatedAt;
+
+      if (!items.some(x => x.id === id)) items.push({ ...cleanData, id });
+      sortItemsLocal();
+      render();
+
+      if (!navigator.onLine) {
+        queueWrite({ type: "set", id, data: cleanData });
+        return;
+      }
+
+      try {
+        await setDoc(doc(db, "prepItems", id), {
+          ...cleanData,
+          updatedAt: serverTimestamp()
+        });
+        setStatus("Added OK");
+      } catch (error) {
+        console.error(error);
+        queueWrite({ type: "set", id, data: cleanData });
+      }
+    }
+
+    async function deleteItemOfflineSafe(id) {
+      items = items.filter(x => x.id !== id);
+      render();
+
+      if (!navigator.onLine) {
+        queueWrite({ type: "delete", id });
+        return;
+      }
+
+      try {
+        await deleteDoc(doc(db, "prepItems", id));
+        setStatus("Deleted OK");
+      } catch (error) {
+        console.error(error);
+        queueWrite({ type: "delete", id });
+      }
+    }
+
+    async function flushPendingWrites() {
+      if (!navigator.onLine) {
+        updateOfflineBadge();
+        return;
+      }
+
+      const queue = getPendingWrites();
+      if (!queue.length) {
+        updateOfflineBadge();
+        return;
+      }
+
+      setStatus(`Syncing ${queue.length} offline change(s)...`);
+
+      const remaining = [];
+
+      for (const entry of queue) {
+        try {
+          if (entry.type === "set") {
+            await setDoc(doc(db, "prepItems", entry.id), {
+              ...(entry.data || {}),
+              updatedAt: serverTimestamp()
+            });
+          } else if (entry.type === "update") {
+            await updateDoc(doc(db, "prepItems", entry.id), {
+              ...(entry.patch || {}),
+              updatedAt: serverTimestamp()
+            });
+          } else if (entry.type === "delete") {
+            await deleteDoc(doc(db, "prepItems", entry.id));
+          }
+        } catch (error) {
+          console.error("Offline sync failed", entry, error);
+          remaining.push(entry);
+        }
+      }
+
+      savePendingWrites(remaining);
+      setStatus(remaining.length ? `Some offline changes still waiting: ${remaining.length}` : "Offline changes synced OK");
+    }
+
+    window.addEventListener("online", () => {
+      isOffline = false;
+      updateOfflineBadge();
+      flushPendingWrites();
+    });
+
+    window.addEventListener("offline", () => {
+      isOffline = true;
+      updateOfflineBadge();
+      setStatus("Offline mode - changes will save on this iPhone and sync later");
+    });
+
 
     const BASE_SECTIONS = ["Prep", "Sauce", "Bakery", "Cookie"];
     const CUSTOM_SECTIONS_KEY = "prep_custom_sections_v1";
@@ -1983,13 +2455,35 @@
       return String(a || "").localeCompare(String(b || ""), undefined, { sensitivity: "base", numeric: true });
     }
 
+    function getPinTime(item) {
+      const value = item && item.pinnedAt;
+      if (!value) return 0;
+      if (typeof value === "number") return value;
+      if (value.seconds) return value.seconds * 1000;
+      return Number(value) || 0;
+    }
+
+    function compareItemsForDisplay(a, b) {
+      const pa = !!a.pinned;
+      const pb = !!b.pinned;
+      if (pa !== pb) return pa ? -1 : 1;
+
+      if (pa && pb) {
+        const ta = getPinTime(a);
+        const tb = getPinTime(b);
+        if (ta !== tb) return tb - ta;
+      }
+
+      return compareText(a.item, b.item);
+    }
+
     function sortItemsLocal() {
       const sections = getAllSections();
       items.sort((a, b) => {
         const sectionA = sections.indexOf(a.section) === -1 ? 999 : sections.indexOf(a.section);
         const sectionB = sections.indexOf(b.section) === -1 ? 999 : sections.indexOf(b.section);
         if (sectionA !== sectionB) return sectionA - sectionB;
-        return compareText(a.item, b.item);
+        return compareItemsForDisplay(a, b);
       });
     }
 
@@ -1997,8 +2491,8 @@
       setStatus("Loading...");
       onSnapshot(prepRef, snapshot => {
         items = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
-        sortItemsLocal(); updateSectionDropdown(); render(); updateDeleteModeButton(); updateEditModeButton();
-        setStatus("Loaded OK Auto save / real-time sync");
+        sortItemsLocal(); updateSectionDropdown(); render(); updateDeleteModeButton(); updateEditModeButton(); updateOfflineBadge(); flushPendingWrites();
+        setStatus(navigator.onLine ? "Loaded OK Auto save / real-time sync" : "Offline mode - showing cached data");
       }, error => {
         console.error(error);
         setStatus("Firebase error ERROR Check Firestore Rules");
@@ -2010,28 +2504,53 @@
       const content = document.getElementById("content");
       if (!items.length) { content.innerHTML = `<div class="loading">No items</div>`; return; }
 
+      const q = String(searchQuery || "").trim().toLowerCase();
+      const visibleItems = q
+        ? items.filter(item => {
+            const text = `${item.item || ""} ${item.section || ""} ${item.recipe || ""}`.toLowerCase();
+            return text.includes(q);
+          })
+        : items;
+
       const groups = {};
       const sections = getAllSections();
       sections.forEach(section => { groups[section] = []; });
 
-      items.forEach(item => {
+      visibleItems.forEach(item => {
         const section = normalizeSectionName(item.section) || "Other";
         if (!groups[section]) groups[section] = [];
         groups[section].push(item);
       });
 
-      Object.keys(groups).forEach(section => { groups[section].sort((a, b) => compareText(a.item, b.item)); });
+      Object.keys(groups).forEach(section => { groups[section].sort(compareItemsForDisplay); });
 
       const leftSection = sections[0] || "Prep";
       const leftHtml = renderBox(leftSection, groups[leftSection] || []);
       const rightHtml = sections.slice(1).map(section => renderBox(section, groups[section] || [])).join("");
 
-      content.innerHTML = `<div class="layout"><div class="leftCol">${leftHtml}</div><div class="rightCol">${rightHtml}</div></div>`;
+      const emptySearch = q && !visibleItems.length ? `<div class="loading">No search result</div>` : "";
+      content.innerHTML = emptySearch || `<div class="layout"><div class="leftCol">${leftHtml}</div><div class="rightCol">${rightHtml}</div></div>`;
     }
 
+    window.handleSearchInput = function(value) {
+      searchQuery = value || "";
+      render();
+    };
+
     function renderBox(title, list) {
-      if (!list.length) return "";
-      let html = `<div class="box"><div class="boxTitle">${escapeHtml(title)}</div>`;
+      const orderOn = isOrderSection(title);
+      if (!list.length && !orderOn) return "";
+
+      const safeTitle = escapeAttr(title);
+      let html = `
+        <div class="box">
+          <div class="boxTitle">
+            <span class="boxTitleText">${escapeHtml(title)}</span>
+            <span class="sectionTools ${orderOn ? "orderOn" : ""}">
+              <button class="sectionOrderToggleBtn ${orderOn ? "orderOn" : ""}" onclick="toggleSectionOrderMode('${safeTitle}'); event.stopPropagation();">${orderOn ? "123 ON" : "123"}</button>
+              ${orderOn ? `<button class="pickupSectionBtn" onclick="copyPickupSection('${safeTitle}', this); event.stopPropagation();" aria-label="Copy pickup list" title="Copy pickup list">📝</button>` : ""}
+            </span>
+          </div>`;
 
       list.forEach(item => {
         const checkedClass = item.checked ? "checked" : "";
@@ -2040,12 +2559,15 @@
         const hasPhoto = String(item.photoData || "").trim() ? "hasPhoto" : "";
         const safeId = escapeAttr(item.id);
         const safeName = escapeAttr(item.item);
+        const pinned = !!item.pinned;
+        const qtyValue = escapeAttr(item.orderQty || "");
 
         let rightControl = "";
         if (deleteMode) {
           rightControl = `<button class="deleteBtn" onclick="confirmDelete('${safeId}', '${safeName}'); event.stopPropagation();">DELETE</button>`;
         } else {
           rightControl = `
+            <button class="pinBtn ${pinned ? "pinned" : ""}" title="${pinned ? "Unpin" : "Pin"}" aria-label="${pinned ? "Unpin" : "Pin"}" onclick="togglePin('${safeId}'); event.stopPropagation();">${pinned ? "⭐" : "☆"}</button>
             <select class="colorWheelSelect" title="Change colour" aria-label="Change colour" onchange="changeColor('${safeId}', this.value)" onclick="event.stopPropagation()">
               <option value="none" ${item.color === "none" ? "selected" : ""}>None</option>
               <option value="red" ${item.color === "red" ? "selected" : ""}>Red</option>
@@ -2055,11 +2577,17 @@
             </select>`;
         }
 
+        const qtyInput = orderOn
+          ? `<input class="orderQtyInput" inputmode="numeric" pattern="[0-9]*" value="${qtyValue}" placeholder="0" onclick="event.stopPropagation()" oninput="saveOrderQty('${safeId}', this.value)">`
+          : "";
+
         html += `
           <div class="row ${rowColor}" data-row-id="${safeId}">
             <div class="checkCell" onclick="toggleCheck('${safeId}')"><div class="customCheck ${checkedClass}">✓</div></div>
             <div class="itemName" onclick="openRecipeModal('${safeId}')">
+              ${pinned ? '<span class="pinDot">⭐</span>' : ''}
               ${escapeHtml(item.item)}
+              ${qtyInput}
               ${hasRecipe ? '<span class="itemDot recipeDot">•</span>' : ''}
               ${hasPhoto ? '<span class="itemDot photoDot">•</span>' : ''}
             </div>
@@ -2126,17 +2654,119 @@
 
 
     async function saveItemChange(item) {
-      setSavingState(true); setStatus("Saving...");
+      setSavingState(true);
+      setStatus(navigator.onLine ? "Saving..." : "Offline saving locally...");
       try {
-        await updateDoc(doc(db, "prepItems", item.id), {
+        await savePatch(item.id, {
           checked: !!item.checked,
-          color: item.color || "none",
-          updatedAt: serverTimestamp()
+          color: item.color || "none"
         });
-        setStatus("Saved OK Auto save / real-time sync");
-      } catch (error) { console.error(error); setStatus("Save failed ERROR"); }
-      finally { setSavingState(false); }
+      } finally {
+        setSavingState(false);
+      }
     }
+
+    window.togglePin = async function(id) {
+      if (!editMode || deleteMode) return;
+      const item = items.find(x => x.id === id); if (!item) return;
+
+      const nextPinned = !item.pinned;
+      item.pinned = nextPinned;
+      item.pinnedAt = nextPinned ? Date.now() : 0;
+
+      sortItemsLocal();
+      render();
+
+      await savePatch(id, {
+        pinned: nextPinned,
+        pinnedAt: item.pinnedAt || 0
+      });
+    };
+
+    let orderQtyTimers = {};
+    window.saveOrderQty = function(id, value) {
+      const item = items.find(x => x.id === id); if (!item) return;
+      const clean = String(value || "").replace(/[^0-9]/g, "").slice(0, 4);
+      item.orderQty = clean;
+
+      if (orderQtyTimers[id]) clearTimeout(orderQtyTimers[id]);
+      orderQtyTimers[id] = setTimeout(() => {
+        savePatch(id, { orderQty: clean }, { silent: true });
+      }, 450);
+    };
+
+    window.toggleSectionOrderMode = function(section) {
+      if (!editMode) return;
+      const clean = normalizeSectionName(section);
+      const config = getSectionOrderConfig();
+      config[clean] = !config[clean];
+      saveSectionOrderConfig(config);
+      render();
+      setStatus(config[clean] ? `Order number ON: ${clean}` : `Order number OFF: ${clean}`);
+    };
+
+    function getPickupLines(sectionFilter = "") {
+      const config = getSectionOrderConfig();
+      return items
+        .filter(item => {
+          const section = normalizeSectionName(item.section);
+          if (sectionFilter && section !== normalizeSectionName(sectionFilter)) return false;
+          if (!config[section]) return false;
+          return String(item.orderQty || "").trim();
+        })
+        .sort((a, b) => {
+          const sectionCompare = compareText(a.section, b.section);
+          if (sectionFilter || sectionCompare === 0) return compareItemsForDisplay(a, b);
+          return sectionCompare;
+        })
+        .map(item => `${item.item} x ${item.orderQty}`);
+    }
+
+    async function copyTextToClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        const ok = document.execCommand("copy");
+        textarea.remove();
+        return ok;
+      }
+    }
+
+    window.copyPickupSection = async function(section, btn) {
+      if (btn) {
+        btn.classList.remove("pickupBounce");
+        void btn.offsetWidth;
+        btn.classList.add("pickupBounce");
+        setTimeout(() => btn.classList.remove("pickupBounce"), 420);
+      }
+
+      const lines = getPickupLines(section);
+      if (!lines.length) {
+        setStatus(`No pickup numbers in ${section}`);
+        return;
+      }
+      const text = `${section}\n` + lines.join("\n");
+      await copyTextToClipboard(text);
+      setStatus(`Copied pickup list: ${section}`);
+    };
+
+    window.copyPickupAll = async function() {
+      const lines = getPickupLines("");
+      if (!lines.length) {
+        setStatus("No pickup numbers to copy");
+        return;
+      }
+      await copyTextToClipboard(lines.join("\n"));
+      setStatus("Copied all pickup items");
+    };
 
     window.toggleEditMode = function() {
       editMode = !editMode;
@@ -2322,11 +2952,10 @@
 
         setStatus("Saving photo...");
 
-        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
+        await savePatch(activeRecipeItemId, {
           photoData,
           photoName: file.name || "photo.jpg",
-          photoUpdatedAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
+          photoUpdatedAtClient: Date.now()
         });
 
         const item = items.find(x => x.id === activeRecipeItemId);
@@ -2405,11 +3034,10 @@
       setStatus("Deleting photo...");
 
       try {
-        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
-          photoData: deleteField(),
-          photoName: deleteField(),
-          photoUpdatedAt: deleteField(),
-          updatedAt: serverTimestamp()
+        await savePatch(activeRecipeItemId, {
+          photoData: "",
+          photoName: "",
+          photoUpdatedAtClient: Date.now()
         });
 
         delete item.photoData;
@@ -2497,10 +3125,7 @@
 
       recipeCheckSaveTimer = setTimeout(async () => {
         try {
-          await updateDoc(doc(db, "prepItems", id), {
-            recipeChecks: checks,
-            updatedAt: serverTimestamp()
-          });
+          await savePatch(id, { recipeChecks: checks }, { silent: true });
 
           setStatus("Checklist saved OK");
         } catch (error) {
@@ -2547,10 +3172,7 @@
       setStatus("Resetting checklist...");
 
       try {
-        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
-          recipeChecks: {},
-          updatedAt: serverTimestamp()
-        });
+        await savePatch(activeRecipeItemId, { recipeChecks: {} });
 
         setStatus("Checklist reset OK");
       } catch (error) {
@@ -2582,10 +3204,7 @@
       try {
         item.item = newName;
 
-        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
-          item: newName,
-          updatedAt: serverTimestamp()
-        });
+        await savePatch(activeRecipeItemId, { item: newName });
 
         document.getElementById("modalTitle").textContent = newName;
         sortItemsLocal();
@@ -2656,13 +3275,11 @@
       try {
         item.section = newSection;
 
-        await updateDoc(doc(db, "prepItems", activeRecipeItemId), {
-          section: newSection,
-          updatedAt: serverTimestamp()
-        });
+        await savePatch(activeRecipeItemId, { section: newSection });
 
         sortItemsLocal();
         updateSectionDropdown();
+    setTimeout(updateOfflineBadge, 200);
         render();
         populateMoveSectionSelect(newSection);
 
@@ -2759,11 +3376,8 @@
 
     async function saveRecipeNow(id, value) {
       try {
-        await updateDoc(doc(db, "prepItems", id), {
-          recipe: value,
-          updatedAt: serverTimestamp()
-        });
-        setStatus("Recipe saved OK");
+        await savePatch(id, { recipe: value });
+        setStatus(navigator.onLine ? "Recipe saved OK" : "Recipe saved offline - will sync later");
       } catch (error) {
         console.error(error);
         setStatus("Recipe save failed ERROR");
@@ -2773,8 +3387,8 @@
     window.confirmDelete = async function(id, itemName) {
       if (!deleteMode || isSaving) return;
       const ok = confirm("Delete this item?\n\n" + itemName); if (!ok) return;
-      setSavingState(true); setStatus("Deleting " + itemName + "...");
-      try { await deleteDoc(doc(db, "prepItems", id)); setStatus("Deleted OK"); }
+      setSavingState(true); setStatus(navigator.onLine ? "Deleting " + itemName + "..." : "Offline delete queued...");
+      try { await deleteItemOfflineSafe(id); }
       catch (error) { console.error(error); setStatus("Delete failed ERROR"); }
       finally { setSavingState(false); }
     };
@@ -2821,6 +3435,50 @@
 
       await addItemCore(section, itemName, true);
     };
+
+
+
+    async function addItemCore(section, itemName, fromPopup) {
+      section = normalizeSectionName(section);
+      itemName = String(itemName || "").trim();
+
+      if (!section) { setStatus("Select a section first"); return; }
+      if (!itemName) { setStatus("Enter an item name first"); return; }
+
+      const id = makeId(section, itemName);
+      if (items.some(x => x.id === id)) {
+        setStatus("Item already exists ERROR");
+        return;
+      }
+
+      setSavingState(true);
+      setStatus(navigator.onLine ? "Adding item..." : "Offline adding item locally...");
+
+      try {
+        await createItemOfflineSafe(id, {
+          id,
+          section,
+          item: itemName,
+          checked: false,
+          color: "none",
+          recipe: "",
+          recipeChecks: {},
+          orderQty: "",
+          pinned: false,
+          pinnedAt: 0,
+          sort: 9999
+        });
+
+        const popupInput = document.getElementById("popupNewItem");
+        const inlineInput = document.getElementById("newItem");
+        if (popupInput) popupInput.value = "";
+        if (inlineInput) inlineInput.value = "";
+        if (fromPopup) closeAddModal();
+        setStatus(navigator.onLine ? "Added OK" : "Added offline - will sync later");
+      } finally {
+        setSavingState(false);
+      }
+    }
 
 
     window.toggleAddPanel = function() {
@@ -2912,19 +3570,7 @@
     window.addNewItem = async function() {
       const section = normalizeSectionName(document.getElementById("newSection").value);
       const itemName = document.getElementById("newItem").value.trim();
-      if (!section) { setStatus("Select a section first"); return; }
-      if (!itemName) { setStatus("Enter an item name first"); return; }
-      setSavingState(true); setStatus("Adding item...");
-      try {
-        const id = makeId(section, itemName);
-        if (items.some(x => x.id === id)) { setStatus("Item already exists ERROR"); setSavingState(false); return; }
-        await setDoc(doc(db, "prepItems", id), {
-          id, section, item: itemName, checked: false, color: "none", recipe: "", recipeChecks: {}, sort: 9999, updatedAt: serverTimestamp()
-        });
-        document.getElementById("newItem").value = "";
-        setStatus("Added OK sorted alphabetically");
-      } catch (error) { console.error(error); setStatus("Add failed ERROR"); }
-      finally { setSavingState(false); }
+      await addItemCore(section, itemName, false);
     };
 
     function makeId(section, itemName) {
