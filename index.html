@@ -2214,6 +2214,97 @@
       box-shadow: none !important;
     }
 
+
+    /* ===== QTY INPUT NEXT TO COLOUR + LONG NAME CLEAN LAYOUT ===== */
+    .row.row-order {
+      grid-template-columns: 58px minmax(0, 1fr) 54px 42px !important;
+      column-gap: 0 !important;
+      align-items: center !important;
+    }
+
+    .row.row-order .qtyCell {
+      justify-content: flex-end !important;
+      padding: 0 1px 0 0 !important;
+      margin-right: -2px !important;
+    }
+
+    .row.row-order .orderQtyInput {
+      width: 48px !important;
+      min-width: 48px !important;
+      max-width: 48px !important;
+      height: 31px !important;
+      min-height: 31px !important;
+      margin: 0 !important;
+      padding: 2px 4px !important;
+      border-radius: 999px !important;
+      text-align: center !important;
+    }
+
+    .row.row-order .colorCell {
+      justify-content: flex-start !important;
+      padding-left: 1px !important;
+      padding-right: 2px !important;
+      gap: 2px !important;
+    }
+
+    .itemLabelText {
+      display: -webkit-box !important;
+      -webkit-box-orient: vertical !important;
+      -webkit-line-clamp: 2;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      word-break: normal !important;
+      overflow-wrap: anywhere !important;
+      line-height: 1.05 !important;
+    }
+
+    .row.row-order .itemLabelText {
+      -webkit-line-clamp: 3;
+    }
+
+    @media (max-width: 520px) {
+      .row.row-order {
+        grid-template-columns: 28px minmax(0, 1fr) 42px 31px !important;
+      }
+
+      .row.row-order .qtyCell {
+        padding-right: 0 !important;
+        margin-right: -3px !important;
+      }
+
+      .row.row-order .orderQtyInput {
+        width: 39px !important;
+        min-width: 39px !important;
+        max-width: 39px !important;
+        height: 28px !important;
+        min-height: 28px !important;
+        font-size: 13px !important;
+      }
+
+      .row.row-order .colorCell {
+        padding-left: 0 !important;
+        padding-right: 1px !important;
+      }
+
+      .row.row-order .itemName {
+        padding-right: 3px !important;
+      }
+    }
+
+    @media (min-width: 780px) {
+      .row.row-order {
+        grid-template-columns: 58px minmax(0, 1fr) 56px 50px !important;
+      }
+
+      .row.row-order .orderQtyInput {
+        width: 50px !important;
+        min-width: 50px !important;
+        max-width: 50px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+      }
+    }
+
   </style>
 </head>
 
