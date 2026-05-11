@@ -2215,93 +2215,186 @@
     }
 
 
-    /* ===== QTY INPUT NEXT TO COLOUR + LONG NAME CLEAN LAYOUT ===== */
-    .row.row-order {
-      grid-template-columns: 58px minmax(0, 1fr) 54px 42px !important;
-      column-gap: 0 !important;
+    /* ===== FULL WIDTH SECTION + HIDE / SHOW ===== */
+    .fullSections {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 12px;
+      width: 100%;
+    }
+
+    .box.boxFull {
+      width: 100%;
+      grid-column: 1 / -1;
+    }
+
+    .box.boxFull .boxTitle {
+      position: relative;
+      display: flex !important;
       align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      flex-wrap: wrap !important;
     }
 
-    .row.row-order .qtyCell {
-      justify-content: flex-end !important;
-      padding: 0 1px 0 0 !important;
-      margin-right: -2px !important;
+    .box.boxCollapsed {
+      padding-bottom: 6px !important;
     }
 
-    .row.row-order .orderQtyInput {
-      width: 48px !important;
-      min-width: 48px !important;
-      max-width: 48px !important;
-      height: 31px !important;
-      min-height: 31px !important;
-      margin: 0 !important;
-      padding: 2px 4px !important;
+    .sectionRows.hidden {
+      display: none !important;
+    }
+
+    .sectionEyeBtn {
+      width: 30px !important;
+      min-width: 30px !important;
+      max-width: 30px !important;
+      height: 28px !important;
+      min-height: 28px !important;
+      max-height: 28px !important;
+      padding: 0 !important;
       border-radius: 999px !important;
-      text-align: center !important;
+      border: 1.5px solid #c7cbd1 !important;
+      background: #ffffff !important;
+      color: #111827 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      overflow: visible !important;
+      box-shadow: 0 2px 6px rgba(17,24,39,.05) !important;
+      font-size: 17px !important;
+      line-height: 1 !important;
     }
 
-    .row.row-order .colorCell {
-      justify-content: flex-start !important;
-      padding-left: 1px !important;
-      padding-right: 2px !important;
-      gap: 2px !important;
+    .sectionEyeBtn:active {
+      transform: translateY(2px) scale(.88) !important;
+      box-shadow: inset 0 3px 7px rgba(17,24,39,.18) !important;
+      background: #d1d5db !important;
     }
 
-    .itemLabelText {
-      display: -webkit-box !important;
-      -webkit-box-orient: vertical !important;
-      -webkit-line-clamp: 2;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
-      word-break: normal !important;
-      overflow-wrap: anywhere !important;
-      line-height: 1.05 !important;
-    }
-
-    .row.row-order .itemLabelText {
-      -webkit-line-clamp: 3;
-    }
-
-    @media (max-width: 520px) {
-      .row.row-order {
-        grid-template-columns: 28px minmax(0, 1fr) 42px 31px !important;
-      }
-
-      .row.row-order .qtyCell {
-        padding-right: 0 !important;
-        margin-right: -3px !important;
-      }
-
-      .row.row-order .orderQtyInput {
-        width: 39px !important;
-        min-width: 39px !important;
-        max-width: 39px !important;
-        height: 28px !important;
-        min-height: 28px !important;
-        font-size: 13px !important;
-      }
-
-      .row.row-order .colorCell {
-        padding-left: 0 !important;
-        padding-right: 1px !important;
-      }
-
-      .row.row-order .itemName {
-        padding-right: 3px !important;
-      }
+    .sectionLayoutSelect {
+      text-align: center;
+      font-weight: 950 !important;
     }
 
     @media (min-width: 780px) {
-      .row.row-order {
-        grid-template-columns: 58px minmax(0, 1fr) 56px 50px !important;
+      .fullSections {
+        gap: 18px;
+        margin-top: 20px;
       }
 
-      .row.row-order .orderQtyInput {
-        width: 50px !important;
-        min-width: 50px !important;
-        max-width: 50px !important;
-        height: 32px !important;
-        min-height: 32px !important;
+      .box.boxFull .row {
+        grid-template-columns: 58px minmax(0, 1fr) 106px;
+      }
+
+      .box.boxFull .row.row-order {
+        grid-template-columns: 58px minmax(0, 1fr) 64px 58px !important;
+      }
+
+      .sectionEyeBtn {
+        width: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+        height: 30px !important;
+        min-height: 30px !important;
+        max-height: 30px !important;
+        font-size: 18px !important;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .fullSections {
+        margin-top: 8px;
+        gap: 8px;
+      }
+
+      .box.boxFull .row.row-order {
+        grid-template-columns: 28px minmax(0, 1fr) 42px 31px !important;
+      }
+    }
+
+
+    /* ===== EYE BUTTON RIGHT SIDE + PRESS EFFECT / CHECKED SORT ===== */
+    .box.boxFull .boxTitle {
+      position: relative !important;
+      padding-left: 48px !important;
+      padding-right: 48px !important;
+    }
+
+    .box.boxFull .sectionEyeBtn {
+      position: absolute !important;
+      right: 8px !important;
+      top: 50% !important;
+      transform: translateY(-50%) scale(1) !important;
+      width: 32px !important;
+      min-width: 32px !important;
+      max-width: 32px !important;
+      height: 30px !important;
+      min-height: 30px !important;
+      max-height: 30px !important;
+      padding: 0 !important;
+      border-radius: 999px !important;
+      border: 1.5px solid #c7cbd1 !important;
+      background: #ffffff !important;
+      color: #111827 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-shadow: 0 2px 6px rgba(17,24,39,.06) !important;
+      font-size: 17px !important;
+      line-height: 1 !important;
+      z-index: 3 !important;
+      transition:
+        transform .10s ease,
+        box-shadow .10s ease,
+        background-color .10s ease,
+        opacity .10s ease !important;
+    }
+
+    .box.boxFull .sectionEyeBtn.eyeClosed {
+      background: #eef2f7 !important;
+      opacity: .92 !important;
+    }
+
+    .box.boxFull .sectionEyeBtn:active,
+    .box.boxFull .sectionEyeBtn.eyePressed {
+      transform: translateY(calc(-50% + 3px)) scale(.86) !important;
+      box-shadow:
+        inset 0 4px 8px rgba(17,24,39,.22),
+        0 1px 2px rgba(17,24,39,.04) !important;
+      background: #cbd5e1 !important;
+    }
+
+    @keyframes eyePillBounce {
+      0% { transform: translateY(-50%) scale(1); }
+      35% {
+        transform: translateY(calc(-50% + 3px)) scale(.86);
+        box-shadow: inset 0 4px 8px rgba(17,24,39,.22);
+      }
+      68% { transform: translateY(calc(-50% - 1px)) scale(1.08); }
+      100% { transform: translateY(-50%) scale(1); }
+    }
+
+    .box.boxFull .sectionEyeBtn.eyeBounce {
+      animation: eyePillBounce .38s cubic-bezier(.2,.85,.2,1) both !important;
+    }
+
+    @media (max-width: 520px) {
+      .box.boxFull .boxTitle {
+        padding-left: 42px !important;
+        padding-right: 42px !important;
+      }
+
+      .box.boxFull .sectionEyeBtn {
+        right: 7px !important;
+        width: 30px !important;
+        min-width: 30px !important;
+        max-width: 30px !important;
+        height: 28px !important;
+        min-height: 28px !important;
+        max-height: 28px !important;
+        font-size: 16px !important;
       }
     }
 
@@ -2367,6 +2460,12 @@
       <div class="addModalBody">
         <label class="addLabel">Section name</label>
         <input id="popupSectionName" class="popupInput" placeholder="New section name">
+
+        <label class="addLabel">Section layout</label>
+        <select id="popupSectionLayout" class="popupInput sectionLayoutSelect">
+          <option value="half">HALF - 2 columns</option>
+          <option value="full">FULL - full width</option>
+        </select>
 
         <button class="popupAddBtn" onclick="addSectionFromPopup()">ADD SECTION</button>
       </div>
@@ -2610,6 +2709,8 @@
     });
     const BASE_SECTIONS = ["Prep", "Sauce", "Bakery", "Cookie"];
     const CUSTOM_SECTIONS_KEY = "prep_custom_sections_v1";
+    const SECTION_LAYOUT_KEY = "prep_section_layout_v1";
+    const SECTION_COLLAPSED_KEY = "prep_section_collapsed_v1";
     function getStoredCustomSections() {
       try {
         const saved = localStorage.getItem(CUSTOM_SECTIONS_KEY);
@@ -2619,6 +2720,40 @@
     }
     function saveCustomSections(sections) {
       localStorage.setItem(CUSTOM_SECTIONS_KEY, JSON.stringify(sections));
+    }
+
+    function getSectionLayoutConfig() {
+      try {
+        const saved = localStorage.getItem(SECTION_LAYOUT_KEY);
+        const parsed = saved ? JSON.parse(saved) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch { return {}; }
+    }
+
+    function saveSectionLayoutConfig(config) {
+      localStorage.setItem(SECTION_LAYOUT_KEY, JSON.stringify(config || {}));
+    }
+
+    function getSectionCollapsedConfig() {
+      try {
+        const saved = localStorage.getItem(SECTION_COLLAPSED_KEY);
+        const parsed = saved ? JSON.parse(saved) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch { return {}; }
+    }
+
+    function saveSectionCollapsedConfig(config) {
+      localStorage.setItem(SECTION_COLLAPSED_KEY, JSON.stringify(config || {}));
+    }
+
+    function isFullSection(section) {
+      const config = getSectionLayoutConfig();
+      return config[normalizeSectionName(section)] === "full";
+    }
+
+    function isSectionCollapsed(section) {
+      const config = getSectionCollapsedConfig();
+      return !!config[normalizeSectionName(section)];
     }
     function normalizeSectionName(value) {
       return String(value || "").trim().replace(/\s+/g, " ");
@@ -2679,15 +2814,28 @@
       if (value.seconds) return value.seconds * 1000;
       return Number(value) || 0;
     }
+    function getDisplayPriority(item) {
+      const checked = !!(item && item.checked);
+      const pinned = !!(item && item.pinned);
+
+      if (checked && pinned) return 0;
+      if (checked) return 1;
+      if (pinned) return 2;
+      return 3;
+    }
+
     function compareItemsForDisplay(a, b) {
-      const pa = !!a.pinned;
-      const pb = !!b.pinned;
-      if (pa !== pb) return pa ? -1 : 1;
-      if (pa && pb) {
+      const priorityA = getDisplayPriority(a);
+      const priorityB = getDisplayPriority(b);
+
+      if (priorityA !== priorityB) return priorityA - priorityB;
+
+      if (!!a.pinned && !!b.pinned) {
         const ta = getPinTime(a);
         const tb = getPinTime(b);
         if (ta !== tb) return tb - ta;
       }
+
       return compareText(a.item, b.item);
     }
     function sortItemsLocal() {
@@ -2713,7 +2861,8 @@
     }
     function render() {
       const content = document.getElementById("content");
-      if (!items.length) { content.innerHTML = `<div class="loading">No items</div>`; return; }
+      if (!items.length && !getStoredCustomSections().length) { content.innerHTML = `<div class="loading">No items</div>`; return; }
+
       const q = String(searchQuery || "").trim().toLowerCase();
       const visibleItems = q
         ? items.filter(item => {
@@ -2721,20 +2870,34 @@
             return text.includes(q);
           })
         : items;
+
       const groups = {};
       const sections = getAllSections();
       sections.forEach(section => { groups[section] = []; });
+
       visibleItems.forEach(item => {
         const section = normalizeSectionName(item.section) || "Other";
         if (!groups[section]) groups[section] = [];
         groups[section].push(item);
       });
+
       Object.keys(groups).forEach(section => { groups[section].sort(compareItemsForDisplay); });
-      const leftSection = sections[0] || "Prep";
-      const leftHtml = renderBox(leftSection, groups[leftSection] || []);
-      const rightHtml = sections.slice(1).map(section => renderBox(section, groups[section] || [])).join("");
+
+      const halfSections = sections.filter(section => !isFullSection(section));
+      const fullSections = sections.filter(section => isFullSection(section));
+
+      const leftSection = halfSections[0] || "";
+      const leftHtml = leftSection ? renderBox(leftSection, groups[leftSection] || [], { layout: "half" }) : "";
+      const rightHtml = halfSections.slice(1).map(section => renderBox(section, groups[section] || [], { layout: "half" })).join("");
+      const fullHtml = fullSections.map(section => renderBox(section, groups[section] || [], { layout: "full", forceShow: true })).join("");
+
       const emptySearch = q && !visibleItems.length ? `<div class="loading">No search result</div>` : "";
-      content.innerHTML = emptySearch || `<div class="layout"><div class="leftCol">${leftHtml}</div><div class="rightCol">${rightHtml}</div></div>`;
+      content.innerHTML = emptySearch || `
+        <div class="layout">
+          <div class="leftCol">${leftHtml}</div>
+          <div class="rightCol">${rightHtml}</div>
+        </div>
+        ${fullHtml ? `<div class="fullSections">${fullHtml}</div>` : ""}`;
     }
     window.handleSearchInput = function(value) {
       searchQuery = value || "";
@@ -2753,14 +2916,21 @@
       if (clearBtn) clearBtn.classList.remove("show");
       render();
     };
-    function renderBox(title, list) {
+    function renderBox(title, list, options = {}) {
       const orderOn = isOrderSection(title);
-      if (!list.length && !orderOn) return "";
+      const layout = options.layout || "half";
+      const isFull = layout === "full";
+      const forceShow = !!options.forceShow;
+      const collapsed = isFull && isSectionCollapsed(title) && !String(searchQuery || "").trim();
+
+      if (!list.length && !orderOn && !forceShow) return "";
+
       const safeTitle = escapeAttr(title);
       let html = `
-        <div class="box">
+        <div class="box ${isFull ? "boxFull" : ""} ${collapsed ? "boxCollapsed" : ""}">
           <div class="boxTitle">
             <span class="boxTitleText">${escapeHtml(title)}</span>
+            ${isFull ? `<button class="sectionEyeBtn ${collapsed ? "eyeClosed" : ""}" onclick="toggleSectionCollapse('${safeTitle}', this); event.stopPropagation();" aria-label="${collapsed ? "Show section" : "Hide section"}" title="${collapsed ? "Show section" : "Hide section"}">${collapsed ? "🙈" : "👁️"}</button>` : ""}
             <span class="sectionTools ${orderOn ? "orderOn" : ""}">
               <button class="sectionOrderToggleBtn ${orderOn ? "orderOn" : ""}" onclick="toggleSectionOrderMode('${safeTitle}'); event.stopPropagation();">QTY</button>
               ${orderOn ? `<button class="resetQtySectionBtn" onclick="resetSectionQty('${safeTitle}', this); event.stopPropagation();" aria-label="Reset qty" title="Reset qty">
@@ -2768,7 +2938,8 @@
                 </button>` : ""}
               ${orderOn ? `<button class="pickupSectionBtn" onclick="copyPickupSection('${safeTitle}', this); event.stopPropagation();" aria-label="Copy pickup list" title="Copy pickup list"><span class="pickupIcon">📝</span></button>` : ""}
             </span>
-          </div>`;
+          </div>
+          <div class="sectionRows ${collapsed ? "hidden" : ""}">`;
       list.forEach(item => {
         const checkedClass = item.checked ? "checked" : "";
         const rowColor = item.color && item.color !== "none" ? `row-${item.color}` : "";
@@ -2807,9 +2978,40 @@
             <div class="colorCell">${rightControl}</div>
           </div>`;
       });
-      html += `</div>`;
+      html += `</div></div>`;
       return html;
     }
+    function animateEyePress(btn) {
+      if (!btn) return;
+
+      btn.classList.remove("eyePressed", "eyeBounce");
+      void btn.offsetWidth;
+
+      btn.classList.add("eyePressed");
+
+      setTimeout(() => {
+        btn.classList.remove("eyePressed");
+        btn.classList.add("eyeBounce");
+      }, 95);
+
+      setTimeout(() => {
+        btn.classList.remove("eyeBounce");
+      }, 520);
+    }
+
+    window.toggleSectionCollapse = function(section, btn) {
+      animateEyePress(btn);
+
+      setTimeout(() => {
+        const clean = normalizeSectionName(section);
+        const config = getSectionCollapsedConfig();
+        config[clean] = !config[clean];
+        saveSectionCollapsedConfig(config);
+        render();
+        setStatus(config[clean] ? `Hidden section: ${clean}` : `Showing section: ${clean}`);
+      }, 180);
+    };
+
     window.toggleCheck = async function(id) {
       if (deleteMode || isSaving) return;
       const item = items.find(x => x.id === id); if (!item) return;
@@ -3508,8 +3710,10 @@
       updateSectionDropdown();
       const modal = document.getElementById("addModal");
       const input = document.getElementById("popupNewItem");
+      const layoutSelect = document.getElementById("popupSectionLayout");
       if (modal) modal.classList.add("show");
       setTimeout(() => {
+        if (layoutSelect) layoutSelect.value = "half";
         if (input) {
           input.value = "";
           input.focus();
@@ -3596,10 +3800,12 @@
     };
     window.addSectionFromPopup = function() {
       const input = document.getElementById("popupSectionName");
+      const layoutSelect = document.getElementById("popupSectionLayout");
       const name = normalizeSectionName(input ? input.value : "");
-      addSectionCore(name, true);
+      const layout = layoutSelect ? layoutSelect.value : "half";
+      addSectionCore(name, true, layout);
     };
-    function addSectionCore(name, fromPopup) {
+    function addSectionCore(name, fromPopup, layout = "half") {
       name = normalizeSectionName(name);
       if (!name) {
         setStatus("Section name required");
@@ -3609,7 +3815,12 @@
       }
       const sections = getAllSections();
       if (sections.includes(name)) {
-        setStatus("Section already exists ERROR");
+        const layoutConfig = getSectionLayoutConfig();
+        layoutConfig[name] = layout === "full" ? "full" : "half";
+        saveSectionLayoutConfig(layoutConfig);
+        render();
+
+        setStatus("Section layout updated " + name + " = " + layout.toUpperCase());
         const inlineSelect = document.getElementById("newSection");
         const popupSelect = document.getElementById("popupNewSection");
         if (inlineSelect) inlineSelect.value = name;
@@ -3621,17 +3832,22 @@
       custom.push(name);
       custom.sort(compareText);
       saveCustomSections(custom);
+
+      const layoutConfig = getSectionLayoutConfig();
+      layoutConfig[name] = layout === "full" ? "full" : "half";
+      saveSectionLayoutConfig(layoutConfig);
+
       updateSectionDropdown();
       const inlineSelect = document.getElementById("newSection");
       const popupSelect = document.getElementById("popupNewSection");
       if (inlineSelect) inlineSelect.value = name;
       if (popupSelect) popupSelect.value = name;
       if (fromPopup) closeSectionModal();
-      setStatus("Section added OK " + name);
+      setStatus("Section added OK " + name + " (" + layout.toUpperCase() + ")");
     };
     window.addSection = function() {
       const name = normalizeSectionName(prompt("New section name:"));
-      addSectionCore(name, false);
+      addSectionCore(name, false, "half");
     };
     window.addNewItem = async function() {
       const section = normalizeSectionName(document.getElementById("newSection").value);
