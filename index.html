@@ -2798,6 +2798,195 @@
       }
     }
 
+
+    /* ===== HOME BLANK AUTO-REPAIR SAFETY ===== */
+    .homeCategoryList:empty::after {
+      content: "Loading home...";
+      display: block;
+      text-align: center;
+      padding: 18px;
+      margin: 10px auto;
+      width: min(360px, 100%);
+      border-radius: 24px;
+      background: rgba(255,255,255,.88);
+      border: 1.5px solid #d1d5db;
+      color: #6b7280;
+      font-weight: 900;
+      box-shadow: 0 8px 22px rgba(17,24,39,.06);
+    }
+
+
+    /* ===== SMOOTH NAV + FIXED HOME BACKGROUND + SLIDE HIDE/SHOW ===== */
+    html, body {
+      min-height: 100dvh !important;
+      background-attachment: fixed !important;
+    }
+
+    .page {
+      min-height: 100dvh !important;
+      background: transparent !important;
+    }
+
+    .homeView {
+      min-height: 100dvh !important;
+      position: relative !important;
+      overflow: hidden !important;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.92) 0 118px, transparent 119px),
+        linear-gradient(180deg, #f7f7f8 0%, #ececef 100%) !important;
+      background-attachment: fixed !important;
+    }
+
+    .homeCategoryList {
+      max-height: calc(100dvh - 138px) !important;
+      overflow-y: auto !important;
+      padding-bottom: 22px !important;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .homeSubpageList {
+      display: block !important;
+      overflow: hidden !important;
+      max-height: 0 !important;
+      opacity: 0 !important;
+      transform: translateY(-8px) !important;
+      padding-top: 0 !important;
+      transition:
+        max-height .34s cubic-bezier(.2,.85,.2,1),
+        opacity .22s ease,
+        transform .34s cubic-bezier(.2,.85,.2,1),
+        padding-top .22s ease !important;
+      will-change: max-height, opacity, transform;
+    }
+
+    .homeCategoryCard.open .homeSubpageList {
+      max-height: 900px !important;
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+      padding-top: 4px !important;
+    }
+
+    .appView.subpageFadeIn {
+      animation: subpageSoftFadeIn .34s ease both;
+    }
+
+    @keyframes subpageSoftFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .sectionRows {
+      display: block !important;
+      overflow: hidden !important;
+      max-height: 2800px !important;
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+      transition:
+        max-height .34s cubic-bezier(.2,.85,.2,1),
+        opacity .22s ease,
+        transform .34s cubic-bezier(.2,.85,.2,1) !important;
+      will-change: max-height, opacity, transform;
+    }
+
+    .sectionRows.hidden {
+      display: block !important;
+      max-height: 0 !important;
+      opacity: 0 !important;
+      transform: translateY(-8px) !important;
+      pointer-events: none !important;
+    }
+
+    .box .boxTitle {
+      position: relative !important;
+      padding-left: 44px !important;
+      padding-right: 44px !important;
+    }
+
+    .box .sectionEyeBtn {
+      position: absolute !important;
+      right: 7px !important;
+      top: 50% !important;
+      transform: translateY(-50%) scale(1) !important;
+      width: 30px !important;
+      min-width: 30px !important;
+      max-width: 30px !important;
+      height: 28px !important;
+      min-height: 28px !important;
+      max-height: 28px !important;
+      padding: 0 !important;
+      border-radius: 999px !important;
+      border: 1.5px solid #c7cbd1 !important;
+      background: #ffffff !important;
+      color: #111827 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-shadow: 0 2px 6px rgba(17,24,39,.06) !important;
+      font-size: 17px !important;
+      line-height: 1 !important;
+      z-index: 4 !important;
+    }
+
+    .box .sectionTools {
+      margin-right: 30px !important;
+    }
+
+    .box .sectionEyeBtn.eyeClosed {
+      background: #eef2f7 !important;
+      opacity: .92 !important;
+    }
+
+    .box .sectionEyeBtn:active,
+    .box .sectionEyeBtn.eyePressed {
+      transform: translateY(calc(-50% + 3px)) scale(.86) !important;
+      box-shadow:
+        inset 0 4px 8px rgba(17,24,39,.22),
+        0 1px 2px rgba(17,24,39,.04) !important;
+      background: #cbd5e1 !important;
+    }
+
+    .box .sectionEyeBtn.eyeBounce {
+      animation: eyePillBounce .38s cubic-bezier(.2,.85,.2,1) both !important;
+    }
+
+    @media (min-width: 780px) {
+      .homeView {
+        background:
+          linear-gradient(180deg, rgba(255,255,255,.92) 0 154px, transparent 155px),
+          linear-gradient(180deg, #f7f7f8 0%, #ececef 100%) !important;
+      }
+
+      .homeCategoryList {
+        max-height: calc(100dvh - 178px) !important;
+      }
+
+      .box .boxTitle {
+        padding-left: 54px !important;
+        padding-right: 54px !important;
+      }
+
+      .box .sectionEyeBtn {
+        right: 8px !important;
+        width: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+        height: 30px !important;
+        min-height: 30px !important;
+        max-height: 30px !important;
+        font-size: 18px !important;
+      }
+
+      .box .sectionTools {
+        margin-right: 36px !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -3130,16 +3319,7 @@
       return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
     }
 
-    function getHomeConfig() {
-      try {
-        const raw = localStorage.getItem(HOME_CONFIG_KEY);
-        const parsed = raw ? JSON.parse(raw) : null;
-
-        if (parsed && Array.isArray(parsed.categories)) {
-          return parsed;
-        }
-      } catch {}
-
+    function createDefaultHomeConfig() {
       return {
         categories: [
           {
@@ -3152,6 +3332,54 @@
           }
         ]
       };
+    }
+
+    function repairHomeConfig(config) {
+      const fallback = createDefaultHomeConfig();
+
+      if (!config || !Array.isArray(config.categories)) return fallback;
+
+      config.categories = config.categories.filter(category => category && category.id && category.name);
+
+      // Prevent blank Home screen if localStorage saved an empty category list.
+      if (!config.categories.length) {
+        config.categories = fallback.categories;
+        return config;
+      }
+
+      config.categories.forEach(category => {
+        if (!Array.isArray(category.subpages)) category.subpages = [];
+        category.subpages = category.subpages.filter(page => page && page.id && page.name);
+      });
+
+      // Make sure the original Prep List page can always be reached.
+      const hasDefaultPage = config.categories.some(category =>
+        (category.subpages || []).some(page => page.id === DEFAULT_PAGE_ID)
+      );
+
+      if (!hasDefaultPage) {
+        config.categories[0].subpages = config.categories[0].subpages || [];
+        config.categories[0].subpages.unshift({ id: DEFAULT_PAGE_ID, name: "Prep List", pinned: true });
+      }
+
+      return config;
+    }
+
+    function getHomeConfig() {
+      try {
+        const raw = localStorage.getItem(HOME_CONFIG_KEY);
+        const parsed = raw ? JSON.parse(raw) : null;
+        const fixed = repairHomeConfig(parsed);
+
+        // Auto-save repair so the app does not keep opening blank.
+        saveHomeConfig(fixed);
+
+        return fixed;
+      } catch {
+        const fallback = createDefaultHomeConfig();
+        saveHomeConfig(fallback);
+        return fallback;
+      }
     }
 
     function saveHomeConfig(config) {
@@ -3200,6 +3428,15 @@
 
       const categories = [...(config.categories || [])].sort(homeSort);
 
+      if (!categories.length) {
+        target.innerHTML = `
+          <div class="homeCategoryCard">
+            <div class="loading" style="padding:18px;font-size:15px;">Home was empty. Tap repair.</div>
+            <button class="popupAddBtn" onclick="resetHomeConfig()">REPAIR HOME</button>
+          </div>`;
+        return;
+      }
+
       target.innerHTML = categories.map(category => {
         const safeCatId = escapeAttr(category.id);
         const isOpen = !!openConfig[category.id];
@@ -3216,7 +3453,7 @@
         }).join("");
 
         return `
-          <div class="homeCategoryCard ${isOpen ? "open" : ""}">
+          <div class="homeCategoryCard ${isOpen ? "open" : ""}" data-category-id="${safeCatId}">
             <div class="homeCategoryPill">
               <button class="homePinBtn ${category.pinned ? "pinned" : ""}" onclick="toggleHomeCategoryPin('${safeCatId}'); event.stopPropagation();" title="Pin category">${category.pinned ? "⭐" : "☆"}</button>
               <button class="homeNameBtn" onclick="toggleHomeCategoryOpen('${safeCatId}')">${escapeHtml(category.name)}</button>
@@ -3240,6 +3477,14 @@
       commitFocusedOrderQty();
       currentPageId = pageId || DEFAULT_PAGE_ID;
       document.body.classList.add("app-mode");
+
+      const appView = document.getElementById("appView");
+      if (appView) {
+        appView.classList.remove("subpageFadeIn");
+        void appView.offsetWidth;
+        appView.classList.add("subpageFadeIn");
+      }
+
       const title = document.getElementById("activePageTitle");
       if (title) title.textContent = getActivePageName().toUpperCase();
       updateSectionDropdown();
@@ -3250,7 +3495,20 @@
       const openConfig = getHomeOpenConfig();
       openConfig[categoryId] = !openConfig[categoryId];
       saveHomeOpenConfig(openConfig);
+
+      const card = document.querySelector(`[data-category-id="${CSS.escape(categoryId)}"]`);
+      if (card) {
+        card.classList.toggle("open", !!openConfig[categoryId]);
+      } else {
+        renderHome();
+      }
+    };
+
+    window.resetHomeConfig = function() {
+      const fallback = createDefaultHomeConfig();
+      saveHomeConfig(fallback);
       renderHome();
+      setStatus("Home repaired OK");
     };
 
     window.addHomeCategory = function() {
@@ -3678,7 +3936,7 @@
       const layout = options.layout || "half";
       const isFull = layout === "full";
       const forceShow = !!options.forceShow;
-      const collapsed = isFull && isSectionCollapsed(title) && !String(searchQuery || "").trim();
+      const collapsed = isSectionCollapsed(title) && !String(searchQuery || "").trim();
 
       if (!list.length && !orderOn && !forceShow) return "";
 
@@ -3687,7 +3945,7 @@
         <div class="box ${isFull ? "boxFull" : ""} ${collapsed ? "boxCollapsed" : ""}">
           <div class="boxTitle">
             <span class="boxTitleText">${escapeHtml(title)}</span>
-            ${isFull ? `<button class="sectionEyeBtn ${collapsed ? "eyeClosed" : ""}" onclick="toggleSectionCollapse('${safeTitle}', this); event.stopPropagation();" aria-label="${collapsed ? "Show section" : "Hide section"}" title="${collapsed ? "Show section" : "Hide section"}">${collapsed ? "🔻" : "🔺"}</button>` : ""}
+            <button class="sectionEyeBtn ${collapsed ? "eyeClosed" : ""}" onclick="toggleSectionCollapse('${safeTitle}', this); event.stopPropagation();" aria-label="${collapsed ? "Show section" : "Hide section"}" title="${collapsed ? "Show section" : "Hide section"}">${collapsed ? "🔻" : "🔺"}</button>
             <span class="sectionTools ${orderOn ? "orderOn" : ""}">
               ${deleteMode ? `<button class="sectionDeleteBtn" onclick="deleteSection('${safeTitle}', this); event.stopPropagation();" aria-label="Delete section" title="Delete section">🗑️</button>` : ""}
               <button class="sectionOrderToggleBtn ${orderOn ? "orderOn" : ""}" onclick="toggleSectionOrderMode('${safeTitle}'); event.stopPropagation();">QTY</button>
@@ -3839,7 +4097,24 @@
         const config = getSectionCollapsedConfig();
         config[clean] = !config[clean];
         saveSectionCollapsedConfig(config);
-        render();
+
+        const box = btn ? btn.closest(".box") : null;
+        const rows = box ? box.querySelector(".sectionRows") : null;
+
+        if (rows) {
+          rows.classList.toggle("hidden", !!config[clean]);
+          box.classList.toggle("boxCollapsed", !!config[clean]);
+        } else {
+          render();
+        }
+
+        if (btn) {
+          btn.classList.toggle("eyeClosed", !!config[clean]);
+          btn.textContent = config[clean] ? "🔻" : "🔺";
+          btn.setAttribute("aria-label", config[clean] ? "Show section" : "Hide section");
+          btn.setAttribute("title", config[clean] ? "Show section" : "Hide section");
+        }
+
         setStatus(config[clean] ? `Hidden section: ${clean}` : `Showing section: ${clean}`);
       }, 180);
     };
@@ -4471,6 +4746,8 @@
         await savePatch(activeRecipeItemId, { section: newSection });
         sortItemsLocal();
         renderHome();
+    setTimeout(renderHome, 150);
+    setTimeout(renderHome, 800);
     updateSectionDropdown();
     setTimeout(updateOfflineBadge, 200);
         render();
