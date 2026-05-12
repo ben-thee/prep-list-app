@@ -3572,6 +3572,273 @@
       }
     }
 
+
+    /* ===== SECTION HEADER ONE-LINE TOOLS + QTY MOVE LEFT ===== */
+
+    /*
+      Header layout:
+      - Section name stays on the same row as hide/show.
+      - QTY / pickup / reset stay together on one line.
+    */
+    .box .boxTitle,
+    .box.boxFull .boxTitle {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto auto !important;
+      align-items: center !important;
+      justify-content: stretch !important;
+      gap: 6px !important;
+      flex-wrap: nowrap !important;
+      padding-left: 12px !important;
+      padding-right: 8px !important;
+      min-height: 54px !important;
+    }
+
+    .box .boxTitleText,
+    .box.boxFull .boxTitleText {
+      grid-column: 1 !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      justify-self: center !important;
+      text-align: center !important;
+      white-space: normal !important;
+      line-height: 1.05 !important;
+    }
+
+    .box .sectionEyeBtn,
+    .box.boxFull .sectionEyeBtn {
+      grid-column: 2 !important;
+      position: static !important;
+      right: auto !important;
+      top: auto !important;
+      transform: none !important;
+      justify-self: center !important;
+      align-self: center !important;
+      margin: 0 !important;
+      width: 30px !important;
+      min-width: 30px !important;
+      max-width: 30px !important;
+      height: 28px !important;
+      min-height: 28px !important;
+      max-height: 28px !important;
+      z-index: 4 !important;
+    }
+
+    .box .sectionEyeBtn:active,
+    .box .sectionEyeBtn.eyePressed,
+    .box.boxFull .sectionEyeBtn:active,
+    .box.boxFull .sectionEyeBtn.eyePressed {
+      transform: translateY(2px) scale(.86) !important;
+    }
+
+    @keyframes eyePillBounceInline {
+      0% { transform: translateY(0) scale(1); }
+      35% { transform: translateY(2px) scale(.86); }
+      68% { transform: translateY(-1px) scale(1.07); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    .box .sectionEyeBtn.eyeBounce,
+    .box.boxFull .sectionEyeBtn.eyeBounce {
+      animation: eyePillBounceInline .38s cubic-bezier(.2,.85,.2,1) both !important;
+    }
+
+    .box .sectionTools,
+    .box.boxFull .sectionTools {
+      grid-column: 3 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-wrap: nowrap !important;
+      gap: 4px !important;
+      margin: 0 !important;
+      min-width: max-content !important;
+      white-space: nowrap !important;
+      justify-self: end !important;
+    }
+
+    body:not(.edit-mode-active) .sectionTools:not(.orderOn) {
+      display: none !important;
+    }
+
+    .sectionTools.orderOn {
+      display: inline-flex !important;
+    }
+
+    .pickupSectionBtn,
+    .resetQtySectionBtn,
+    .sectionOrderToggleBtn {
+      flex: 0 0 auto !important;
+      margin: 0 !important;
+      white-space: nowrap !important;
+    }
+
+    .pickupSectionBtn,
+    .resetQtySectionBtn {
+      width: 30px !important;
+      min-width: 30px !important;
+      max-width: 30px !important;
+      height: 28px !important;
+      min-height: 28px !important;
+      max-height: 28px !important;
+      padding: 0 !important;
+    }
+
+    .resetQtyIconImg {
+      width: 26px !important;
+      height: 26px !important;
+      min-width: 26px !important;
+      min-height: 26px !important;
+      max-width: 26px !important;
+      max-height: 26px !important;
+    }
+
+    /*
+      Move QTY number bubble a little left.
+      Keep it small like the colour button.
+    */
+    .row.row-order {
+      grid-template-columns: 31px minmax(0, 1fr) 23px 25px !important;
+      column-gap: 0 !important;
+    }
+
+    .row.row-order .qtyCell {
+      justify-content: flex-start !important;
+      padding: 0 !important;
+      margin: 0 0 0 -1px !important;
+      min-width: 0 !important;
+      z-index: 4 !important;
+    }
+
+    .row.row-order .orderQtyInput {
+      width: 18px !important;
+      min-width: 18px !important;
+      max-width: 18px !important;
+      height: 18px !important;
+      min-height: 18px !important;
+      max-height: 18px !important;
+      line-height: 18px !important;
+      font-size: 9.5px !important;
+      transform: translateX(-1px) !important;
+    }
+
+    @media (max-width: 520px) {
+      .box .boxTitle,
+      .box.boxFull .boxTitle {
+        grid-template-columns: minmax(0, 1fr) 30px auto !important;
+        gap: 4px !important;
+        padding-left: 9px !important;
+        padding-right: 6px !important;
+        min-height: 50px !important;
+      }
+
+      .box .boxTitleText,
+      .box.boxFull .boxTitleText {
+        font-size: inherit !important;
+      }
+
+      .box .sectionTools,
+      .box.boxFull .sectionTools {
+        gap: 3px !important;
+      }
+
+      .pickupSectionBtn,
+      .resetQtySectionBtn {
+        width: 28px !important;
+        min-width: 28px !important;
+        max-width: 28px !important;
+        height: 26px !important;
+        min-height: 26px !important;
+        max-height: 26px !important;
+      }
+
+      .resetQtyIconImg {
+        width: 24px !important;
+        height: 24px !important;
+        min-width: 24px !important;
+        min-height: 24px !important;
+        max-width: 24px !important;
+        max-height: 24px !important;
+      }
+
+      .sectionOrderToggleBtn {
+        min-width: 44px !important;
+        height: 26px !important;
+        min-height: 26px !important;
+        padding: 0 8px !important;
+        font-size: 10px !important;
+      }
+
+      .row.row-order {
+        grid-template-columns: 31px minmax(0, 1fr) 23px 25px !important;
+      }
+
+      .row.row-order .qtyCell {
+        margin-left: -2px !important;
+      }
+
+      .row.row-order .orderQtyInput {
+        width: 18px !important;
+        min-width: 18px !important;
+        max-width: 18px !important;
+        height: 18px !important;
+        min-height: 18px !important;
+        max-height: 18px !important;
+        line-height: 18px !important;
+        transform: translateX(-2px) !important;
+      }
+    }
+
+    @media (min-width: 780px) {
+      .box .boxTitle,
+      .box.boxFull .boxTitle {
+        grid-template-columns: minmax(0, 1fr) 34px auto !important;
+        gap: 8px !important;
+        min-height: 62px !important;
+        padding-left: 18px !important;
+        padding-right: 12px !important;
+      }
+
+      .box .sectionEyeBtn,
+      .box.boxFull .sectionEyeBtn {
+        width: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+        height: 30px !important;
+        min-height: 30px !important;
+        max-height: 30px !important;
+      }
+
+      .pickupSectionBtn,
+      .resetQtySectionBtn {
+        width: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+        height: 30px !important;
+        min-height: 30px !important;
+        max-height: 30px !important;
+      }
+
+      .row.row-order {
+        grid-template-columns: 58px minmax(0, 1fr) 28px 38px !important;
+      }
+
+      .row.row-order .qtyCell {
+        margin-left: -2px !important;
+      }
+
+      .row.row-order .orderQtyInput {
+        width: 21px !important;
+        min-width: 21px !important;
+        max-width: 21px !important;
+        height: 21px !important;
+        min-height: 21px !important;
+        max-height: 21px !important;
+        line-height: 21px !important;
+        font-size: 11px !important;
+        transform: translateX(-2px) !important;
+      }
+    }
+
   </style>
 </head>
 
