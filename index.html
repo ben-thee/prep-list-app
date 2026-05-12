@@ -3235,6 +3235,343 @@
       }
     }
 
+
+    /* ===== WHOLE ROW PILL GREY + COLOUR OVERRIDE + NO TEXT CLIP ===== */
+    .itemDot.recipeDot,
+    .itemDot.photoDot {
+      display: none !important;
+    }
+
+    /*
+      Grey is now the WHOLE item pill:
+      tick area + item name + QTY + colour area.
+    */
+    .row {
+      background: #f3f4f6 !important;
+      overflow: hidden !important;
+    }
+
+    .row.row-red {
+      background: #f3dada !important;
+      border-color: #e7bcbc !important;
+    }
+
+    .row.row-green {
+      background: #dff3e4 !important;
+      border-color: #bfe1c9 !important;
+    }
+
+    .row.row-yellow {
+      background: #f7efcc !important;
+      border-color: #e7dca9 !important;
+    }
+
+    .row.row-blue {
+      background: #dfeaf7 !important;
+      border-color: #bad0e8 !important;
+    }
+
+    .checkCell,
+    .itemName,
+    .qtyCell,
+    .colorCell {
+      background: transparent !important;
+    }
+
+    .itemName {
+      align-self: stretch !important;
+      height: 100% !important;
+      min-height: 100% !important;
+      width: 100% !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
+      padding: 2px 24px 2px 8px !important;
+      display: flex !important;
+      align-items: center !important;
+      position: relative !important;
+      min-width: 0 !important;
+      overflow: visible !important;
+    }
+
+    .itemLabelText {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      display: -webkit-box !important;
+      -webkit-box-orient: vertical !important;
+      -webkit-line-clamp: 2 !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      word-break: normal !important;
+      overflow-wrap: anywhere !important;
+      line-height: 1.16 !important;
+      max-height: 2.42em !important;
+      padding: 2px 0 !important;
+      transform: none !important;
+    }
+
+    .pinInlineBtn {
+      position: absolute !important;
+      right: 3px !important;
+      top: 50% !important;
+      transform: translateY(-50%) scale(.88) !important;
+      margin: 0 !important;
+      z-index: 4 !important;
+    }
+
+    .row:not(.row-order) {
+      grid-template-columns: 31px minmax(0, 1fr) 25px !important;
+      column-gap: 0 !important;
+    }
+
+    .row:not(.row-order) .checkCell {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      z-index: 3 !important;
+    }
+
+    .row:not(.row-order) .colorCell {
+      justify-content: center !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      z-index: 3 !important;
+    }
+
+    .row.row-order {
+      grid-template-columns: 31px minmax(0, 1fr) 28px 25px !important;
+      column-gap: 0 !important;
+    }
+
+    .row.row-order .checkCell {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      z-index: 3 !important;
+    }
+
+    .row.row-order .qtyCell {
+      justify-content: center !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      min-width: 0 !important;
+      z-index: 3 !important;
+    }
+
+    .row.row-order .orderQtyInput {
+      width: 26px !important;
+      min-width: 26px !important;
+      max-width: 26px !important;
+      height: 26px !important;
+      min-height: 26px !important;
+      max-height: 26px !important;
+      border-radius: 999px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      text-align: center !important;
+      font-size: 12px !important;
+      font-weight: 950 !important;
+      line-height: 26px !important;
+      box-sizing: border-box !important;
+      background: rgba(255,255,255,.74) !important;
+    }
+
+    .row.row-order .colorCell {
+      justify-content: center !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      min-width: 0 !important;
+      z-index: 3 !important;
+    }
+
+    @media (min-width: 780px) {
+      .row:not(.row-order) {
+        grid-template-columns: 58px minmax(0, 1fr) 38px !important;
+      }
+
+      .row.row-order {
+        grid-template-columns: 58px minmax(0, 1fr) 36px 38px !important;
+      }
+
+      .itemName {
+        padding-left: 14px !important;
+        padding-right: 30px !important;
+      }
+
+      .pinInlineBtn {
+        right: 5px !important;
+        transform: translateY(-50%) scale(1) !important;
+      }
+
+      .row.row-order .orderQtyInput {
+        width: 30px !important;
+        min-width: 30px !important;
+        max-width: 30px !important;
+        height: 30px !important;
+        min-height: 30px !important;
+        max-height: 30px !important;
+        line-height: 30px !important;
+        font-size: 13px !important;
+      }
+    }
+
+
+    /* ===== QTY SAME AS COLOUR + STAR NO OVERLAP FINAL ===== */
+    /*
+      Whole row pill stays grey/selected colour.
+      QTY is now same visual size as colour button and pushed right.
+      Star is kept at the far right of name area, next to QTY/colour,
+      while text reserves space so it never runs underneath the star.
+    */
+
+    .row.row-order {
+      grid-template-columns: 31px minmax(0, 1fr) 22px 25px !important;
+      column-gap: 0 !important;
+    }
+
+    .row.row-order .qtyCell {
+      justify-content: flex-end !important;
+      padding: 0 !important;
+      margin: 0 -2px 0 0 !important;
+      min-width: 0 !important;
+      z-index: 4 !important;
+      background: transparent !important;
+    }
+
+    .row.row-order .orderQtyInput {
+      width: 19px !important;
+      min-width: 19px !important;
+      max-width: 19px !important;
+      height: 19px !important;
+      min-height: 19px !important;
+      max-height: 19px !important;
+      border-radius: 999px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      text-align: center !important;
+      font-size: 10px !important;
+      font-weight: 950 !important;
+      line-height: 19px !important;
+      box-sizing: border-box !important;
+      background: rgba(255,255,255,.78) !important;
+      transform: translateX(2px) !important;
+    }
+
+    .row.row-order .colorCell {
+      justify-content: center !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      min-width: 0 !important;
+      z-index: 4 !important;
+      background: transparent !important;
+    }
+
+    .row.row-order .colorWheelSelect {
+      transform: translateX(1px) !important;
+    }
+
+    .itemName {
+      padding-right: 32px !important;
+      overflow: hidden !important;
+    }
+
+    .itemLabelText {
+      max-width: 100% !important;
+      padding-right: 0 !important;
+    }
+
+    .pinInlineBtn {
+      position: absolute !important;
+      right: 4px !important;
+      top: 50% !important;
+      transform: translateY(-50%) scale(.88) !important;
+      margin: 0 !important;
+      z-index: 5 !important;
+      flex: 0 0 auto !important;
+    }
+
+    @media (max-width: 520px) {
+      .row.row-order {
+        grid-template-columns: 31px minmax(0, 1fr) 21px 25px !important;
+      }
+
+      .row.row-order .orderQtyInput {
+        width: 18px !important;
+        min-width: 18px !important;
+        max-width: 18px !important;
+        height: 18px !important;
+        min-height: 18px !important;
+        max-height: 18px !important;
+        font-size: 9.5px !important;
+        line-height: 18px !important;
+        transform: translateX(3px) !important;
+      }
+
+      .itemName {
+        padding-right: 31px !important;
+      }
+
+      .pinInlineBtn {
+        right: 3px !important;
+        transform: translateY(-50%) scale(.86) !important;
+      }
+    }
+
+    @media (min-width: 780px) {
+      .row.row-order {
+        grid-template-columns: 58px minmax(0, 1fr) 27px 38px !important;
+      }
+
+      .row.row-order .orderQtyInput {
+        width: 21px !important;
+        min-width: 21px !important;
+        max-width: 21px !important;
+        height: 21px !important;
+        min-height: 21px !important;
+        max-height: 21px !important;
+        font-size: 11px !important;
+        line-height: 21px !important;
+        transform: translateX(4px) !important;
+      }
+
+      .row.row-order .colorWheelSelect {
+        transform: translateX(4px) !important;
+      }
+
+      .itemName {
+        padding-right: 40px !important;
+      }
+
+      .pinInlineBtn {
+        right: 7px !important;
+        transform: translateY(-50%) scale(1) !important;
+      }
+    }
+
+
+    /* ===== ITEM PIN REMOVED + UNCHECK RESETS COLOUR ===== */
+    .pinInlineBtn,
+    .pinBtn,
+    .pinDot {
+      display: none !important;
+    }
+
+    .itemName {
+      padding-right: 8px !important;
+    }
+
+    .row.row-order .itemName {
+      padding-right: 8px !important;
+    }
+
+    .itemLabelText {
+      max-width: 100% !important;
+    }
+
+    @media (min-width: 780px) {
+      .itemName,
+      .row.row-order .itemName {
+        padding-right: 12px !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -3618,6 +3955,72 @@
       return config;
     }
 
+
+    function normalizeHomeConfigForCompare(config) {
+      const fixed = repairHomeConfig(config);
+      const categories = [...(fixed.categories || [])]
+        .map(category => ({
+          id: category.id,
+          name: category.name,
+          pinned: !!category.pinned,
+          subpages: [...(category.subpages || [])]
+            .map(page => ({ id: page.id, name: page.name, pinned: !!page.pinned }))
+            .sort((a, b) => compareText(a.id, b.id))
+        }))
+        .sort((a, b) => compareText(a.id, b.id));
+
+      return JSON.stringify({ categories });
+    }
+
+    function mergeHomeConfigs(localConfig, remoteConfig) {
+      const local = repairHomeConfig(localConfig);
+      const remote = repairHomeConfig(remoteConfig);
+      const categoryMap = new Map();
+
+      function absorb(source, preferNames = false) {
+        (source.categories || []).forEach(category => {
+          if (!category || !category.id) return;
+
+          const existing = categoryMap.get(category.id) || {
+            id: category.id,
+            name: category.name || "Category",
+            pinned: !!category.pinned,
+            subpages: []
+          };
+
+          if (preferNames || !existing.name) existing.name = category.name || existing.name;
+          existing.pinned = !!existing.pinned || !!category.pinned;
+
+          const pageMap = new Map((existing.subpages || []).map(page => [page.id, page]));
+
+          (category.subpages || []).forEach(page => {
+            if (!page || !page.id) return;
+
+            const existingPage = pageMap.get(page.id) || {
+              id: page.id,
+              name: page.name || "Subpage",
+              pinned: !!page.pinned
+            };
+
+            if (preferNames || !existingPage.name) existingPage.name = page.name || existingPage.name;
+            existingPage.pinned = !!existingPage.pinned || !!page.pinned;
+
+            pageMap.set(page.id, existingPage);
+          });
+
+          existing.subpages = Array.from(pageMap.values());
+          categoryMap.set(category.id, existing);
+        });
+      }
+
+      // Local first preserves categories made on this device.
+      // Remote second preserves latest shared names when ids match.
+      absorb(local, false);
+      absorb(remote, true);
+
+      return repairHomeConfig({ categories: Array.from(categoryMap.values()) });
+    }
+
     function getLocalHomeConfigRaw() {
       try {
         const raw = localStorage.getItem(HOME_CONFIG_KEY);
@@ -3671,25 +4074,34 @@
     }
 
     function loadHomeConfigRealtime() {
-      // Show local Home immediately, then Firestore will update it when available.
+      // Show local Home immediately, then Firestore will merge into it when available.
       homeConfigCache = repairHomeConfig(getLocalHomeConfigRaw() || createDefaultHomeConfig());
       writeHomeConfigLocal(homeConfigCache);
       renderHome();
 
       onSnapshot(homeConfigRef, snapshot => {
+        const local = getLocalHomeConfigRaw() || homeConfigCache || createDefaultHomeConfig();
+
         if (!snapshot.exists()) {
+          saveHomeConfig(local);
           syncHomeConfigNow();
           return;
         }
 
-        const remote = repairHomeConfig(snapshot.data());
+        const remote = snapshot.data();
+        const merged = mergeHomeConfigs(local, remote);
+        const remoteChanged = normalizeHomeConfigForCompare(merged) !== normalizeHomeConfigForCompare(remote);
 
         isApplyingRemoteHomeConfig = true;
-        homeConfigCache = remote;
-        writeHomeConfigLocal(remote);
+        homeConfigCache = merged;
+        writeHomeConfigLocal(merged);
         isApplyingRemoteHomeConfig = false;
 
         renderHome();
+
+        if (remoteChanged && navigator.onLine) {
+          saveHomeConfig(merged);
+        }
 
         if (document.body.classList.contains("app-mode")) {
           const found = findHomePage(currentPageId);
@@ -4145,21 +4557,8 @@
     function compareText(a, b) {
       return String(a || "").localeCompare(String(b || ""), undefined, { sensitivity: "base", numeric: true });
     }
-    function getPinTime(item) {
-      const value = item && item.pinnedAt;
-      if (!value) return 0;
-      if (typeof value === "number") return value;
-      if (value.seconds) return value.seconds * 1000;
-      return Number(value) || 0;
-    }
     function getDisplayPriority(item) {
-      const checked = !!(item && item.checked);
-      const pinned = !!(item && item.pinned);
-
-      if (checked && pinned) return 0;
-      if (checked) return 1;
-      if (pinned) return 2;
-      return 3;
+      return item && item.checked ? 0 : 1;
     }
 
     function compareItemsForDisplay(a, b) {
@@ -4167,12 +4566,6 @@
       const priorityB = getDisplayPriority(b);
 
       if (priorityA !== priorityB) return priorityA - priorityB;
-
-      if (!!a.pinned && !!b.pinned) {
-        const ta = getPinTime(a);
-        const tb = getPinTime(b);
-        if (ta !== tb) return tb - ta;
-      }
 
       return compareText(a.item, b.item);
     }
@@ -4287,7 +4680,6 @@
         const hasPhoto = String(item.photoData || "").trim() ? "hasPhoto" : "";
         const safeId = escapeAttr(item.id);
         const safeName = escapeAttr(item.item);
-        const pinned = !!item.pinned;
         const qtyValue = escapeAttr(item.orderQty || "");
         let rightControl = "";
         if (deleteMode) {
@@ -4310,7 +4702,6 @@
             <div class="checkCell" onclick="toggleCheck('${safeId}')"><div class="customCheck ${checkedClass}">✓</div></div>
             <div class="itemName" onclick="openRecipeModal('${safeId}')">
               <span class="itemLabelText">${escapeHtml(item.item)}</span>
-              <button class="pinInlineBtn ${pinned ? "pinned" : ""}" title="${pinned ? "Unpin" : "Pin"}" aria-label="${pinned ? "Unpin" : "Pin"}" onclick="togglePin('${safeId}'); event.stopPropagation();">${pinned ? "⭐" : "☆"}</button>
               ${hasRecipe ? '<span class="itemDot recipeDot">•</span>' : ''}
               ${hasPhoto ? '<span class="itemDot photoDot">•</span>' : ''}
             </div>
@@ -4446,7 +4837,16 @@
     window.toggleCheck = async function(id) {
       if (deleteMode || isSaving) return;
       const item = items.find(x => x.id === id); if (!item) return;
-      item.checked = !item.checked; render(); await saveItemChange(item);
+
+      item.checked = !item.checked;
+
+      // If unticked, reset colour back to none automatically.
+      if (!item.checked) {
+        item.color = "none";
+      }
+
+      render();
+      await saveItemChange(item);
     };
     function animateColourChange(id, colour) {
       const safe = (colour || "none").toLowerCase();
@@ -4495,19 +4895,6 @@
         setSavingState(false);
       }
     }
-    window.togglePin = async function(id) {
-      if (!editMode || deleteMode) return;
-      const item = items.find(x => x.id === id); if (!item) return;
-      const nextPinned = !item.pinned;
-      item.pinned = nextPinned;
-      item.pinnedAt = nextPinned ? Date.now() : 0;
-      sortItemsLocal();
-      render();
-      await savePatch(id, {
-        pinned: nextPinned,
-        pinnedAt: item.pinnedAt || 0
-      });
-    };
     let orderQtyTimers = {};
     window.saveOrderQty = function(id, value) {
       const item = items.find(x => x.id === id); if (!item) return;
