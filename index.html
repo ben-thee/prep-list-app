@@ -3839,6 +3839,304 @@
       }
     }
 
+
+    /* ===== COMPACT SECTION HEADER + QTY SLIGHT RIGHT ===== */
+    /*
+      Fix section header overlap:
+      - Section title same scale as item text.
+      - Header icon buttons same small scale as colour wheel.
+      - Tools stay on one row without covering the section name.
+      - QTY number input moved right slightly, close to but not touching colour button.
+    */
+
+    .box .boxTitle,
+    .box.boxFull .boxTitle {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto auto !important;
+      align-items: center !important;
+      justify-content: stretch !important;
+      gap: 4px !important;
+      min-height: 40px !important;
+      padding: 4px 6px 4px 10px !important;
+      overflow: hidden !important;
+    }
+
+    .box .boxTitleText,
+    .box.boxFull .boxTitleText {
+      grid-column: 1 !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      justify-self: center !important;
+      text-align: center !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      line-height: 1.05 !important;
+      font-size: 16px !important;
+      font-weight: 950 !important;
+    }
+
+    .box .sectionEyeBtn,
+    .box.boxFull .sectionEyeBtn,
+    .pickupSectionBtn,
+    .resetQtySectionBtn {
+      width: 21px !important;
+      min-width: 21px !important;
+      max-width: 21px !important;
+      height: 21px !important;
+      min-height: 21px !important;
+      max-height: 21px !important;
+      padding: 0 !important;
+      font-size: 13px !important;
+      line-height: 1 !important;
+      border-radius: 999px !important;
+      flex: 0 0 21px !important;
+    }
+
+    .box .sectionEyeBtn,
+    .box.boxFull .sectionEyeBtn {
+      grid-column: 2 !important;
+      position: static !important;
+      right: auto !important;
+      top: auto !important;
+      transform: none !important;
+      margin: 0 !important;
+      justify-self: center !important;
+      align-self: center !important;
+    }
+
+    .resetQtyIconImg {
+      width: 20px !important;
+      min-width: 20px !important;
+      max-width: 20px !important;
+      height: 20px !important;
+      min-height: 20px !important;
+      max-height: 20px !important;
+      object-fit: contain !important;
+    }
+
+    .pickupSectionBtn {
+      font-size: 13px !important;
+    }
+
+    .sectionOrderToggleBtn {
+      width: auto !important;
+      min-width: 36px !important;
+      max-width: 42px !important;
+      height: 21px !important;
+      min-height: 21px !important;
+      max-height: 21px !important;
+      padding: 0 6px !important;
+      font-size: 9px !important;
+      line-height: 1 !important;
+      flex: 0 0 auto !important;
+    }
+
+    .box .sectionTools,
+    .box.boxFull .sectionTools {
+      grid-column: 3 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      flex-wrap: nowrap !important;
+      gap: 3px !important;
+      margin: 0 !important;
+      min-width: max-content !important;
+      max-width: 96px !important;
+      white-space: nowrap !important;
+      justify-self: end !important;
+      overflow: visible !important;
+    }
+
+    body:not(.edit-mode-active) .sectionTools:not(.orderOn) {
+      display: none !important;
+    }
+
+    .sectionTools.orderOn {
+      display: inline-flex !important;
+    }
+
+    .box .sectionEyeBtn:active,
+    .box .sectionEyeBtn.eyePressed,
+    .box.boxFull .sectionEyeBtn:active,
+    .box.boxFull .sectionEyeBtn.eyePressed {
+      transform: translateY(2px) scale(.86) !important;
+    }
+
+    .box .sectionEyeBtn.eyeBounce,
+    .box.boxFull .sectionEyeBtn.eyeBounce {
+      animation: eyePillBounceInline .38s cubic-bezier(.2,.85,.2,1) both !important;
+    }
+
+    /*
+      QTY input position: a little to the right, near colour button,
+      but still leaving a small gap.
+    */
+    .row.row-order {
+      grid-template-columns: 31px minmax(0, 1fr) 23px 25px !important;
+      column-gap: 0 !important;
+    }
+
+    .row.row-order .qtyCell {
+      justify-content: flex-end !important;
+      padding: 0 !important;
+      margin: 0 1px 0 0 !important;
+      min-width: 0 !important;
+      z-index: 4 !important;
+    }
+
+    .row.row-order .orderQtyInput {
+      width: 18px !important;
+      min-width: 18px !important;
+      max-width: 18px !important;
+      height: 18px !important;
+      min-height: 18px !important;
+      max-height: 18px !important;
+      line-height: 18px !important;
+      font-size: 9.5px !important;
+      transform: translateX(1px) !important;
+    }
+
+    .row.row-order .colorCell {
+      padding-left: 1px !important;
+    }
+
+    @media (max-width: 520px) {
+      .box .boxTitle,
+      .box.boxFull .boxTitle {
+        grid-template-columns: minmax(0, 1fr) 21px auto !important;
+        gap: 3px !important;
+        min-height: 38px !important;
+        padding: 4px 5px 4px 8px !important;
+      }
+
+      .box .boxTitleText,
+      .box.boxFull .boxTitleText {
+        font-size: 13px !important;
+      }
+
+      .box .sectionTools,
+      .box.boxFull .sectionTools {
+        gap: 2px !important;
+        max-width: 92px !important;
+      }
+
+      .box .sectionEyeBtn,
+      .box.boxFull .sectionEyeBtn,
+      .pickupSectionBtn,
+      .resetQtySectionBtn {
+        width: 20px !important;
+        min-width: 20px !important;
+        max-width: 20px !important;
+        height: 20px !important;
+        min-height: 20px !important;
+        max-height: 20px !important;
+        flex-basis: 20px !important;
+        font-size: 12px !important;
+      }
+
+      .resetQtyIconImg {
+        width: 19px !important;
+        min-width: 19px !important;
+        max-width: 19px !important;
+        height: 19px !important;
+        min-height: 19px !important;
+        max-height: 19px !important;
+      }
+
+      .sectionOrderToggleBtn {
+        min-width: 34px !important;
+        max-width: 38px !important;
+        height: 20px !important;
+        min-height: 20px !important;
+        max-height: 20px !important;
+        padding: 0 5px !important;
+        font-size: 8.5px !important;
+      }
+
+      .row.row-order .qtyCell {
+        margin-right: 1px !important;
+      }
+
+      .row.row-order .orderQtyInput {
+        transform: translateX(1px) !important;
+      }
+    }
+
+    @media (min-width: 780px) {
+      .box .boxTitle,
+      .box.boxFull .boxTitle {
+        grid-template-columns: minmax(0, 1fr) 23px auto !important;
+        gap: 5px !important;
+        min-height: 46px !important;
+        padding: 5px 8px 5px 12px !important;
+      }
+
+      .box .boxTitleText,
+      .box.boxFull .boxTitleText {
+        font-size: 20px !important;
+      }
+
+      .box .sectionEyeBtn,
+      .box.boxFull .sectionEyeBtn,
+      .pickupSectionBtn,
+      .resetQtySectionBtn {
+        width: 23px !important;
+        min-width: 23px !important;
+        max-width: 23px !important;
+        height: 23px !important;
+        min-height: 23px !important;
+        max-height: 23px !important;
+        flex-basis: 23px !important;
+        font-size: 14px !important;
+      }
+
+      .resetQtyIconImg {
+        width: 22px !important;
+        min-width: 22px !important;
+        max-width: 22px !important;
+        height: 22px !important;
+        min-height: 22px !important;
+        max-height: 22px !important;
+      }
+
+      .sectionOrderToggleBtn {
+        min-width: 42px !important;
+        max-width: 46px !important;
+        height: 23px !important;
+        min-height: 23px !important;
+        max-height: 23px !important;
+        padding: 0 7px !important;
+        font-size: 10px !important;
+      }
+
+      .box .sectionTools,
+      .box.boxFull .sectionTools {
+        max-width: 110px !important;
+        gap: 4px !important;
+      }
+
+      .row.row-order {
+        grid-template-columns: 58px minmax(0, 1fr) 29px 38px !important;
+      }
+
+      .row.row-order .qtyCell {
+        margin-right: 2px !important;
+      }
+
+      .row.row-order .orderQtyInput {
+        width: 21px !important;
+        min-width: 21px !important;
+        max-width: 21px !important;
+        height: 21px !important;
+        min-height: 21px !important;
+        max-height: 21px !important;
+        line-height: 21px !important;
+        font-size: 11px !important;
+        transform: translateX(2px) !important;
+      }
+    }
+
   </style>
 </head>
 
