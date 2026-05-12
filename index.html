@@ -2987,6 +2987,254 @@
       }
     }
 
+
+    /* ===== QTY ROW FINAL LAYOUT FIX ===== */
+    .row.row-order {
+      grid-template-columns: 42px minmax(0, 1fr) 38px 30px !important;
+      column-gap: 0 !important;
+      align-items: center !important;
+    }
+
+    .row.row-order .checkCell {
+      padding-right: 0 !important;
+      justify-content: center !important;
+    }
+
+    .row.row-order .itemName {
+      padding-left: 3px !important;
+      padding-right: 2px !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+    }
+
+    .row.row-order .itemLabelText,
+    .itemLabelText {
+      display: -webkit-box !important;
+      -webkit-box-orient: vertical !important;
+      -webkit-line-clamp: 2 !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      word-break: normal !important;
+      overflow-wrap: anywhere !important;
+      line-height: 1.05 !important;
+      max-height: 2.15em !important;
+    }
+
+    .row.row-order .qtyCell {
+      display: flex !important;
+      justify-content: flex-end !important;
+      align-items: center !important;
+      padding: 0 !important;
+      margin: 0 -2px 0 0 !important;
+      min-width: 0 !important;
+      z-index: 2 !important;
+    }
+
+    .row.row-order .orderQtyInput {
+      width: 31px !important;
+      min-width: 31px !important;
+      max-width: 31px !important;
+      height: 31px !important;
+      min-height: 31px !important;
+      max-height: 31px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border-radius: 999px !important;
+      text-align: center !important;
+      font-size: 13px !important;
+      font-weight: 950 !important;
+      line-height: 31px !important;
+      box-sizing: border-box !important;
+    }
+
+    .row.row-order .colorCell {
+      justify-content: center !important;
+      padding-left: 0 !important;
+      padding-right: 1px !important;
+      min-width: 0 !important;
+      gap: 0 !important;
+    }
+
+    @media (max-width: 520px) {
+      .row.row-order {
+        grid-template-columns: 27px minmax(0, 1fr) 31px 25px !important;
+      }
+
+      .row.row-order .itemName {
+        padding-left: 2px !important;
+        padding-right: 1px !important;
+      }
+
+      .row.row-order .orderQtyInput {
+        width: 28px !important;
+        min-width: 28px !important;
+        max-width: 28px !important;
+        height: 28px !important;
+        min-height: 28px !important;
+        max-height: 28px !important;
+        font-size: 12px !important;
+        line-height: 28px !important;
+      }
+
+      .row.row-order .qtyCell {
+        margin-right: -3px !important;
+      }
+    }
+
+    @media (min-width: 780px) {
+      .row.row-order {
+        grid-template-columns: 50px minmax(0, 1fr) 38px 34px !important;
+      }
+
+      .row.row-order .itemName {
+        padding-left: 4px !important;
+        padding-right: 2px !important;
+      }
+
+      .row.row-order .orderQtyInput {
+        width: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        font-size: 13px !important;
+        line-height: 32px !important;
+      }
+    }
+
+
+    /* ===== ITEM NAME WIDTH / DOTS OFF / STAR RIGHT ===== */
+    .itemDot.recipeDot,
+    .itemDot.photoDot {
+      display: none !important;
+    }
+
+    .row {
+      background: #ffffff !important;
+    }
+
+    .itemName {
+      background: #f3f4f6 !important;
+      border-radius: 999px !important;
+      padding-left: 2px !important;
+      padding-right: 2px !important;
+      margin: 2px 0 !important;
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      align-items: center !important;
+      column-gap: 3px !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+    }
+
+    .itemLabelText {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      display: -webkit-box !important;
+      -webkit-box-orient: vertical !important;
+      -webkit-line-clamp: 2 !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      word-break: normal !important;
+      overflow-wrap: anywhere !important;
+      line-height: 1.04 !important;
+      max-height: 2.12em !important;
+    }
+
+    .pinInlineBtn {
+      justify-self: end !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      transform: translateY(-1px) !important;
+    }
+
+    .row:not(.row-order) {
+      grid-template-columns: 26px minmax(0, 1fr) 28px !important;
+      column-gap: 0 !important;
+    }
+
+    .row:not(.row-order) .checkCell {
+      padding-right: 0 !important;
+    }
+
+    .row:not(.row-order) .itemName {
+      padding-left: 1px !important;
+      padding-right: 1px !important;
+    }
+
+    .row:not(.row-order) .colorCell {
+      justify-content: center !important;
+      padding-left: 0 !important;
+      padding-right: 1px !important;
+    }
+
+    .row.row-order {
+      grid-template-columns: 26px minmax(0, 1fr) 31px 26px !important;
+      column-gap: 0 !important;
+    }
+
+    .row.row-order .checkCell {
+      padding-right: 0 !important;
+    }
+
+    .row.row-order .itemName {
+      padding-left: 1px !important;
+      padding-right: 1px !important;
+    }
+
+    .row.row-order .qtyCell {
+      justify-content: flex-end !important;
+      margin-right: -3px !important;
+      padding: 0 !important;
+    }
+
+    .row.row-order .orderQtyInput {
+      width: 28px !important;
+      min-width: 28px !important;
+      max-width: 28px !important;
+      height: 28px !important;
+      min-height: 28px !important;
+      max-height: 28px !important;
+      border-radius: 999px !important;
+      padding: 0 !important;
+      font-size: 12px !important;
+      line-height: 28px !important;
+    }
+
+    .row.row-order .colorCell {
+      justify-content: center !important;
+      padding-left: 0 !important;
+      padding-right: 1px !important;
+    }
+
+    @media (min-width: 780px) {
+      .row:not(.row-order) {
+        grid-template-columns: 50px minmax(0, 1fr) 34px !important;
+      }
+
+      .row.row-order {
+        grid-template-columns: 50px minmax(0, 1fr) 36px 34px !important;
+      }
+
+      .itemName {
+        padding-left: 4px !important;
+        padding-right: 3px !important;
+        column-gap: 5px !important;
+      }
+
+      .row.row-order .orderQtyInput {
+        width: 31px !important;
+        min-width: 31px !important;
+        max-width: 31px !important;
+        height: 31px !important;
+        min-height: 31px !important;
+        max-height: 31px !important;
+        line-height: 31px !important;
+        font-size: 13px !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -3144,6 +3392,10 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const prepRef = collection(db, "prepItems");
+    const homeConfigRef = doc(db, "prepMeta", "homeConfig");
+    let homeConfigCache = null;
+    let isApplyingRemoteHomeConfig = false;
+    let homeConfigSaveTimer = null;
     let items = [];
     let deleteMode = false;
     let editMode = false;
@@ -3308,6 +3560,7 @@
       isOffline = false;
       updateOfflineBadge();
       flushPendingWrites();
+      syncHomeConfigNow();
     });
     window.addEventListener("offline", () => {
       isOffline = true;
@@ -3365,25 +3618,96 @@
       return config;
     }
 
-    function getHomeConfig() {
+    function getLocalHomeConfigRaw() {
       try {
         const raw = localStorage.getItem(HOME_CONFIG_KEY);
-        const parsed = raw ? JSON.parse(raw) : null;
-        const fixed = repairHomeConfig(parsed);
-
-        // Auto-save repair so the app does not keep opening blank.
-        saveHomeConfig(fixed);
-
-        return fixed;
+        return raw ? JSON.parse(raw) : null;
       } catch {
-        const fallback = createDefaultHomeConfig();
-        saveHomeConfig(fallback);
-        return fallback;
+        return null;
       }
     }
 
-    function saveHomeConfig(config) {
+    function writeHomeConfigLocal(config) {
       localStorage.setItem(HOME_CONFIG_KEY, JSON.stringify(config || { categories: [] }));
+    }
+
+    function getHomeConfig() {
+      const base = homeConfigCache || getLocalHomeConfigRaw() || createDefaultHomeConfig();
+      return repairHomeConfig(base);
+    }
+
+    function saveHomeConfig(config, options = {}) {
+      const fixed = repairHomeConfig(config);
+      homeConfigCache = fixed;
+      writeHomeConfigLocal(fixed);
+
+      if (options.localOnly || isApplyingRemoteHomeConfig) return;
+
+      if (homeConfigSaveTimer) clearTimeout(homeConfigSaveTimer);
+
+      homeConfigSaveTimer = setTimeout(async () => {
+        try {
+          await setDoc(homeConfigRef, {
+            ...fixed,
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        } catch (error) {
+          console.warn("Home config cloud sync failed; saved locally", error);
+          setStatus("Home saved locally - will sync when online");
+        }
+      }, 250);
+    }
+
+    function syncHomeConfigNow() {
+      if (!navigator.onLine) return;
+      const config = getHomeConfig();
+
+      setDoc(homeConfigRef, {
+        ...config,
+        updatedAt: serverTimestamp()
+      }, { merge: true }).catch(error => {
+        console.warn("Home config sync retry failed", error);
+      });
+    }
+
+    function loadHomeConfigRealtime() {
+      // Show local Home immediately, then Firestore will update it when available.
+      homeConfigCache = repairHomeConfig(getLocalHomeConfigRaw() || createDefaultHomeConfig());
+      writeHomeConfigLocal(homeConfigCache);
+      renderHome();
+
+      onSnapshot(homeConfigRef, snapshot => {
+        if (!snapshot.exists()) {
+          syncHomeConfigNow();
+          return;
+        }
+
+        const remote = repairHomeConfig(snapshot.data());
+
+        isApplyingRemoteHomeConfig = true;
+        homeConfigCache = remote;
+        writeHomeConfigLocal(remote);
+        isApplyingRemoteHomeConfig = false;
+
+        renderHome();
+
+        if (document.body.classList.contains("app-mode")) {
+          const found = findHomePage(currentPageId);
+          if (!found) {
+            currentPageId = DEFAULT_PAGE_ID;
+            document.body.classList.remove("app-mode");
+          }
+
+          const title = document.getElementById("activePageTitle");
+          if (title) title.textContent = getActivePageName().toUpperCase();
+
+          updateSectionDropdown();
+          render();
+        }
+      }, error => {
+        console.warn("Home config realtime sync failed; using local config", error);
+        renderHome();
+      });
     }
 
     function getHomeOpenConfig() {
@@ -5050,6 +5374,7 @@
         document.body.classList.add("appReady");
       }, 3250);
     });
+    loadHomeConfigRealtime();
     loadRealtime();
   </script>
 </body>
