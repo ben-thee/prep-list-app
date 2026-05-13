@@ -4627,6 +4627,14 @@
       localStorage.setItem(HOME_CONFIG_KEY, JSON.stringify(config || { categories: [] }));
     }
 
+    window.clearHomeLocalBackup = function() {
+      localStorage.removeItem(HOME_CONFIG_KEY);
+      localStorage.removeItem(HOME_OPEN_KEY);
+      homeConfigCache = createDefaultHomeConfig();
+      renderHome();
+      setStatus("Home local backup cleared - reload to pull Firestore");
+    };
+
     function getHomeConfig() {
       const base = homeConfigCache || getLocalHomeConfigRaw() || createDefaultHomeConfig();
       return repairHomeConfig(base);
@@ -4634,9 +4642,11 @@
 
     function saveHomeConfig(config, options = {}) {
       const fixed = repairHomeConfig(config);
+
       homeConfigCache = fixed;
       writeHomeConfigLocal(fixed);
 
+      // localStorage is backup only. Do not echo Firestore snapshots back to Firestore.
       if (options.localOnly || isApplyingRemoteHomeConfig) return;
 
       if (homeConfigSaveTimer) clearTimeout(homeConfigSaveTimer);
@@ -4648,18 +4658,20 @@
             updatedAt: serverTimestamp()
           }, { merge: true });
         } catch (error) {
-          console.warn("Home config cloud sync failed; saved locally", error);
+          console.warn("Home config Firestore save failed; kept local backup", error);
           setStatus("Home saved locally - will sync when online");
         }
-      }, 250);
+      }, 180);
     }
 
     function syncHomeConfigNow() {
-      if (!navigator.onLine) return;
-      const config = getHomeConfig();
+      if (!navigator.onLine || isApplyingRemoteHomeConfig) return;
+
+      const config = getLocalHomeConfigRaw() || homeConfigCache;
+      if (!config) return;
 
       setDoc(homeConfigRef, {
-        ...config,
+        ...repairHomeConfig(config),
         updatedAt: serverTimestamp()
       }, { merge: true }).catch(error => {
         console.warn("Home config sync retry failed", error);
@@ -4667,34 +4679,46 @@
     }
 
     function loadHomeConfigRealtime() {
-      // Show local Home immediately, then Firestore will merge into it when available.
-      homeConfigCache = repairHomeConfig(getLocalHomeConfigRaw() || createDefaultHomeConfig());
-      writeHomeConfigLocal(homeConfigCache);
+      // Firestore is the source of truth.
+      // localStorage is only a temporary backup while Firestore is loading/offline.
+      const localBackup = getLocalHomeConfigRaw();
+
+      homeConfigCache = repairHomeConfig(localBackup || createDefaultHomeConfig());
       renderHome();
 
       onSnapshot(homeConfigRef, snapshot => {
-        const local = getLocalHomeConfigRaw() || homeConfigCache || createDefaultHomeConfig();
-
         if (!snapshot.exists()) {
-          saveHomeConfig(local);
-          syncHomeConfigNow();
+          const seed = repairHomeConfig(localBackup || createDefaultHomeConfig());
+
+          isApplyingRemoteHomeConfig = true;
+          homeConfigCache = seed;
+          writeHomeConfigLocal(seed);
+          isApplyingRemoteHomeConfig = false;
+
+          renderHome();
+
+          // Only if Firestore has no Home config yet, seed it once from local/default.
+          if (navigator.onLine) {
+            setDoc(homeConfigRef, {
+              ...seed,
+              updatedAt: serverTimestamp()
+            }, { merge: true }).catch(error => {
+              console.warn("Home config initial seed failed", error);
+            });
+          }
+
           return;
         }
 
-        const remote = snapshot.data();
-        const merged = mergeHomeConfigs(local, remote);
-        const remoteChanged = normalizeHomeConfigForCompare(merged) !== normalizeHomeConfigForCompare(remote);
+        const remote = repairHomeConfig(snapshot.data());
 
+        // Remote replaces local. No merge. No local overwrite.
         isApplyingRemoteHomeConfig = true;
-        homeConfigCache = merged;
-        writeHomeConfigLocal(merged);
+        homeConfigCache = remote;
+        writeHomeConfigLocal(remote);
         isApplyingRemoteHomeConfig = false;
 
         renderHome();
-
-        if (remoteChanged && navigator.onLine) {
-          saveHomeConfig(merged);
-        }
 
         if (document.body.classList.contains("app-mode")) {
           const found = findHomePage(currentPageId);
@@ -4710,7 +4734,9 @@
           render();
         }
       }, error => {
-        console.warn("Home config realtime sync failed; using local config", error);
+        console.warn("Home config realtime sync failed; using local backup only", error);
+
+        homeConfigCache = repairHomeConfig(getLocalHomeConfigRaw() || createDefaultHomeConfig());
         renderHome();
       });
     }
