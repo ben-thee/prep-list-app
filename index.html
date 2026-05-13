@@ -4138,70 +4138,32 @@
     }
 
 
-    /* ===== PRO VIDEO SPLASH FINAL - BLUR FILL / NO MAIN CROP ===== */
-    html.splashLock,
-    body.splashLock {
-      width: 100vw !important;
-      height: 100vh !important;
-      height: 100dvh !important;
-      overflow: hidden !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      background: #000000 !important;
+    /* ===== RELIABLE IPHONE VIDEO SPLASH V2 ===== */
+    html.splashLock, body.splashLock {
+      width:100vw !important; height:100vh !important; height:100dvh !important;
+      overflow:hidden !important; padding:0 !important; margin:0 !important; background:#000 !important;
     }
-
     .appSplash.videoSplash {
-      position: fixed !important;
-      inset: 0 !important;
-      z-index: 99999 !important;
-      background: #000000 !important;
-      display: block !important;
-      overflow: hidden !important;
-      pointer-events: none !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      height: 100dvh !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      opacity: 1 !important;
-      transition: opacity .86s cubic-bezier(.22,.61,.36,1) !important;
+      position:fixed !important; inset:0 !important; z-index:99999 !important;
+      background:#000 url("splash-poster.png") center center / cover no-repeat !important;
+      display:block !important; overflow:hidden !important; pointer-events:none !important;
+      width:100vw !important; height:100vh !important; height:100dvh !important;
+      padding:0 !important; margin:0 !important; opacity:1 !important;
+      transition:opacity .86s cubic-bezier(.22,.61,.36,1) !important;
     }
-
-    .appSplash.videoSplash.fadeOut {
-      opacity: 0 !important;
-    }
-
-    .appSplash.videoSplash.hide {
-      display: none !important;
-    }
-
+    .appSplash.videoSplash.fadeOut { opacity:0 !important; }
+    .appSplash.videoSplash.hide { display:none !important; }
     .splashVideo {
-      position: fixed !important;
-      inset: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      height: 100dvh !important;
-      min-width: 100vw !important;
-      min-height: 100vh !important;
-      min-height: 100dvh !important;
-      max-width: none !important;
-      max-height: none !important;
-      object-fit: cover !important;
-      object-position: center center !important;
-      display: block !important;
-      background: #000000 !important;
-      transform: translateZ(0) scale(1.001) !important;
-      backface-visibility: hidden !important;
-      -webkit-backface-visibility: hidden !important;
+      position:fixed !important; inset:0 !important; width:100vw !important;
+      height:100vh !important; height:100dvh !important; min-width:100vw !important;
+      min-height:100vh !important; min-height:100dvh !important; max-width:none !important; max-height:none !important;
+      object-fit:cover !important; object-position:center center !important; display:block !important;
+      background:#000 url("splash-poster.png") center center / cover no-repeat !important;
+      transform:translateZ(0) !important; backface-visibility:hidden !important; -webkit-backface-visibility:hidden !important;
     }
-
-    @supports (-webkit-touch-callout: none) {
-      html.splashLock,
-      body.splashLock,
-      .appSplash.videoSplash,
-      .splashVideo {
-        height: -webkit-fill-available !important;
-        min-height: -webkit-fill-available !important;
+    @supports (-webkit-touch-callout:none) {
+      html.splashLock, body.splashLock, .appSplash.videoSplash, .splashVideo {
+        height:-webkit-fill-available !important; min-height:-webkit-fill-available !important;
       }
     }
 
@@ -4210,8 +4172,10 @@
 
 <body class="splashLock">
   <div id="appSplash" class="appSplash videoSplash">
-    <video id="splashVideo" class="splashVideo" autoplay muted playsinline webkit-playsinline preload="auto">
-      <source src="bside-opening-final.mp4" type="video/mp4">
+    <video id="splashVideo" class="splashVideo"
+      autoplay muted playsinline webkit-playsinline
+      preload="auto" poster="splash-poster.png">
+      <source src="bside-opening-final-v2.mp4?v=2" type="video/mp4">
     </video>
   </div>
 
@@ -6389,16 +6353,15 @@
 
       let closed = false;
       let started = false;
+      let playWatchdog = null;
       let safetyTimer = null;
 
       function closeSplash() {
         if (closed) return;
         closed = true;
-
+        if (playWatchdog) clearTimeout(playWatchdog);
         if (safetyTimer) clearTimeout(safetyTimer);
-
         splash.classList.add("fadeOut");
-
         setTimeout(() => {
           splash.classList.add("hide");
           splash.remove();
@@ -6410,51 +6373,34 @@
       function startVideo() {
         if (!video || started) return;
         started = true;
-
         video.muted = true;
         video.defaultMuted = true;
         video.playsInline = true;
+        video.setAttribute("muted", "");
         video.setAttribute("playsinline", "");
         video.setAttribute("webkit-playsinline", "");
         video.preload = "auto";
         video.playbackRate = 1;
-
-        try {
-          video.currentTime = 0;
-        } catch (error) {}
-
+        try { video.currentTime = 0; video.load(); } catch (error) {}
         const playPromise = video.play();
-
         if (playPromise && typeof playPromise.catch === "function") {
-          playPromise.catch(() => {
-            setTimeout(closeSplash, 1800);
-          });
+          playPromise.catch(() => setTimeout(closeSplash, 1800));
         }
+        playWatchdog = setTimeout(() => {
+          if (!video || video.paused || video.currentTime < 0.05) closeSplash();
+        }, 3200);
+        safetyTimer = setTimeout(closeSplash, 9966);
       }
 
       if (video) {
+        video.addEventListener("playing", () => {
+          if (playWatchdog) clearTimeout(playWatchdog);
+        }, { once: true });
         video.addEventListener("canplay", startVideo, { once: true });
         video.addEventListener("loadeddata", startVideo, { once: true });
-
-        video.addEventListener("ended", () => {
-          setTimeout(closeSplash, 760);
-        }, { once: true });
-
-        video.addEventListener("error", () => {
-          setTimeout(closeSplash, 1200);
-        }, { once: true });
-
+        video.addEventListener("ended", () => setTimeout(closeSplash, 760), { once: true });
+        video.addEventListener("error", () => setTimeout(closeSplash, 1200), { once: true });
         startVideo();
-
-        // Emergency fallback only. It is longer than the full clip and will not cut normal playback.
-        safetyTimer = setTimeout(() => {
-          const d = Number(video.duration);
-          if (Number.isFinite(d) && d > 0 && video.currentTime < d - 0.2) {
-            setTimeout(closeSplash, 1200);
-          } else {
-            closeSplash();
-          }
-        }, 9566);
       } else {
         setTimeout(closeSplash, 1800);
       }
