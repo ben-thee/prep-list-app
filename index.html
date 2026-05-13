@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="HOME_SYNC_MAIN_URL_V13">
+  <meta name="app-build" content="NO_OFFLINE_SUBPAGE_DELETE_RENAME_V15">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -2599,7 +2599,7 @@
 
     .homeSubpagePill {
       min-height: 42px;
-      grid-template-columns: 34px 1fr auto;
+      grid-template-columns: 34px minmax(0, 1fr) auto auto;
       background: #ffffff;
       margin-top: 6px;
       box-shadow: 0 1px 4px rgba(17,24,39,.04);
@@ -2631,6 +2631,7 @@
     .homeIconBtn,
     .homeAddSubBtn,
     .homeRenameBtn,
+    .homeDeleteSubpageBtn,
     .homePinBtn {
       width: 32px !important;
       min-width: 32px !important;
@@ -2657,6 +2658,12 @@
 
     .homeAddSubBtn {
       font-size: 22px !important;
+    }
+
+    .homeDeleteSubpageBtn {
+      color: #dc2626 !important;
+      border-color: #f1c7c7 !important;
+      background: #fff5f5 !important;
     }
 
     .titleBackBtn {
@@ -4384,7 +4391,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "HOME_SYNC_MAIN_URL_V13";
+    const APP_BUILD_VERSION = "NO_OFFLINE_SUBPAGE_DELETE_RENAME_V15";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     function clearHomeLocalStateForNewBuild() {
@@ -4433,25 +4440,11 @@
     }
 
     function markHomeConfigUnsynced(config) {
-      try {
-        localStorage.setItem(HOME_UNSYNCED_KEY, JSON.stringify({
-          savedAt: Date.now(),
-          config: repairHomeConfig(config)
-        }));
-      } catch (error) {
-        console.warn("Could not store unsynced Home config", error);
-      }
+      console.warn("Offline Home save disabled. Change was not synced.", config);
     }
 
     function getUnsyncedHomeConfig() {
-      try {
-        const raw = localStorage.getItem(HOME_UNSYNCED_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        return parsed && parsed.config ? repairHomeConfig(parsed.config) : null;
-      } catch {
-        return null;
-      }
+      return null;
     }
 
     function clearUnsyncedHomeConfig() {
@@ -4620,23 +4613,17 @@
     const PENDING_WRITES_KEY = "prep_pending_writes_v2";
     const SECTION_ORDER_CONFIG_KEY = "prep_section_order_config_v1";
     function getPendingWrites() {
-      try {
-        const raw = localStorage.getItem(PENDING_WRITES_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return [];
-      }
+      return [];
     }
     function savePendingWrites(queue) {
-      localStorage.setItem(PENDING_WRITES_KEY, JSON.stringify(queue));
       updateOfflineBadge();
     }
     function queueWrite(entry) {
-      const queue = getPendingWrites();
-      queue.push({ ...entry, queuedAt: Date.now() });
-      savePendingWrites(queue);
-      setStatus("Offline saved locally - will sync when online");
+      console.warn("Offline save disabled. Change was not synced.", entry);
+      setStatus("Offline - change not saved. Connect internet and try again.");
+    }
+    async function flushPendingWrites() {
+      updateOfflineBadge();
     }
     function getSectionOrderConfig() {
       try {
@@ -4724,51 +4711,15 @@
         queueWrite({ type: "delete", id });
       }
     }
-    async function flushPendingWrites() {
-      if (!navigator.onLine) {
-        updateOfflineBadge();
-        return;
-      }
-      const queue = getPendingWrites();
-      if (!queue.length) {
-        updateOfflineBadge();
-        return;
-      }
-      setStatus(`Syncing ${queue.length} offline change(s)...`);
-      const remaining = [];
-      for (const entry of queue) {
-        try {
-          if (entry.type === "set") {
-            await setDoc(doc(db, "prepItems", entry.id), {
-              ...(entry.data || {}),
-              updatedAt: serverTimestamp()
-            });
-          } else if (entry.type === "update") {
-            await updateDoc(doc(db, "prepItems", entry.id), {
-              ...(entry.patch || {}),
-              updatedAt: serverTimestamp()
-            });
-          } else if (entry.type === "delete") {
-            await deleteDoc(doc(db, "prepItems", entry.id));
-          }
-        } catch (error) {
-          console.error("Offline sync failed", entry, error);
-          remaining.push(entry);
-        }
-      }
-      savePendingWrites(remaining);
-      setStatus(remaining.length ? `Some offline changes still waiting: ${remaining.length}` : "Offline changes synced OK");
-    }
     window.addEventListener("online", () => {
       isOffline = false;
       updateOfflineBadge();
-      flushPendingWrites();
       syncHomeConfigNow();
     });
     window.addEventListener("offline", () => {
       isOffline = true;
       updateOfflineBadge();
-      setStatus("Offline mode - changes will save on this iPhone and sync later");
+      setStatus("Offline - changes will not save until internet is back");
     });
 
     function makeLocalId(prefix) {
@@ -4888,70 +4839,44 @@
     }
 
     function getLocalHomeConfigRaw() {
-      try {
-        const raw = localStorage.getItem(HOME_CONFIG_KEY);
-        return raw ? JSON.parse(raw) : null;
-      } catch {
-        return null;
-      }
+      return null;
     }
 
     function writeHomeConfigLocal(config) {
-      localStorage.setItem(HOME_CONFIG_KEY, JSON.stringify(config || { categories: [] }));
+      // Offline/local Home cache disabled. Firestore is the only source of truth.
     }
 
     function getHomeConfig() {
-      const base = homeConfigCache || getLocalHomeConfigRaw() || createDefaultHomeConfig();
+      const base = homeConfigCache || createDefaultHomeConfig();
       return repairHomeConfig(base);
     }
 
-    function saveHomeConfig(config, options = {}) {
+    async function saveHomeConfig(config, options = {}) {
       const fixed = repairHomeConfig(config);
 
       homeConfigCache = fixed;
-      writeHomeConfigLocal(fixed);
       renderHome();
 
-      // localStorage is only backup. Every user Home change must go to Firestore.
       if (options.localOnly || isApplyingRemoteHomeConfig) return;
 
-      const payload = {
-        ...fixed,
-        updatedAt: serverTimestamp()
-      };
+      if (!navigator.onLine) {
+        setStatus("Offline - Home change not saved. Connect internet and try again.");
+        throw new Error("Offline Home save disabled");
+      }
 
-      setDoc(homeConfigRef, payload, { merge: true }).catch(error => {
-        console.warn("Home config immediate Firestore save failed; will retry", error);
-        setStatus("Offline backup saved - Home will sync when online");
-      });
-
-      if (homeConfigSaveTimer) clearTimeout(homeConfigSaveTimer);
-      homeConfigSaveTimer = setTimeout(async () => {
-        try {
-          await setDoc(homeConfigRef, {
-            ...repairHomeConfig(homeConfigCache),
-            updatedAt: serverTimestamp()
-          }, { merge: true });
-        } catch (error) {
-          console.warn("Home config delayed Firestore save failed", error);
-        }
-      }, 700);
+      try {
+        await pushHomeConfigToCloud(fixed, options.reason || "home-edit");
+        setStatus("Home synced OK");
+      } catch (error) {
+        console.error("Home Firestore save failed", error);
+        setStatus("Home sync failed - not saved");
+        throw error;
+      }
     }
 
-    function syncHomeConfigNow() {
-      if (!navigator.onLine || isApplyingRemoteHomeConfig) return;
-
-      const pending = getUnsyncedHomeConfig();
-      if (!pending) return;
-
-      pushHomeConfigToCloud(pending, "offline-retry")
-        .then(() => setStatus("Home offline changes synced"))
-        .catch(error => {
-          console.warn("Home config sync retry failed", error);
-          markHomeConfigUnsynced(pending);
-        });
+    async function syncHomeConfigNow() {
+      // Offline Home queue disabled.
     }
-
 
     function autoOpenChangedHomeCategories(previousConfig, nextConfig) {
       try {
@@ -4984,7 +4909,7 @@
         if (snap.exists()) {
           const remote = repairHomeConfig(snap.data());
           homeConfigCache = remote;
-          writeHomeConfigLocal(remote);
+          // local Home cache disabled;
           renderHome();
           setStatus("Home pulled from Firestore OK");
         } else {
@@ -5009,14 +4934,14 @@
 
           isApplyingRemoteHomeConfig = true;
           homeConfigCache = seed;
-          writeHomeConfigLocal(seed);
+          // local Home cache disabled;
           isApplyingRemoteHomeConfig = false;
           renderHome();
 
           if (navigator.onLine) {
             pushHomeConfigToCloud(seed, "initial-seed").catch(error => {
               console.warn("Home config initial seed failed", error);
-              markHomeConfigUnsynced(seed);
+              setStatus("Home initial seed failed - check Firestore connection");
             });
           }
           return;
@@ -5029,7 +4954,7 @@
         isApplyingRemoteHomeConfig = true;
         autoOpenNewRemoteHomeCategories(previous, remote);
         homeConfigCache = remote;
-        writeHomeConfigLocal(remote);
+        // local Home cache disabled;
         isApplyingRemoteHomeConfig = false;
         clearUnsyncedHomeConfig();
 
@@ -5050,8 +4975,9 @@
         }
       }, error => {
         console.warn("Home config realtime sync failed; using local backup only", error);
-        homeConfigCache = repairHomeConfig(getLocalHomeConfigRaw() || createDefaultHomeConfig());
+        homeConfigCache = createDefaultHomeConfig();
         renderHome();
+        setStatus("Home realtime failed - check Firestore connection");
       });
     }
 
@@ -5139,7 +5065,8 @@
             <div class="homeSubpagePill">
               <button class="homePinBtn ${page.pinned ? "pinned" : ""}" onclick="toggleHomePagePin('${safePageId}'); event.stopPropagation();" title="Pin page">${page.pinned ? "⭐" : "☆"}</button>
               <button class="homeOpenPageBtn" onclick="openPrepPage('${safePageId}')">${escapeHtml(page.name)}</button>
-              <button class="homeRenameBtn" onclick="renameHomePage('${safePageId}'); event.stopPropagation();" title="Rename page">✏️</button>
+              <button class="homeRenameBtn" onclick="renameHomePage('${safePageId}'); event.stopPropagation();" title="Rename subpage" aria-label="Rename subpage">✏️</button>
+              <button class="homeDeleteSubpageBtn" onclick="deleteHomePage('${safePageId}', this); event.stopPropagation();" title="Delete subpage" aria-label="Delete subpage">🗑️</button>
             </div>`;
         }).join("");
 
@@ -5372,6 +5299,77 @@ This will delete ${subpages.length} subpage(s) and ${relatedItems.length} item(s
       }
 
       setStatus("Subpage renamed and synced OK " + name);
+    };
+
+    window.deleteHomePage = async function(pageId, btn) {
+      animateSectionDeletePress(btn);
+      await new Promise(resolve => setTimeout(resolve, 160));
+
+      const current = getHomeConfig();
+      let targetCategory = null;
+      let targetPage = null;
+
+      for (const category of current.categories || []) {
+        const page = (category.subpages || []).find(p => p.id === pageId);
+        if (page) {
+          targetCategory = category;
+          targetPage = page;
+          break;
+        }
+      }
+
+      if (!targetCategory || !targetPage) {
+        setStatus("Subpage not found");
+        return;
+      }
+
+      if (pageId === DEFAULT_PAGE_ID) {
+        alert("Prep List cannot be deleted.");
+        setStatus("Default Prep List cannot be deleted");
+        return;
+      }
+
+      const relatedItems = items.filter(item => (item.pageId || DEFAULT_PAGE_ID) === pageId);
+
+      const ok = confirm(`Delete subpage "${targetPage.name}"?
+
+This will delete ${relatedItems.length} item(s) in this subpage.`);
+      if (!ok) {
+        setStatus(`Delete subpage cancelled: ${targetPage.name}`);
+        return;
+      }
+
+      if (!navigator.onLine) {
+        setStatus("Offline - subpage not deleted. Connect internet and try again.");
+        return;
+      }
+
+      try {
+        await mutateHomeConfigCloud(config => {
+          for (const category of config.categories || []) {
+            category.subpages = (category.subpages || []).filter(page => page.id !== pageId);
+          }
+        }, "delete-subpage");
+
+        if (relatedItems.length) {
+          await Promise.all(relatedItems.map(item => deleteDoc(doc(db, "prepItems", item.id))));
+        }
+
+        items = items.filter(item => (item.pageId || DEFAULT_PAGE_ID) !== pageId);
+        localStorage.removeItem(`${CUSTOM_SECTIONS_KEY}_${pageId}`);
+
+        if (currentPageId === pageId) {
+          currentPageId = DEFAULT_PAGE_ID;
+          document.body.classList.remove("app-mode");
+        }
+
+        renderHome();
+        render();
+        setStatus(`Subpage deleted OK: ${targetPage.name}`);
+      } catch (error) {
+        console.error(error);
+        setStatus("Subpage delete failed - check Firestore");
+      }
     };
 
     window.toggleHomeCategoryPin = async function(categoryId) {
