@@ -4383,6 +4383,111 @@
     let currentPageId = "prep-list";
 
     const HOME_CONFIG_KEY = "prep_home_config_v1";
+    const HOME_UNSYNCED_KEY = "prep_home_unsynced_v1";
+    const HOME_DEVICE_ID_KEY = "prep_home_device_id_v1";
+
+    function getHomeDeviceId() {
+      let id = localStorage.getItem(HOME_DEVICE_ID_KEY);
+      if (!id) {
+        id = `device-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+        localStorage.setItem(HOME_DEVICE_ID_KEY, id);
+      }
+      return id;
+    }
+
+    function markHomeConfigUnsynced(config) {
+      try {
+        localStorage.setItem(HOME_UNSYNCED_KEY, JSON.stringify({
+          savedAt: Date.now(),
+          config: repairHomeConfig(config)
+        }));
+      } catch (error) {
+        console.warn("Could not store unsynced Home config", error);
+      }
+    }
+
+    function getUnsyncedHomeConfig() {
+      try {
+        const raw = localStorage.getItem(HOME_UNSYNCED_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed && parsed.config ? repairHomeConfig(parsed.config) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function clearUnsyncedHomeConfig() {
+      localStorage.removeItem(HOME_UNSYNCED_KEY);
+    }
+
+    function homeConfigSignature(config) {
+      const fixed = repairHomeConfig(config);
+      return JSON.stringify((fixed.categories || []).map(category => ({
+        id: category.id,
+        name: category.name,
+        pinned: !!category.pinned,
+        subpages: (category.subpages || []).map(page => ({
+          id: page.id,
+          name: page.name,
+          pinned: !!page.pinned
+        }))
+      })));
+    }
+
+    function autoOpenNewRemoteHomeCategories(previousConfig, nextConfig) {
+      try {
+        const previous = repairHomeConfig(previousConfig || createDefaultHomeConfig());
+        const next = repairHomeConfig(nextConfig || createDefaultHomeConfig());
+        const previousMap = new Map();
+        (previous.categories || []).forEach(category => {
+          previousMap.set(category.id, new Set((category.subpages || []).map(page => page.id)));
+        });
+
+        const openConfig = getHomeOpenConfig();
+        let changed = false;
+
+        (next.categories || []).forEach(category => {
+          const oldPages = previousMap.get(category.id);
+          const newPages = new Set((category.subpages || []).map(page => page.id));
+          let hasNewSubpage = !oldPages;
+
+          if (oldPages) {
+            for (const pageId of newPages) {
+              if (!oldPages.has(pageId)) {
+                hasNewSubpage = true;
+                break;
+              }
+            }
+          }
+
+          if (hasNewSubpage && newPages.size) {
+            openConfig[category.id] = true;
+            changed = true;
+          }
+        });
+
+        if (changed) saveHomeOpenConfig(openConfig);
+      } catch (error) {
+        console.warn("Auto-open remote Home category failed", error);
+      }
+    }
+
+    async function pushHomeConfigToCloud(config, reason = "home-edit") {
+      const fixed = repairHomeConfig(config);
+      const payload = {
+        ...fixed,
+        syncVersion: Date.now(),
+        updatedBy: getHomeDeviceId(),
+        updatedReason: reason,
+        updatedAt: serverTimestamp()
+      };
+
+      await setDoc(homeConfigRef, payload, { merge: false });
+      clearUnsyncedHomeConfig();
+      return fixed;
+    }
+
     const HOME_OPEN_KEY = "prep_home_open_v1";
     const DEFAULT_PAGE_ID = "prep-list";
     let searchQuery = "";
@@ -4679,38 +4784,43 @@
       const fixed = repairHomeConfig(config);
       homeConfigCache = fixed;
       writeHomeConfigLocal(fixed);
+      renderHome();
 
-      // Home list/category/subpage changes must go to Firestore immediately.
-      // localStorage is only a fast backup for this device while Firestore loads/offline.
-      if (options.localOnly || isApplyingRemoteHomeConfig) return;
+      // Home config = categories + subpages. Firestore must be the source for every device.
+      // localStorage is backup only for this device while offline/loading.
+      if (options.localOnly || isApplyingRemoteHomeConfig) return Promise.resolve(fixed);
 
-      if (homeConfigSaveTimer) clearTimeout(homeConfigSaveTimer);
+      if (!navigator.onLine) {
+        markHomeConfigUnsynced(fixed);
+        setStatus("Home saved offline - will sync when online");
+        return Promise.resolve(fixed);
+      }
 
-      const payload = {
-        ...fixed,
-        updatedAt: serverTimestamp()
-      };
-
-      setDoc(homeConfigRef, payload, { merge: false }).then(() => {
-        setStatus("Home synced to Firestore");
-      }).catch(error => {
-        console.warn("Home config Firestore save failed; kept local backup", error);
-        setStatus("Home saved on this device only - will retry when online");
-      });
+      return pushHomeConfigToCloud(fixed, options.reason || "home-edit")
+        .then(result => {
+          setStatus("Home synced to Firestore");
+          return result;
+        })
+        .catch(error => {
+          console.warn("Home config Firestore save failed; kept local backup", error);
+          markHomeConfigUnsynced(fixed);
+          setStatus("Home saved on this device only - will retry when online");
+          return fixed;
+        });
     }
 
     function syncHomeConfigNow() {
       if (!navigator.onLine || isApplyingRemoteHomeConfig) return;
 
-      const config = homeConfigCache || getLocalHomeConfigRaw();
-      if (!config) return;
+      const pending = getUnsyncedHomeConfig();
+      if (!pending) return;
 
-      setDoc(homeConfigRef, {
-        ...repairHomeConfig(config),
-        updatedAt: serverTimestamp()
-      }, { merge: false }).catch(error => {
-        console.warn("Home config sync retry failed", error);
-      });
+      pushHomeConfigToCloud(pending, "offline-retry")
+        .then(() => setStatus("Home offline changes synced"))
+        .catch(error => {
+          console.warn("Home config sync retry failed", error);
+          markHomeConfigUnsynced(pending);
+        });
     }
 
     function loadHomeConfigRealtime() {
@@ -4731,23 +4841,24 @@
           renderHome();
 
           if (navigator.onLine) {
-            setDoc(homeConfigRef, {
-              ...seed,
-              updatedAt: serverTimestamp()
-            }, { merge: false }).catch(error => {
+            pushHomeConfigToCloud(seed, "initial-seed").catch(error => {
               console.warn("Home config initial seed failed", error);
+              markHomeConfigUnsynced(seed);
             });
           }
           return;
         }
 
+        const previous = homeConfigCache;
         const remote = repairHomeConfig(snapshot.data());
 
-        // Remote Firestore replaces local backup. No local merge that can hide new category changes.
+        // Remote Firestore replaces local backup. No local merge that can hide new category/subpage changes.
         isApplyingRemoteHomeConfig = true;
+        autoOpenNewRemoteHomeCategories(previous, remote);
         homeConfigCache = remote;
         writeHomeConfigLocal(remote);
         isApplyingRemoteHomeConfig = false;
+        clearUnsyncedHomeConfig();
 
         renderHome();
 
@@ -4889,32 +5000,37 @@
       }
     };
 
-    window.resetHomeConfig = function() {
+    window.resetHomeConfig = async function() {
       const fallback = createDefaultHomeConfig();
-      saveHomeConfig(fallback);
+      await saveHomeConfig(fallback, { reason: "reset-home" });
       renderHome();
-      setStatus("Home repaired OK");
+      setStatus("Home repaired and synced OK");
     };
 
-    window.addHomeCategory = function() {
+    window.addHomeCategory = async function() {
       const name = normalizeSectionName(prompt("New category name:"));
       if (!name) return;
 
       const config = getHomeConfig();
       config.categories = config.categories || [];
-      config.categories.push({
+      const category = {
         id: makeLocalId("cat"),
         name,
         pinned: false,
         subpages: []
-      });
+      };
+      config.categories.push(category);
 
-      saveHomeConfig(config);
+      const openConfig = getHomeOpenConfig();
+      openConfig[category.id] = true;
+      saveHomeOpenConfig(openConfig);
+
+      await saveHomeConfig(config, { reason: "add-category" });
       renderHome();
-      setStatus("Category added OK " + name);
+      setStatus("Category added and synced OK " + name);
     };
 
-    window.renameHomeCategory = function(categoryId) {
+    window.renameHomeCategory = async function(categoryId) {
       const config = getHomeConfig();
       const category = (config.categories || []).find(c => c.id === categoryId);
       if (!category) return;
@@ -4923,9 +5039,9 @@
       if (!name) return;
 
       category.name = name;
-      saveHomeConfig(config);
+      await saveHomeConfig(config, { reason: "rename-category" });
       renderHome();
-      setStatus("Category renamed OK " + name);
+      setStatus("Category renamed and synced OK " + name);
     };
 
 
@@ -4941,14 +5057,16 @@
       const pageIds = subpages.map(page => page.id);
       const relatedItems = items.filter(item => pageIds.includes(item.pageId || DEFAULT_PAGE_ID));
 
-      const ok = confirm(`Delete category "${category.name}"?\n\nThis will delete ${subpages.length} subpage(s) and ${relatedItems.length} item(s).`);
+      const ok = confirm(`Delete category "${category.name}"?
+
+This will delete ${subpages.length} subpage(s) and ${relatedItems.length} item(s).`);
       if (!ok) {
         setStatus(`Delete category cancelled: ${category.name}`);
         return;
       }
 
       config.categories = (config.categories || []).filter(c => c.id !== categoryId);
-      saveHomeConfig(config);
+      await saveHomeConfig(config, { reason: "delete-category" });
 
       const openConfig = getHomeOpenConfig();
       delete openConfig[categoryId];
@@ -4969,7 +5087,7 @@
       render();
 
       if (!relatedItems.length) {
-        setStatus(`Category deleted: ${category.name}`);
+        setStatus(`Category deleted and synced: ${category.name}`);
         return;
       }
 
@@ -4989,7 +5107,7 @@
       }
     };
 
-    window.addHomeSubpage = function(categoryId) {
+    window.addHomeSubpage = async function(categoryId) {
       const name = normalizeSectionName(prompt("New subpage name:"));
       if (!name) return;
 
@@ -5005,12 +5123,12 @@
       openConfig[categoryId] = true;
       saveHomeOpenConfig(openConfig);
 
-      saveHomeConfig(config);
+      await saveHomeConfig(config, { reason: "add-subpage" });
       renderHome();
-      setStatus("Subpage added OK " + name);
+      setStatus("Subpage added and synced OK " + name);
     };
 
-    window.renameHomePage = function(pageId) {
+    window.renameHomePage = async function(pageId) {
       const config = getHomeConfig();
       let target = null;
 
@@ -5025,7 +5143,7 @@
       if (!name) return;
 
       target.name = name;
-      saveHomeConfig(config);
+      await saveHomeConfig(config, { reason: "rename-subpage" });
       renderHome();
 
       if (currentPageId === pageId) {
@@ -5033,20 +5151,20 @@
         if (title) title.textContent = name.toUpperCase();
       }
 
-      setStatus("Subpage renamed OK " + name);
+      setStatus("Subpage renamed and synced OK " + name);
     };
 
-    window.toggleHomeCategoryPin = function(categoryId) {
+    window.toggleHomeCategoryPin = async function(categoryId) {
       const config = getHomeConfig();
       const category = (config.categories || []).find(c => c.id === categoryId);
       if (!category) return;
 
       category.pinned = !category.pinned;
-      saveHomeConfig(config);
+      await saveHomeConfig(config, { reason: "pin-category" });
       renderHome();
     };
 
-    window.toggleHomePagePin = function(pageId) {
+    window.toggleHomePagePin = async function(pageId) {
       const config = getHomeConfig();
 
       for (const category of config.categories || []) {
@@ -5057,7 +5175,7 @@
         }
       }
 
-      saveHomeConfig(config);
+      await saveHomeConfig(config, { reason: "pin-subpage" });
       renderHome();
     };
 
