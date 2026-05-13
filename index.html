@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="HOME_SYNC_CONFLICT_SAFE_V11">
+  <meta name="app-build" content="HOME_SYNC_MAIN_URL_V13">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4383,6 +4383,42 @@
     let activePhotoItemId = null;
     let currentPageId = "prep-list";
 
+
+    const APP_BUILD_VERSION = "HOME_SYNC_MAIN_URL_V13";
+    const APP_BUILD_KEY = "prep_app_build_version_v1";
+
+    function clearHomeLocalStateForNewBuild() {
+      try {
+        const lastBuild = localStorage.getItem(APP_BUILD_KEY);
+        if (lastBuild === APP_BUILD_VERSION) return;
+
+        // Clear only Home/UI local caches that cause Safari/PWA disagreement.
+        // Do NOT clear prepItems data in Firestore.
+        [
+          "prep_home_config_v1",
+          "prep_home_unsynced_v1",
+          "prep_home_open_v1",
+          "prep_section_layout_v1",
+          "prep_section_collapsed_v1",
+          "prep_section_order_config_v1"
+        ].forEach(key => localStorage.removeItem(key));
+
+        Object.keys(localStorage).forEach(key => {
+          if (
+            key.startsWith("prep_custom_sections_v1_") ||
+            key.startsWith("prep_section_layout_v1_") ||
+            key.startsWith("prep_section_collapsed_v1_")
+          ) {
+            localStorage.removeItem(key);
+          }
+        });
+
+        localStorage.setItem(APP_BUILD_KEY, APP_BUILD_VERSION);
+      } catch (error) {
+        console.warn("Build cache reset skipped", error);
+      }
+    }
+
     const HOME_CONFIG_KEY = "prep_home_config_v1";
     const HOME_UNSYNCED_KEY = "prep_home_unsynced_v1";
     const HOME_DEVICE_ID_KEY = "prep_home_device_id_v1";
@@ -4937,16 +4973,39 @@
       }
     }
 
+
+    window.forceCloudHomeReload = async function() {
+      try {
+        localStorage.removeItem(HOME_CONFIG_KEY);
+        localStorage.removeItem(HOME_UNSYNCED_KEY);
+        localStorage.removeItem(HOME_OPEN_KEY);
+
+        const snap = await getDoc(homeConfigRef);
+        if (snap.exists()) {
+          const remote = repairHomeConfig(snap.data());
+          homeConfigCache = remote;
+          writeHomeConfigLocal(remote);
+          renderHome();
+          setStatus("Home pulled from Firestore OK");
+        } else {
+          setStatus("No Firestore Home config found");
+        }
+      } catch (error) {
+        console.error(error);
+        setStatus("Force cloud reload failed");
+      }
+    };
+
     function loadHomeConfigRealtime() {
       // Firestore is the source of truth for categories/subpages.
       // localStorage is only a temporary backup while Firestore is loading/offline.
-      const localBackup = isStandalonePWA() ? null : getLocalHomeConfigRaw();
-      homeConfigCache = repairHomeConfig(localBackup || createDefaultHomeConfig());
+      const localBackup = null;
+      homeConfigCache = createDefaultHomeConfig();
       renderHome();
 
       onSnapshot(homeConfigRef, snapshot => {
         if (!snapshot.exists()) {
-          const seed = repairHomeConfig(localBackup || createDefaultHomeConfig());
+          const seed = repairHomeConfig(createDefaultHomeConfig());
 
           isApplyingRemoteHomeConfig = true;
           homeConfigCache = seed;
@@ -6687,6 +6746,7 @@ This will delete ${subpages.length} subpage(s) and ${relatedItems.length} item(s
         document.body.classList.add("appReady");
       }, 3250);
     });
+    clearHomeLocalStateForNewBuild();
     clearOldPWACaches();
     loadHomeConfigRealtime();
     loadRealtime();
