@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="HOME_CONFIG_IN_PREPITEMS_V16">
+  <meta name="app-build" content="CATEGORY_RENAME_DIRECT_V17">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4373,6 +4373,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const prepRef = collection(db, "prepItems");
+    // Home/category/subpage data is stored here: prepItems / __homeConfig
     const HOME_CONFIG_DOC_ID = "__homeConfig";
     const homeConfigRef = doc(db, "prepItems", HOME_CONFIG_DOC_ID);
     let homeConfigCache = null;
@@ -4392,7 +4393,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "HOME_CONFIG_IN_PREPITEMS_V16";
+    const APP_BUILD_VERSION = "CATEGORY_RENAME_DIRECT_V17";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     function clearHomeLocalStateForNewBuild() {
@@ -5142,6 +5143,21 @@
       }
     };
 
+
+    async function readLatestHomeConfigForEdit() {
+      const snap = await getDoc(homeConfigRef);
+      if (snap.exists()) return repairHomeConfig(snap.data());
+      return repairHomeConfig(homeConfigCache || createDefaultHomeConfig());
+    }
+
+    async function saveLatestHomeConfigForEdit(config, reason = "home-edit") {
+      const fixed = repairHomeConfig(config);
+      await pushHomeConfigToCloud(fixed, reason);
+      homeConfigCache = fixed;
+      renderHome();
+      return fixed;
+    }
+
     window.resetHomeConfig = async function() {
       const fallback = createDefaultHomeConfig();
       homeConfigCache = fallback;
@@ -5185,19 +5201,34 @@
     };
 
     window.renameHomeCategory = async function(categoryId) {
-      const current = getHomeConfig();
-      const existing = (current.categories || []).find(c => c.id === categoryId);
-      if (!existing) return;
+      if (!navigator.onLine) {
+        alert("Offline - cannot rename category. Connect internet and try again.");
+        setStatus("Offline - rename category not saved");
+        return;
+      }
 
-      const name = normalizeSectionName(prompt("Rename category:", existing.name));
-      if (!name) return;
+      try {
+        const latest = await readLatestHomeConfigForEdit();
+        const category = (latest.categories || []).find(c => c.id === categoryId);
 
-      await mutateHomeConfigCloud(config => {
-        const category = (config.categories || []).find(c => c.id === categoryId);
-        if (category) category.name = name;
-      }, "rename-category");
+        if (!category) {
+          alert("Category not found in Firestore.");
+          setStatus("Rename failed - category not found");
+          return;
+        }
 
-      setStatus("Category renamed and synced OK " + name);
+        const name = normalizeSectionName(prompt("Rename category:", category.name));
+        if (!name) return;
+
+        category.name = name;
+
+        await saveLatestHomeConfigForEdit(latest, "rename-category-direct");
+        setStatus("Category renamed and synced OK: " + name);
+      } catch (error) {
+        console.error(error);
+        alert("Rename category failed. Check Firestore Rules / internet.");
+        setStatus("Rename category failed - check Firestore");
+      }
     };
 
     window.deleteHomeCategory = async function(categoryId, btn) {
@@ -5290,35 +5321,48 @@ This will delete ${subpages.length} subpage(s) and ${relatedItems.length} item(s
     };
 
     window.renameHomePage = async function(pageId) {
-      const current = getHomeConfig();
-      let target = null;
-
-      for (const category of current.categories || []) {
-        const page = (category.subpages || []).find(p => p.id === pageId);
-        if (page) { target = page; break; }
+      if (!navigator.onLine) {
+        alert("Offline - cannot rename subpage. Connect internet and try again.");
+        setStatus("Offline - rename subpage not saved");
+        return;
       }
 
-      if (!target) return;
+      try {
+        const latest = await readLatestHomeConfigForEdit();
+        let target = null;
 
-      const name = normalizeSectionName(prompt("Rename subpage:", target.name));
-      if (!name) return;
-
-      await mutateHomeConfigCloud(config => {
-        for (const category of config.categories || []) {
+        for (const category of latest.categories || []) {
           const page = (category.subpages || []).find(p => p.id === pageId);
           if (page) {
-            page.name = name;
+            target = page;
             break;
           }
         }
-      }, "rename-subpage");
 
-      if (currentPageId === pageId) {
-        const title = document.getElementById("activePageTitle");
-        if (title) title.textContent = name.toUpperCase();
+        if (!target) {
+          alert("Subpage not found in Firestore.");
+          setStatus("Rename failed - subpage not found");
+          return;
+        }
+
+        const name = normalizeSectionName(prompt("Rename subpage:", target.name));
+        if (!name) return;
+
+        target.name = name;
+
+        await saveLatestHomeConfigForEdit(latest, "rename-subpage-direct");
+
+        if (currentPageId === pageId) {
+          const title = document.getElementById("activePageTitle");
+          if (title) title.textContent = name.toUpperCase();
+        }
+
+        setStatus("Subpage renamed and synced OK: " + name);
+      } catch (error) {
+        console.error(error);
+        alert("Rename subpage failed. Check Firestore Rules / internet.");
+        setStatus("Rename subpage failed - check Firestore");
       }
-
-      setStatus("Subpage renamed and synced OK " + name);
     };
 
     window.deleteHomePage = async function(pageId, btn) {
