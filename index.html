@@ -15,6 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
+  <meta name="app-build" content="HOME_SYNC_PWA_FIX_2026_05_13_V10">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4782,31 +4783,35 @@
 
     function saveHomeConfig(config, options = {}) {
       const fixed = repairHomeConfig(config);
+
       homeConfigCache = fixed;
       writeHomeConfigLocal(fixed);
       renderHome();
 
-      // Home config = categories + subpages. Firestore must be the source for every device.
-      // localStorage is backup only for this device while offline/loading.
-      if (options.localOnly || isApplyingRemoteHomeConfig) return Promise.resolve(fixed);
+      // localStorage is only backup. Every user Home change must go to Firestore.
+      if (options.localOnly || isApplyingRemoteHomeConfig) return;
 
-      if (!navigator.onLine) {
-        markHomeConfigUnsynced(fixed);
-        setStatus("Home saved offline - will sync when online");
-        return Promise.resolve(fixed);
-      }
+      const payload = {
+        ...fixed,
+        updatedAt: serverTimestamp()
+      };
 
-      return pushHomeConfigToCloud(fixed, options.reason || "home-edit")
-        .then(result => {
-          setStatus("Home synced to Firestore");
-          return result;
-        })
-        .catch(error => {
-          console.warn("Home config Firestore save failed; kept local backup", error);
-          markHomeConfigUnsynced(fixed);
-          setStatus("Home saved on this device only - will retry when online");
-          return fixed;
-        });
+      setDoc(homeConfigRef, payload, { merge: true }).catch(error => {
+        console.warn("Home config immediate Firestore save failed; will retry", error);
+        setStatus("Offline backup saved - Home will sync when online");
+      });
+
+      if (homeConfigSaveTimer) clearTimeout(homeConfigSaveTimer);
+      homeConfigSaveTimer = setTimeout(async () => {
+        try {
+          await setDoc(homeConfigRef, {
+            ...repairHomeConfig(homeConfigCache),
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        } catch (error) {
+          console.warn("Home config delayed Firestore save failed", error);
+        }
+      }, 700);
     }
 
     function syncHomeConfigNow() {
@@ -4823,10 +4828,31 @@
         });
     }
 
+
+    function autoOpenChangedHomeCategories(previousConfig, nextConfig) {
+      try {
+        const openConfig = getHomeOpenConfig();
+        const previousPageIds = new Set();
+
+        (previousConfig?.categories || []).forEach(category => {
+          (category.subpages || []).forEach(page => previousPageIds.add(page.id));
+        });
+
+        (nextConfig?.categories || []).forEach(category => {
+          const hasNewPage = (category.subpages || []).some(page => !previousPageIds.has(page.id));
+          if (hasNewPage) openConfig[category.id] = true;
+        });
+
+        saveHomeOpenConfig(openConfig);
+      } catch (error) {
+        console.warn("Auto open changed Home categories failed", error);
+      }
+    }
+
     function loadHomeConfigRealtime() {
       // Firestore is the source of truth for categories/subpages.
       // localStorage is only a temporary backup while Firestore is loading/offline.
-      const localBackup = getLocalHomeConfigRaw();
+      const localBackup = isStandalonePWA() ? null : getLocalHomeConfigRaw();
       homeConfigCache = repairHomeConfig(localBackup || createDefaultHomeConfig());
       renderHome();
 
@@ -4880,6 +4906,28 @@
         homeConfigCache = repairHomeConfig(getLocalHomeConfigRaw() || createDefaultHomeConfig());
         renderHome();
       });
+    }
+
+
+
+    function isStandalonePWA() {
+      return window.navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
+    }
+
+    async function clearOldPWACaches() {
+      try {
+        if ("serviceWorker" in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(reg => reg.unregister()));
+        }
+
+        if ("caches" in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(key => caches.delete(key)));
+        }
+      } catch (error) {
+        console.warn("PWA cache clear skipped", error, "HOME_SYNC_PWA_FIX_2026_05_13_V10");
+      }
     }
 
     function getHomeOpenConfig() {
@@ -6530,6 +6578,7 @@ This will delete ${subpages.length} subpage(s) and ${relatedItems.length} item(s
         document.body.classList.add("appReady");
       }, 3250);
     });
+    clearOldPWACaches();
     loadHomeConfigRealtime();
     loadRealtime();
   </script>
