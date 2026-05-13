@@ -4138,31 +4138,86 @@
     }
 
 
-    /* ===== SHARP FULLSCREEN VIDEO SPLASH V3 ===== */
-    html.splashLock, body.splashLock {
-      width:100vw !important; height:100vh !important; height:100dvh !important;
-      overflow:hidden !important; padding:0 !important; margin:0 !important; background:#000 !important;
+    /* ===== FADE ONLY OPENING SPLASH RESTORE ===== */
+    html.splashLock,
+    body.splashLock {
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      overflow: hidden !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      background: #f7f7f8 !important;
     }
-    .appSplash.videoSplash {
-      position:fixed !important; inset:0 !important; z-index:99999 !important;
-      background:#000 !important; display:block !important; overflow:hidden !important;
-      pointer-events:none !important; width:100vw !important; height:100vh !important; height:100dvh !important;
-      padding:0 !important; margin:0 !important; opacity:1 !important;
-      transition:opacity .86s cubic-bezier(.22,.61,.36,1) !important;
+
+    .appSplash.fadeSplash {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 99999 !important;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,.96) 0 28%, rgba(247,247,248,.98) 58%, #ececef 100%) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      overflow: hidden !important;
+      pointer-events: none !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      opacity: 1 !important;
+      transition: opacity .82s cubic-bezier(.22,.61,.36,1) !important;
     }
-    .appSplash.videoSplash.fadeOut { opacity:0 !important; }
-    .appSplash.videoSplash.hide { display:none !important; }
-    .splashVideo {
-      position:fixed !important; inset:0 !important; width:100vw !important; height:100vh !important; height:100dvh !important;
-      min-width:100vw !important; min-height:100vh !important; min-height:100dvh !important;
-      max-width:none !important; max-height:none !important; object-fit:cover !important; object-position:center center !important;
-      display:block !important; background:#000 !important; transform:translateZ(0) scale(1.003) !important;
-      backface-visibility:hidden !important; -webkit-backface-visibility:hidden !important;
-      image-rendering:auto !important;
+
+    .appSplash.fadeSplash.fadeOut {
+      opacity: 0 !important;
     }
-    @supports (-webkit-touch-callout:none) {
-      html.splashLock, body.splashLock, .appSplash.videoSplash, .splashVideo {
-        height:-webkit-fill-available !important; min-height:-webkit-fill-available !important;
+
+    .appSplash.fadeSplash.hide {
+      display: none !important;
+    }
+
+    .splashLogoWrap {
+      width: min(42vw, 220px) !important;
+      height: min(42vw, 220px) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 42px !important;
+      transform: scale(.96) !important;
+      opacity: 0 !important;
+      animation: splashLogoFadeIn .95s cubic-bezier(.22,.61,.36,1) .18s forwards;
+    }
+
+    .splashLogoImg {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain !important;
+      display: block !important;
+      filter: drop-shadow(0 14px 30px rgba(17,24,39,.16)) !important;
+      transform: translateZ(0) !important;
+      backface-visibility: hidden !important;
+      -webkit-backface-visibility: hidden !important;
+    }
+
+    @keyframes splashLogoFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(.88);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @supports (-webkit-touch-callout: none) {
+      html.splashLock,
+      body.splashLock,
+      .appSplash.fadeSplash {
+        height: -webkit-fill-available !important;
+        min-height: -webkit-fill-available !important;
       }
     }
 
@@ -4170,12 +4225,10 @@
 </head>
 
 <body class="splashLock">
-  <div id="appSplash" class="appSplash videoSplash">
-    <video id="splashVideo" class="splashVideo"
-      autoplay muted playsinline webkit-playsinline
-      preload="auto">
-      <source src="bside-opening-sharp-fullscreen-v3.mp4?v=3" type="video/mp4">
-    </video>
+  <div id="appSplash" class="appSplash fadeSplash">
+    <div class="splashLogoWrap">
+      <img class="splashLogoImg" src="icon-512.png" alt="B Side">
+    </div>
   </div>
 
   <div class="page">
@@ -6366,7 +6419,6 @@
     }, 100);
     window.addEventListener("load", () => {
       const splash = document.getElementById("appSplash");
-      const video = document.getElementById("splashVideo");
 
       document.body.classList.add("appReady");
 
@@ -6376,59 +6428,17 @@
         return;
       }
 
-      let closed = false;
-      let started = false;
-      let safetyTimer = null;
-
-      function closeSplash() {
-        if (closed) return;
-        closed = true;
-        if (safetyTimer) clearTimeout(safetyTimer);
-
+      // Old fade-in style: hold briefly, then fade out into the app.
+      setTimeout(() => {
         splash.classList.add("fadeOut");
-        setTimeout(() => {
-          splash.classList.add("hide");
-          splash.remove();
-          document.documentElement.classList.remove("splashLock");
-          document.body.classList.remove("splashLock");
-        }, 900);
-      }
+      }, 1850);
 
-      function startVideo() {
-        if (!video || started) return;
-        started = true;
-
-        video.muted = true;
-        video.defaultMuted = true;
-        video.playsInline = true;
-        video.setAttribute("muted", "");
-        video.setAttribute("playsinline", "");
-        video.setAttribute("webkit-playsinline", "");
-        video.preload = "auto";
-        video.playbackRate = 1;
-
-        try {
-          video.currentTime = 0;
-          video.load();
-        } catch (error) {}
-
-        const playPromise = video.play();
-        if (playPromise && typeof playPromise.catch === "function") {
-          playPromise.catch(() => setTimeout(closeSplash, 1800));
-        }
-
-        safetyTimer = setTimeout(closeSplash, 9966);
-      }
-
-      if (video) {
-        video.addEventListener("canplay", startVideo, { once: true });
-        video.addEventListener("loadeddata", startVideo, { once: true });
-        video.addEventListener("ended", () => setTimeout(closeSplash, 760), { once: true });
-        video.addEventListener("error", () => setTimeout(closeSplash, 1200), { once: true });
-        startVideo();
-      } else {
-        setTimeout(closeSplash, 1800);
-      }
+      setTimeout(() => {
+        splash.classList.add("hide");
+        splash.remove();
+        document.documentElement.classList.remove("splashLock");
+        document.body.classList.remove("splashLock");
+      }, 2750);
     });
     loadHomeConfigRealtime();
     loadRealtime();
