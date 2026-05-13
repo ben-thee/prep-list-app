@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_1_SPLASH_FIX">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_2_SPLASH_HARD_FIX">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4356,10 +4356,54 @@
     </div>
   </div>
 
+
+  <script>
+    (function () {
+      var done = false;
+
+      function finishSplashHard() {
+        if (done) return;
+        done = true;
+
+        var splash = document.getElementById("appSplash");
+        document.body.classList.add("appReady");
+
+        if (!splash) return;
+
+        try {
+          splash.classList.add("fadeOut");
+          setTimeout(function () {
+            try {
+              splash.classList.add("hide");
+              if (splash.parentNode) splash.parentNode.removeChild(splash);
+            } catch (error) {}
+          }, 760);
+        } catch (error) {
+          try {
+            if (splash.parentNode) splash.parentNode.removeChild(splash);
+          } catch (innerError) {}
+        }
+      }
+
+      window.__finishPrepSplashHard = finishSplashHard;
+
+      if (document.readyState === "complete" || document.readyState === "interactive") {
+        setTimeout(finishSplashHard, 3600);
+      } else {
+        document.addEventListener("DOMContentLoaded", function () {
+          setTimeout(finishSplashHard, 3600);
+        }, { once: true });
+      }
+
+      // Absolute fallback. Even if DOM events behave oddly in iOS PWA, remove splash.
+      setTimeout(finishSplashHard, 5200);
+    })();
+  </script>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import {
-      getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, deleteField,
+      getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, deleteField, getDoc,
       onSnapshot, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
     const firebaseConfig = {
@@ -4394,7 +4438,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_1_SPLASH_FIX";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_2_SPLASH_HARD_FIX";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -6659,6 +6703,7 @@
         splash.classList.add("hide");
         splash.remove();
         document.body.classList.add("appReady");
+        if (window.__finishPrepSplashHard) window.__finishPrepSplashHard();
       }, 3000);
     }
 
@@ -6673,6 +6718,7 @@
         document.body.classList.add("appReady");
         const splash = document.getElementById("appSplash");
         if (splash) splash.remove();
+        if (window.__finishPrepSplashHard) window.__finishPrepSplashHard();
         const content = document.getElementById("content");
         if (content) content.innerHTML = `<div class="loading">App start error. Check console.</div>`;
       }
