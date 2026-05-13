@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="NO_OFFLINE_SUBPAGE_DELETE_RENAME_V15">
+  <meta name="app-build" content="HOME_CONFIG_IN_PREPITEMS_V16">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4373,7 +4373,8 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const prepRef = collection(db, "prepItems");
-    const homeConfigRef = doc(db, "prepMeta", "homeConfig");
+    const HOME_CONFIG_DOC_ID = "__homeConfig";
+    const homeConfigRef = doc(db, "prepItems", HOME_CONFIG_DOC_ID);
     let homeConfigCache = null;
     let isApplyingRemoteHomeConfig = false;
     let homeConfigSaveTimer = null;
@@ -4391,7 +4392,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "NO_OFFLINE_SUBPAGE_DELETE_RENAME_V15";
+    const APP_BUILD_VERSION = "HOME_CONFIG_IN_PREPITEMS_V16";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     function clearHomeLocalStateForNewBuild() {
@@ -4507,6 +4508,11 @@
       const fixed = repairHomeConfig(config);
       const payload = {
         ...fixed,
+        id: HOME_CONFIG_DOC_ID,
+        type: "homeConfig",
+        item: "__HOME_CONFIG_DO_NOT_DELETE",
+        section: "__meta",
+        pageId: "__meta",
         syncVersion: Date.now(),
         updatedBy: getHomeDeviceId(),
         updatedReason: reason,
@@ -4605,6 +4611,20 @@
 
       return { config: fixed, result };
     }
+
+
+    window.forceSeedHomeConfigToPrepItems = async function() {
+      const fixed = repairHomeConfig(homeConfigCache || createDefaultHomeConfig());
+      try {
+        await pushHomeConfigToCloud(fixed, "manual-force-seed-prepItems");
+        setStatus("Home config written to prepItems/__homeConfig OK");
+        return fixed;
+      } catch (error) {
+        console.error(error);
+        setStatus("Home config write failed - check Firestore Rules");
+        throw error;
+      }
+    };
 
     const HOME_OPEN_KEY = "prep_home_open_v1";
     const DEFAULT_PAGE_ID = "prep-list";
@@ -4868,8 +4888,8 @@
         await pushHomeConfigToCloud(fixed, options.reason || "home-edit");
         setStatus("Home synced OK");
       } catch (error) {
-        console.error("Home Firestore save failed", error);
-        setStatus("Home sync failed - not saved");
+        console.error("Home prepItems/__homeConfig save failed", error);
+        setStatus("Home sync failed - check prepItems/__homeConfig");
         throw error;
       }
     }
@@ -4941,7 +4961,7 @@
           if (navigator.onLine) {
             pushHomeConfigToCloud(seed, "initial-seed").catch(error => {
               console.warn("Home config initial seed failed", error);
-              setStatus("Home initial seed failed - check Firestore connection");
+              setStatus("Home config write failed - check prepItems/__homeConfig");
             });
           }
           return;
@@ -5190,7 +5210,7 @@
 
       const subpages = category.subpages || [];
       const pageIds = subpages.map(page => page.id);
-      const relatedItems = items.filter(item => pageIds.includes(item.pageId || DEFAULT_PAGE_ID));
+      const relatedItems = items.filter(item => item.id !== HOME_CONFIG_DOC_ID && pageIds.includes(item.pageId || DEFAULT_PAGE_ID));
 
       const ok = confirm(`Delete category "${category.name}"?
 
@@ -5329,7 +5349,7 @@ This will delete ${subpages.length} subpage(s) and ${relatedItems.length} item(s
         return;
       }
 
-      const relatedItems = items.filter(item => (item.pageId || DEFAULT_PAGE_ID) === pageId);
+      const relatedItems = items.filter(item => item.id !== HOME_CONFIG_DOC_ID && (item.pageId || DEFAULT_PAGE_ID) === pageId);
 
       const ok = confirm(`Delete subpage "${targetPage.name}"?
 
@@ -5562,7 +5582,9 @@ This will delete ${relatedItems.length} item(s) in this subpage.`);
     function loadRealtime() {
       setStatus("Loading...");
       onSnapshot(prepRef, snapshot => {
-        items = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+        items = snapshot.docs
+          .map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
+          .filter(item => item.id !== HOME_CONFIG_DOC_ID && item.type !== "homeConfig" && item.section !== "__meta");
         sortItemsLocal(); updateSectionDropdown(); renderHome(); render(); updateDeleteModeButton(); updateEditModeButton(); updateOfflineBadge(); flushPendingWrites();
         setStatus(navigator.onLine ? "Loaded OK Auto save / real-time sync" : "Offline mode - showing cached data");
       }, error => {
