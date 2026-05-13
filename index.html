@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_1_SPLASH_FIX">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4394,8 +4394,12 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_1_SPLASH_FIX";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
+
+    async function clearOldPWACaches() {
+      // V18.1: no service-worker/offline cache system. Keep this as a safe no-op.
+    }
 
     function clearHomeLocalStateForNewBuild() {
       try {
@@ -6634,26 +6638,57 @@
     }, 100);
     window.addEventListener("online", syncHomeConfigNow);
 
-    window.addEventListener("load", () => {
+    let splashFinished = false;
+    function finishSplash() {
+      if (splashFinished) return;
+      splashFinished = true;
+
       const splash = document.getElementById("appSplash");
       setTimeout(playStartupSoundOnce, 250);
+
       if (!splash) {
         document.body.classList.add("appReady");
         return;
       }
+
       setTimeout(() => {
         splash.classList.add("fadeOut");
-      }, 2300);
+      }, 2100);
+
       setTimeout(() => {
         splash.classList.add("hide");
         splash.remove();
         document.body.classList.add("appReady");
-      }, 3250);
-    });
-    clearHomeLocalStateForNewBuild();
-    clearOldPWACaches();
-    loadHomeConfigRealtime();
-    loadRealtime();
+      }, 3000);
+    }
+
+    function startApp() {
+      try {
+        clearHomeLocalStateForNewBuild();
+        clearOldPWACaches();
+        loadHomeConfigRealtime();
+        loadRealtime();
+      } catch (error) {
+        console.error("App start failed", error);
+        document.body.classList.add("appReady");
+        const splash = document.getElementById("appSplash");
+        if (splash) splash.remove();
+        const content = document.getElementById("content");
+        if (content) content.innerHTML = `<div class="loading">App start error. Check console.</div>`;
+      }
+
+      finishSplash();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", startApp, { once: true });
+      window.addEventListener("load", finishSplash, { once: true });
+    } else {
+      startApp();
+    }
+
+    // Hard safety: never allow splash to block the app forever.
+    setTimeout(finishSplash, 4200);
   </script>
 </body>
 </html>
