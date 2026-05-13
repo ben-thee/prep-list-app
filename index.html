@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_2_SPLASH_HARD_FIX">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_3_STARTUP_FIX">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4406,6 +4406,23 @@
       getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, deleteField, getDoc,
       onSnapshot, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    window.addEventListener("error", event => {
+      const target = document.getElementById("homeCategoryList");
+      if (target && !target.children.length) {
+        target.innerHTML = `<div class="homeCategoryCard"><div class="loading" style="padding:18px;font-size:13px;">Startup error: ${String(event.message || "unknown").slice(0, 120)}</div></div>`;
+      }
+      if (window.__finishPrepSplashHard) window.__finishPrepSplashHard();
+    });
+
+    window.addEventListener("unhandledrejection", event => {
+      const target = document.getElementById("homeCategoryList");
+      if (target && !target.children.length) {
+        target.innerHTML = `<div class="homeCategoryCard"><div class="loading" style="padding:18px;font-size:13px;">Startup promise error. Check Firestore / network.</div></div>`;
+      }
+      if (window.__finishPrepSplashHard) window.__finishPrepSplashHard();
+    });
+
     const firebaseConfig = {
       apiKey: "AIzaSyDzdxT4kocIK04UJhhbMQjpVw4Wtim5yVg",
       authDomain: "prep-5ada7.firebaseapp.com",
@@ -4438,7 +4455,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_2_SPLASH_HARD_FIX";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_3_STARTUP_FIX";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -5103,22 +5120,6 @@
         renderHome();
       }
     };
-
-
-    async function readLatestHomeConfigForEdit() {
-      const snap = await getDoc(homeConfigRef);
-      if (snap.exists()) return repairHomeConfig(snap.data());
-      return repairHomeConfig(homeConfigCache || createDefaultHomeConfig());
-    }
-
-    async function saveLatestHomeConfigForEdit(config, reason = "home-edit") {
-      const fixed = repairHomeConfig(config);
-      await pushHomeConfigToCloud(fixed, reason);
-      homeConfigCache = fixed;
-      renderHome();
-      return fixed;
-    }
-
     window.resetHomeConfig = async function() {
       const ok = confirm("Reset Home categories to default?");
       if (!ok) return;
@@ -6663,8 +6664,14 @@
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
     }
-    updateSectionDropdown();
-    const popupInputReady = setInterval(() => {
+    function setupInputEnterHandlers() {
+      try {
+        updateSectionDropdown();
+      } catch (error) {
+        console.warn("Initial section dropdown setup skipped", error);
+      }
+
+      const popupInputReady = setInterval(() => {
       const popupInput = document.getElementById("popupNewItem");
       if (!popupInput) return;
       clearInterval(popupInputReady);
@@ -6680,6 +6687,8 @@
         if (event.key === "Enter") addSectionFromPopup();
       });
     }, 100);
+    }
+
     window.addEventListener("online", syncHomeConfigNow);
 
     let splashFinished = false;
@@ -6709,6 +6718,9 @@
 
     function startApp() {
       try {
+        homeConfigCache = cleanHomeConfigForFirestore(createDefaultHomeConfig());
+        renderHome();
+        setupInputEnterHandlers();
         clearHomeLocalStateForNewBuild();
         clearOldPWACaches();
         loadHomeConfigRealtime();
