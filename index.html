@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="HOME_SYNC_PWA_FIX_2026_05_13_V10">
+  <meta name="app-build" content="HOME_SYNC_CONFLICT_SAFE_V11">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4489,6 +4489,94 @@
       return fixed;
     }
 
+    function mergeHomeById(baseConfig, overlayConfig) {
+      const base = repairHomeConfig(baseConfig || createDefaultHomeConfig());
+      const overlay = repairHomeConfig(overlayConfig || createDefaultHomeConfig());
+      const categoryMap = new Map();
+
+      function addCategory(category, preferOverlay = false) {
+        if (!category || !category.id) return;
+
+        const existing = categoryMap.get(category.id) || {
+          id: category.id,
+          name: category.name || "Category",
+          pinned: !!category.pinned,
+          subpages: []
+        };
+
+        if (preferOverlay) {
+          existing.name = category.name || existing.name;
+          existing.pinned = !!category.pinned;
+        } else {
+          existing.name = existing.name || category.name || "Category";
+          existing.pinned = !!existing.pinned || !!category.pinned;
+        }
+
+        const pageMap = new Map((existing.subpages || []).map(page => [page.id, page]));
+
+        (category.subpages || []).forEach(page => {
+          if (!page || !page.id) return;
+
+          const current = pageMap.get(page.id) || {
+            id: page.id,
+            name: page.name || "Subpage",
+            pinned: !!page.pinned
+          };
+
+          if (preferOverlay) {
+            current.name = page.name || current.name;
+            current.pinned = !!page.pinned;
+          } else {
+            current.name = current.name || page.name || "Subpage";
+            current.pinned = !!current.pinned || !!page.pinned;
+          }
+
+          pageMap.set(page.id, current);
+        });
+
+        existing.subpages = Array.from(pageMap.values());
+        categoryMap.set(category.id, existing);
+      }
+
+      (base.categories || []).forEach(category => addCategory(category, false));
+      (overlay.categories || []).forEach(category => addCategory(category, true));
+
+      return repairHomeConfig({ categories: Array.from(categoryMap.values()) });
+    }
+
+    async function getCloudHomeConfig() {
+      try {
+        const snap = await getDoc(homeConfigRef);
+        if (snap.exists()) return repairHomeConfig(snap.data());
+      } catch (error) {
+        console.warn("Could not read cloud Home config", error);
+      }
+      return repairHomeConfig(homeConfigCache || getLocalHomeConfigRaw() || createDefaultHomeConfig());
+    }
+
+    async function mutateHomeConfigCloud(mutator, reason = "home-edit") {
+      const remote = await getCloudHomeConfig();
+      const base = mergeHomeById(remote, homeConfigCache || getLocalHomeConfigRaw() || createDefaultHomeConfig());
+      const draft = repairHomeConfig(JSON.parse(JSON.stringify(base)));
+      const result = mutator(draft) || {};
+      const fixed = repairHomeConfig(draft);
+
+      homeConfigCache = fixed;
+      writeHomeConfigLocal(fixed);
+      renderHome();
+
+      try {
+        await pushHomeConfigToCloud(fixed, reason);
+        clearUnsyncedHomeConfig();
+      } catch (error) {
+        console.warn("Home cloud mutation failed; stored unsynced backup", error);
+        markHomeConfigUnsynced(fixed);
+        setStatus("Offline backup saved - Home will sync when online");
+      }
+
+      return { config: fixed, result };
+    }
+
     const HOME_OPEN_KEY = "prep_home_open_v1";
     const DEFAULT_PAGE_ID = "prep-list";
     let searchQuery = "";
@@ -4876,9 +4964,9 @@
         }
 
         const previous = homeConfigCache;
-        const remote = repairHomeConfig(snapshot.data());
+        const remote = mergeHomeById(snapshot.data(), getUnsyncedHomeConfig() || { categories: [] });
 
-        // Remote Firestore replaces local backup. No local merge that can hide new category/subpage changes.
+        // Remote Firestore is authoritative; only explicit unsynced edits are merged back.
         isApplyingRemoteHomeConfig = true;
         autoOpenNewRemoteHomeCategories(previous, remote);
         homeConfigCache = remote;
@@ -5050,55 +5138,68 @@
 
     window.resetHomeConfig = async function() {
       const fallback = createDefaultHomeConfig();
-      await saveHomeConfig(fallback, { reason: "reset-home" });
+      homeConfigCache = fallback;
+      writeHomeConfigLocal(fallback);
       renderHome();
-      setStatus("Home repaired and synced OK");
+
+      try {
+        await pushHomeConfigToCloud(fallback, "reset-home");
+        clearUnsyncedHomeConfig();
+        setStatus("Home repaired and synced OK");
+      } catch (error) {
+        markHomeConfigUnsynced(fallback);
+        setStatus("Home repaired locally - will sync when online");
+      }
     };
 
     window.addHomeCategory = async function() {
       const name = normalizeSectionName(prompt("New category name:"));
       if (!name) return;
 
-      const config = getHomeConfig();
-      config.categories = config.categories || [];
       const category = {
         id: makeLocalId("cat"),
         name,
         pinned: false,
         subpages: []
       };
-      config.categories.push(category);
 
       const openConfig = getHomeOpenConfig();
       openConfig[category.id] = true;
       saveHomeOpenConfig(openConfig);
 
-      await saveHomeConfig(config, { reason: "add-category" });
-      renderHome();
+      await mutateHomeConfigCloud(config => {
+        config.categories = config.categories || [];
+        if (!config.categories.some(c => c.id === category.id)) {
+          config.categories.push(category);
+        }
+        return { category };
+      }, "add-category");
+
       setStatus("Category added and synced OK " + name);
     };
 
     window.renameHomeCategory = async function(categoryId) {
-      const config = getHomeConfig();
-      const category = (config.categories || []).find(c => c.id === categoryId);
-      if (!category) return;
+      const current = getHomeConfig();
+      const existing = (current.categories || []).find(c => c.id === categoryId);
+      if (!existing) return;
 
-      const name = normalizeSectionName(prompt("Rename category:", category.name));
+      const name = normalizeSectionName(prompt("Rename category:", existing.name));
       if (!name) return;
 
-      category.name = name;
-      await saveHomeConfig(config, { reason: "rename-category" });
-      renderHome();
+      await mutateHomeConfigCloud(config => {
+        const category = (config.categories || []).find(c => c.id === categoryId);
+        if (category) category.name = name;
+      }, "rename-category");
+
       setStatus("Category renamed and synced OK " + name);
     };
-
 
     window.deleteHomeCategory = async function(categoryId, btn) {
       animateSectionDeletePress(btn);
       await new Promise(resolve => setTimeout(resolve, 160));
 
-      const config = getHomeConfig();
-      const category = (config.categories || []).find(c => c.id === categoryId);
+      const current = getHomeConfig();
+      const category = (current.categories || []).find(c => c.id === categoryId);
       if (!category) return;
 
       const subpages = category.subpages || [];
@@ -5113,8 +5214,9 @@ This will delete ${subpages.length} subpage(s) and ${relatedItems.length} item(s
         return;
       }
 
-      config.categories = (config.categories || []).filter(c => c.id !== categoryId);
-      await saveHomeConfig(config, { reason: "delete-category" });
+      await mutateHomeConfigCloud(config => {
+        config.categories = (config.categories || []).filter(c => c.id !== categoryId);
+      }, "delete-category");
 
       const openConfig = getHomeOpenConfig();
       delete openConfig[categoryId];
@@ -5159,28 +5261,33 @@ This will delete ${subpages.length} subpage(s) and ${relatedItems.length} item(s
       const name = normalizeSectionName(prompt("New subpage name:"));
       if (!name) return;
 
-      const config = getHomeConfig();
-      const category = (config.categories || []).find(c => c.id === categoryId);
-      if (!category) return;
-
-      category.subpages = category.subpages || [];
       const page = { id: makeLocalId("page"), name, pinned: false };
-      category.subpages.push(page);
 
       const openConfig = getHomeOpenConfig();
       openConfig[categoryId] = true;
       saveHomeOpenConfig(openConfig);
 
-      await saveHomeConfig(config, { reason: "add-subpage" });
-      renderHome();
-      setStatus("Subpage added and synced OK " + name);
+      let added = false;
+
+      await mutateHomeConfigCloud(config => {
+        const category = (config.categories || []).find(c => c.id === categoryId);
+        if (!category) return;
+
+        category.subpages = category.subpages || [];
+        if (!category.subpages.some(p => p.id === page.id)) {
+          category.subpages.push(page);
+          added = true;
+        }
+      }, "add-subpage");
+
+      setStatus(added ? "Subpage added and synced OK " + name : "Subpage sync skipped - category not found");
     };
 
     window.renameHomePage = async function(pageId) {
-      const config = getHomeConfig();
+      const current = getHomeConfig();
       let target = null;
 
-      for (const category of config.categories || []) {
+      for (const category of current.categories || []) {
         const page = (category.subpages || []).find(p => p.id === pageId);
         if (page) { target = page; break; }
       }
@@ -5190,9 +5297,15 @@ This will delete ${subpages.length} subpage(s) and ${relatedItems.length} item(s
       const name = normalizeSectionName(prompt("Rename subpage:", target.name));
       if (!name) return;
 
-      target.name = name;
-      await saveHomeConfig(config, { reason: "rename-subpage" });
-      renderHome();
+      await mutateHomeConfigCloud(config => {
+        for (const category of config.categories || []) {
+          const page = (category.subpages || []).find(p => p.id === pageId);
+          if (page) {
+            page.name = name;
+            break;
+          }
+        }
+      }, "rename-subpage");
 
       if (currentPageId === pageId) {
         const title = document.getElementById("activePageTitle");
@@ -5203,27 +5316,23 @@ This will delete ${subpages.length} subpage(s) and ${relatedItems.length} item(s
     };
 
     window.toggleHomeCategoryPin = async function(categoryId) {
-      const config = getHomeConfig();
-      const category = (config.categories || []).find(c => c.id === categoryId);
-      if (!category) return;
-
-      category.pinned = !category.pinned;
-      await saveHomeConfig(config, { reason: "pin-category" });
+      await mutateHomeConfigCloud(config => {
+        const category = (config.categories || []).find(c => c.id === categoryId);
+        if (category) category.pinned = !category.pinned;
+      }, "pin-category");
       renderHome();
     };
 
     window.toggleHomePagePin = async function(pageId) {
-      const config = getHomeConfig();
-
-      for (const category of config.categories || []) {
-        const page = (category.subpages || []).find(p => p.id === pageId);
-        if (page) {
-          page.pinned = !page.pinned;
-          break;
+      await mutateHomeConfigCloud(config => {
+        for (const category of config.categories || []) {
+          const page = (category.subpages || []).find(p => p.id === pageId);
+          if (page) {
+            page.pinned = !page.pinned;
+            break;
+          }
         }
-      }
-
-      await saveHomeConfig(config, { reason: "pin-subpage" });
+      }, "pin-subpage");
       renderHome();
     };
 
