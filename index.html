@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_8_ADD_ITEM_ID_FIX">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_9_NOTE_UNDERLINE_FIX">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -3101,9 +3101,6 @@
 
 
     /* ===== ITEM NAME WIDTH / DOTS OFF / STAR RIGHT ===== */
-    .itemDot.,
-
-
     .row {
       background: #ffffff !important;
     }
@@ -3231,9 +3228,6 @@
 
 
     /* ===== WHOLE ROW PILL GREY + COLOUR OVERRIDE + NO TEXT CLIP ===== */
-    .itemDot.,
-
-
     /*
       Grey is now the WHOLE item pill:
       tick area + item name + QTY + colour area.
@@ -4236,16 +4230,38 @@
       backface-visibility: hidden !important;
       -webkit-backface-visibility: hidden !important;
     }
-
-
-    /* ===== V18.5 NOTE UNDERLINE + TAP EFFECTS ===== */
-    .itemName.hasNote .itemLabelText {
-      text-decoration-line: underline !important;
-      text-decoration-thickness: 2px !important;
-      text-decoration-color: rgba(17, 24, 39, .72) !important;
-      text-underline-offset: 4px !important;
-      text-decoration-skip-ink: auto !important;
+    /* ===== V18.5 TAP EFFECTS ===== */
+    /* ===== V18.9 NOTE UNDERLINE FIX ===== */
+    .itemName.hasNote {
+      position: relative !important;
+      padding-bottom: 8px !important;
     }
+
+    .itemName.hasNote::after {
+      content: "" !important;
+      position: absolute !important;
+      left: 8px !important;
+      right: 8px !important;
+      bottom: 3px !important;
+      height: 2px !important;
+      border-radius: 999px !important;
+      background: rgba(17, 24, 39, .70) !important;
+      pointer-events: none !important;
+    }
+
+    @media (min-width: 780px) {
+      .itemName.hasNote {
+        padding-bottom: 10px !important;
+      }
+
+      .itemName.hasNote::after {
+        left: 14px !important;
+        right: 14px !important;
+        bottom: 4px !important;
+        height: 2px !important;
+      }
+    }
+
 
     button,
     .checkCell,
@@ -4582,7 +4598,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_8_ADD_ITEM_ID_FIX";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_9_NOTE_UNDERLINE_FIX";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
