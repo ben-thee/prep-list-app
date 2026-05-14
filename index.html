@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_4_SPLASH_STABLE_B">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_7_REMOVE_ALL_DOTS">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -94,19 +94,7 @@
       font-size: 12px; font-weight: 900; line-height: 1.05;
       cursor: pointer; word-break: break-word; min-width: 0;
     }
-    .itemDot {
-      display: inline-block;
-      font-size: 14px;
-      margin-left: 4px;
-      line-height: 1;
-      font-weight: 900;
-    }
-    .itemDot.recipeDot {
-      color: #16a34a;
-    }
-    .itemDot.photoDot {
-      color: #dc2626;
-    }
+
     .colorCell {
       display: flex; align-items: center; justify-content: flex-end;
       min-height: 31px; padding: 2px 5px 2px 2px;
@@ -404,7 +392,7 @@
       .row { grid-template-columns: 58px 1fr 106px; min-height: 40px; }
       .checkCell, .colorCell { min-height: 40px; padding: 4px; }
       .itemName { font-size: 20px; padding: 4px 14px; line-height: 1.1; }
-      .itemDot { font-size: 20px; margin-left: 8px; }
+
       .photoModalTitle { font-size: 26px; }
       .colorWheelSelect { width: 24px; height: 24px; min-width: 24px; min-height: 24px; }
       .colorCell { justify-content: flex-end; padding-right: 12px; }
@@ -3113,10 +3101,8 @@
 
 
     /* ===== ITEM NAME WIDTH / DOTS OFF / STAR RIGHT ===== */
-    .itemDot.recipeDot,
-    .itemDot.photoDot {
-      display: none !important;
-    }
+    .itemDot.,
+
 
     .row {
       background: #ffffff !important;
@@ -3245,10 +3231,8 @@
 
 
     /* ===== WHOLE ROW PILL GREY + COLOUR OVERRIDE + NO TEXT CLIP ===== */
-    .itemDot.recipeDot,
-    .itemDot.photoDot {
-      display: none !important;
-    }
+    .itemDot.,
+
 
     /*
       Grey is now the WHOLE item pill:
@@ -4253,6 +4237,112 @@
       -webkit-backface-visibility: hidden !important;
     }
 
+
+    /* ===== V18.5 NOTE UNDERLINE + TAP EFFECTS ===== */
+    .itemName.hasNote .itemLabelText {
+      text-decoration-line: underline !important;
+      text-decoration-thickness: 2px !important;
+      text-decoration-color: rgba(17, 24, 39, .72) !important;
+      text-underline-offset: 4px !important;
+      text-decoration-skip-ink: auto !important;
+    }
+
+    button,
+    .checkCell,
+    .itemName,
+    .homeOpenPageBtn,
+    .homeNameBtn,
+    .homePinBtn,
+    .homeRenameBtn,
+    .homeAddSubBtn,
+    .homeDeleteCategoryBtn,
+    .homeDeleteSubpageBtn,
+    .titleBackBtn,
+    .titleEditBtn,
+    .searchClearBtn,
+    .colorWheelSelect,
+    .orderQtyInput,
+    .closeBtn,
+    .modalActionBtn,
+    .photoBtn,
+    .photoDangerBtn,
+    .popupAddBtn {
+      transition:
+        transform .12s cubic-bezier(.2,.85,.2,1),
+        filter .12s ease,
+        opacity .12s ease,
+        box-shadow .12s ease,
+        background-color .12s ease !important;
+      touch-action: manipulation;
+    }
+
+    button:active,
+    .homeOpenPageBtn:active,
+    .homeNameBtn:active,
+    .homePinBtn:active,
+    .homeRenameBtn:active,
+    .homeAddSubBtn:active,
+    .homeDeleteCategoryBtn:active,
+    .homeDeleteSubpageBtn:active,
+    .titleBackBtn:active,
+    .titleEditBtn:active,
+    .searchClearBtn:active,
+    .closeBtn:active,
+    .modalActionBtn:active,
+    .photoBtn:active,
+    .photoDangerBtn:active,
+    .popupAddBtn:active {
+      transform: translateY(1px) scale(.955) !important;
+      filter: brightness(.94) saturate(.98) !important;
+      box-shadow: 0 1px 3px rgba(17,24,39,.08) !important;
+    }
+
+    .checkCell:active .customCheck {
+      transform: scale(.86) !important;
+      box-shadow: 0 0 0 5px rgba(220,38,38,.08) !important;
+      background: #fff5f5 !important;
+    }
+
+    .itemName:active {
+      transform: translateY(1px) scale(.992) !important;
+      filter: brightness(.96) !important;
+      background: rgba(17,24,39,.035) !important;
+      border-radius: 18px !important;
+    }
+
+    .colorWheelSelect:active {
+      transform: translateX(2px) scale(.82) !important;
+      filter: brightness(.96) saturate(1.1) !important;
+    }
+
+    .orderQtyInput:focus {
+      transform: scale(1.035) !important;
+      box-shadow: 0 0 0 4px rgba(17,24,39,.08) !important;
+      border-color: #9ca3af !important;
+    }
+
+    .trashDeleteBtn:active,
+    .homeDeleteCategoryBtn:active,
+    .homeDeleteSubpageBtn:active,
+    .photoDangerBtn:active {
+      transform: translateY(1px) scale(.92) !important;
+      filter: brightness(.92) saturate(1.08) !important;
+      box-shadow: 0 0 0 5px rgba(220,38,38,.10) !important;
+    }
+
+    .pickupSectionBtn:active,
+    .resetQtySectionBtn:active,
+    .sectionEyeBtn:active {
+      transform: translateY(1px) scale(.90) !important;
+      filter: brightness(.94) !important;
+    }
+
+    @media (min-width: 780px) {
+      .colorWheelSelect:active {
+        transform: translateX(4px) scale(.84) !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -4492,7 +4582,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_4_SPLASH_STABLE_B";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_7_REMOVE_ALL_DOTS";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -5649,8 +5739,7 @@
       list.forEach(item => {
         const checkedClass = item.checked ? "checked" : "";
         const rowColor = item.color && item.color !== "none" ? `row-${item.color}` : "";
-        const hasRecipe = String(item.recipe || item.note || "").trim() ? "hasRecipe" : "";
-        const hasPhoto = String(item.photoData || "").trim() ? "hasPhoto" : "";
+        const hasNote = String(item.recipe || item.note || "").trim() ? "hasNote" : "";
         const safeId = escapeAttr(item.id);
         const safeName = escapeAttr(item.item);
         const qtyValue = escapeAttr(item.orderQty || "");
@@ -5673,10 +5762,8 @@
         html += `
           <div class="row ${rowColor} ${orderOn ? "row-order" : ""}" data-row-id="${safeId}">
             <div class="checkCell" onclick="toggleCheck('${safeId}')"><div class="customCheck ${checkedClass}">✓</div></div>
-            <div class="itemName" onclick="openRecipeModal('${safeId}')">
+            <div class="itemName ${hasNote ? 'hasNote' : ''}" onclick="openRecipeModal('${safeId}')" title="${hasNote ? 'Has note' : 'Open note'}">
               <span class="itemLabelText">${escapeHtml(item.item)}</span>
-              ${hasRecipe ? '<span class="itemDot recipeDot">•</span>' : ''}
-              ${hasPhoto ? '<span class="itemDot photoDot">•</span>' : ''}
             </div>
             ${qtyInput}
             <div class="colorCell">${rightControl}</div>
