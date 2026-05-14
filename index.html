@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_7_REMOVE_ALL_DOTS">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_8_ADD_ITEM_ID_FIX">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4582,7 +4582,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_7_REMOVE_ALL_DOTS";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_8_ADD_ITEM_ID_FIX";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -6656,15 +6656,30 @@
     async function addItemCore(section, itemName, fromPopup) {
       section = normalizeSectionName(section);
       itemName = String(itemName || "").trim();
+      const pageId = currentPageId || DEFAULT_PAGE_ID;
+
       if (!section) { setStatus("Select a section first"); return; }
       if (!itemName) { setStatus("Enter an item name first"); return; }
-      const id = makeId(section, itemName);
-      if (items.some(x => x.id === id)) {
-        setStatus("Item already exists ERROR");
+
+      const normalizedNewName = itemName.toLowerCase().replace(/\s+/g, " ").trim();
+      const duplicateSamePageSection = items.some(x =>
+        (x.pageId || DEFAULT_PAGE_ID) === pageId &&
+        normalizeSectionName(x.section) === section &&
+        String(x.item || "").toLowerCase().replace(/\s+/g, " ").trim() === normalizedNewName
+      );
+
+      if (duplicateSamePageSection) {
+        setStatus(`Item already exists in ${section}: ${itemName}`);
         return;
       }
+
+      let id = makeId(section, itemName, pageId);
+      if (items.some(x => x.id === id)) {
+        id = `${id}-${Date.now().toString(36).slice(-5)}`;
+      }
+
       setSavingState(true);
-      setStatus(navigator.onLine ? "Adding item..." : "Offline adding item locally...");
+      setStatus(navigator.onLine ? "Adding item..." : "Offline - item not added");
       try {
         await createItemOfflineSafe(id, {
           id,
@@ -6678,14 +6693,17 @@
           pinned: false,
           pinnedAt: 0,
           sort: 9999,
-          pageId: currentPageId || DEFAULT_PAGE_ID
+          pageId
         });
         const popupInput = document.getElementById("popupNewItem");
         const inlineInput = document.getElementById("newItem");
         if (popupInput) popupInput.value = "";
         if (inlineInput) inlineInput.value = "";
         if (fromPopup) closeAddModal();
-        setStatus(navigator.onLine ? "Added OK" : "Added offline - will sync later");
+        setStatus("Added OK / real-time sync");
+      } catch (error) {
+        console.error("Add item failed", error);
+        setStatus("Add item failed - check duplicate item / Firestore");
       } finally {
         setSavingState(false);
       }
@@ -6769,10 +6787,14 @@
       const itemName = document.getElementById("newItem").value.trim();
       await addItemCore(section, itemName, false);
     };
-    function makeId(section, itemName) {
+    function makeId(section, itemName, pageId = currentPageId || DEFAULT_PAGE_ID) {
       const slug = String(itemName || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
       const sec = String(section || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-      return sec + "-" + slug;
+      const page = String(pageId || DEFAULT_PAGE_ID).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      const finalSlug = slug || "item";
+      const finalSec = sec || "section";
+      const finalPage = page || DEFAULT_PAGE_ID;
+      return `${finalPage}-${finalSec}-${finalSlug}`;
     }
     function escapeHtml(str) {
       return String(str || "")
