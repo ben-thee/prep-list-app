@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_3_STARTUP_FIX">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_4_SPLASH_STABLE_B">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4216,6 +4216,43 @@
 
     /* ===== HOME CONFIG CLOUD SYNC FIX ===== */
 
+
+    /* ===== V18.4 SPLASH B STABLE FIRST FRAME ===== */
+    .splashStack {
+      position: fixed !important;
+      left: 50% !important;
+      top: 50% !important;
+      transform: translate3d(-50%, -50%, 0) !important;
+      -webkit-transform: translate3d(-50%, -50%, 0) !important;
+      will-change: opacity !important;
+      contain: layout paint !important;
+      backface-visibility: hidden !important;
+      -webkit-backface-visibility: hidden !important;
+    }
+
+    .splashBLogo {
+      width: min(44vw, 230px) !important;
+      height: auto !important;
+      display: block !important;
+      opacity: 1 !important;
+      transform: translate3d(0, 0, 0) scale(1) !important;
+      -webkit-transform: translate3d(0, 0, 0) scale(1) !important;
+      filter: drop-shadow(0 6px 18px rgba(17,24,39,.08)) !important;
+      animation: none !important;
+      will-change: auto !important;
+      object-fit: contain !important;
+      object-position: center center !important;
+      backface-visibility: hidden !important;
+      -webkit-backface-visibility: hidden !important;
+    }
+
+    .splashSideReveal {
+      transform: translate3d(0, -2px, 0) !important;
+      -webkit-transform: translate3d(0, -2px, 0) !important;
+      backface-visibility: hidden !important;
+      -webkit-backface-visibility: hidden !important;
+    }
+
   </style>
 </head>
 
@@ -4455,7 +4492,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_3_STARTUP_FIX";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_4_SPLASH_STABLE_B";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
