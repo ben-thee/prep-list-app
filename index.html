@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_18_REPLACE_LOOP_LOGO_NO_BG">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_21_SUBPAGE_HOME_LOGO">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4464,10 +4464,30 @@
     }
 
 
-    /* ===== V18.18 VIDEO NO BG SAFETY ===== */
-    .subpageVideoLogo {
+    /* ===== V18.21 SUBPAGE HOME LOGO ===== */
+    .subpageHomeLogo {
+      width: min(30vw, 92px) !important;
+      height: 46px !important;
+      display: block !important;
+      object-fit: contain !important;
+      object-position: center center !important;
+      margin: 0 auto !important;
+      border: 0 !important;
+      outline: 0 !important;
       background: transparent !important;
-      mix-blend-mode: normal !important;
+      box-shadow: none !important;
+      pointer-events: none !important;
+      transform: translateZ(0) !important;
+      -webkit-transform: translateZ(0) !important;
+      backface-visibility: hidden !important;
+      -webkit-backface-visibility: hidden !important;
+    }
+
+    @media (min-width: 780px) {
+      .subpageHomeLogo {
+        width: 104px !important;
+        height: 52px !important;
+      }
     }
 
   </style>
@@ -4497,7 +4517,7 @@
     <div id="appView" class="appView">
     <div class="titleBar">
       <button id="homeBackBtn" class="titleBackBtn" onclick="showHome()" aria-label="Back home" title="Back home">‹</button>
-      <video class="subpageVideoLogo" id="activePageTitleVideo" src="subpage-logo-loop-nobg.mp4?v=18.18" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Subpage logo"></video>
+      <img class="subpageHomeLogo" id="activePageTitleImage" src="icon-512.png" alt="Prep List logo">
       <button id="editModeBtn" class="titleEditBtn" onclick="toggleEditMode()" aria-label="Edit mode">✏️</button>
     </div>
 
@@ -4709,7 +4729,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_18_REPLACE_LOOP_LOGO_NO_BG";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_21_SUBPAGE_HOME_LOGO";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -5240,7 +5260,7 @@
               document.body.classList.remove("app-mode");
             }
 
-            keepSubpageLogoVideoPlaying();
+            keepSubpageLogoVisible();
 
             updateSectionDropdown();
             render();
@@ -5355,7 +5375,7 @@
         appView.classList.add("subpageFadeIn");
       }
 
-      keepSubpageLogoVideoPlaying();
+      keepSubpageLogoVisible();
       updateSectionDropdown();
       render();
     };
@@ -5517,7 +5537,7 @@
       await pushHomeConfigToCloud(latest, "rename-subpage");
 
       if (currentPageId === pageId) {
-        keepSubpageLogoVideoPlaying();
+        keepSubpageLogoVisible();
       }
 
       setStatus("Subpage renamed and synced OK: " + name);
@@ -5818,19 +5838,14 @@
           <div class="rightCol">${rightHtml}</div>
         </div>
         ${fullHtml ? `<div class="fullSections">${fullHtml}</div>` : ""}`;
-      keepSubpageLogoVideoPlaying();
+      keepSubpageLogoVisible();
+    }
+    function keepSubpageLogoVisible() {
+      const image = document.getElementById("activePageTitleImage");
+      if (!image) return;
+      image.style.display = "block";
     }
 
-    function keepSubpageLogoVideoPlaying() {
-      const video = document.getElementById("activePageTitleVideo");
-      if (!video) return;
-      video.muted = true;
-      video.loop = true;
-      video.playsInline = true;
-      video.setAttribute("playsinline", "");
-      video.setAttribute("webkit-playsinline", "");
-      video.play().catch(() => {});
-    }
 
     window.handleSearchInput = function(value) {
       searchQuery = value || "";
