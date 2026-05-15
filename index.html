@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_9_NOTE_UNDERLINE_FIX">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_10_REMOVE_NOTE_UNDERLINE">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4231,35 +4231,11 @@
       -webkit-backface-visibility: hidden !important;
     }
     /* ===== V18.5 TAP EFFECTS ===== */
-    /* ===== V18.9 NOTE UNDERLINE FIX ===== */
-    .itemName.hasNote {
-      position: relative !important;
-      padding-bottom: 8px !important;
-    }
 
-    .itemName.hasNote::after {
-      content: "" !important;
-      position: absolute !important;
-      left: 8px !important;
-      right: 8px !important;
-      bottom: 3px !important;
-      height: 2px !important;
-      border-radius: 999px !important;
-      background: rgba(17, 24, 39, .70) !important;
-      pointer-events: none !important;
-    }
 
     @media (min-width: 780px) {
-      .itemName.hasNote {
-        padding-bottom: 10px !important;
-      }
 
-      .itemName.hasNote::after {
-        left: 14px !important;
-        right: 14px !important;
-        bottom: 4px !important;
-        height: 2px !important;
-      }
+
     }
 
 
@@ -4598,7 +4574,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_9_NOTE_UNDERLINE_FIX";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_10_REMOVE_NOTE_UNDERLINE";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -5755,7 +5731,6 @@
       list.forEach(item => {
         const checkedClass = item.checked ? "checked" : "";
         const rowColor = item.color && item.color !== "none" ? `row-${item.color}` : "";
-        const hasNote = String(item.recipe || item.note || "").trim() ? "hasNote" : "";
         const safeId = escapeAttr(item.id);
         const safeName = escapeAttr(item.item);
         const qtyValue = escapeAttr(item.orderQty || "");
@@ -5778,7 +5753,7 @@
         html += `
           <div class="row ${rowColor} ${orderOn ? "row-order" : ""}" data-row-id="${safeId}">
             <div class="checkCell" onclick="toggleCheck('${safeId}')"><div class="customCheck ${checkedClass}">✓</div></div>
-            <div class="itemName ${hasNote ? 'hasNote' : ''}" onclick="openRecipeModal('${safeId}')" title="${hasNote ? 'Has note' : 'Open note'}">
+            <div class="itemName" onclick="openRecipeModal('${safeId}')" title="Open note">
               <span class="itemLabelText">${escapeHtml(item.item)}</span>
             </div>
             ${qtyInput}
