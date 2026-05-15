@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_16_SUBPAGE_WHITE_BG">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_18_REPLACE_LOOP_LOGO_NO_BG">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4437,6 +4437,39 @@
       background: #ffffff !important;
     }
 
+
+    /* ===== V18.17 SHOW EMPTY SECTIONS ===== */
+    .emptySectionMsg {
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 4px 2px 2px;
+      padding: 9px 10px;
+      border-radius: 999px;
+      border: 1.2px dashed #d1d5db;
+      background: #ffffff;
+      color: #9ca3af;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .01em;
+    }
+
+    @media (min-width: 780px) {
+      .emptySectionMsg {
+        min-height: 44px;
+        font-size: 15px;
+        margin: 6px 4px 3px;
+      }
+    }
+
+
+    /* ===== V18.18 VIDEO NO BG SAFETY ===== */
+    .subpageVideoLogo {
+      background: transparent !important;
+      mix-blend-mode: normal !important;
+    }
+
   </style>
 </head>
 
@@ -4464,7 +4497,7 @@
     <div id="appView" class="appView">
     <div class="titleBar">
       <button id="homeBackBtn" class="titleBackBtn" onclick="showHome()" aria-label="Back home" title="Back home">‹</button>
-      <video class="subpageVideoLogo" id="activePageTitleVideo" src="subpage-logo-loop.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Subpage logo"></video>
+      <video class="subpageVideoLogo" id="activePageTitleVideo" src="subpage-logo-loop-nobg.mp4?v=18.18" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Subpage logo"></video>
       <button id="editModeBtn" class="titleEditBtn" onclick="toggleEditMode()" aria-label="Edit mode">✏️</button>
     </div>
 
@@ -4676,7 +4709,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_16_SUBPAGE_WHITE_BG";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_18_REPLACE_LOOP_LOGO_NO_BG";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -5747,7 +5780,8 @@
     function render() {
       const content = document.getElementById("content");
       const pageItems = getCurrentPageItems();
-      if (!pageItems.length && !getStoredCustomSections().length) { content.innerHTML = `<div class="loading">No items</div>`; return; }
+      // V18.17: Do not blank the page when a subpage has no items.
+      // Known sections are still shown with "No item yet".
 
       const q = String(searchQuery || "").trim().toLowerCase();
       const visibleItems = q
@@ -5822,7 +5856,7 @@
       const forceShow = !!options.forceShow;
       const collapsed = isSectionCollapsed(title) && !String(searchQuery || "").trim();
 
-      if (!list.length && !orderOn && !forceShow) return "";
+      // V18.17: Always show sections, even when empty.
 
       const safeTitle = escapeAttr(title);
       let html = `
@@ -5841,6 +5875,10 @@
             </span>
           </div>
           <div class="sectionRows ${collapsed ? "hidden" : ""}">`;
+      if (!list.length) {
+        html += `<div class="emptySectionMsg">No item yet</div>`;
+      }
+
       list.forEach(item => {
         const checkedClass = item.checked ? "checked" : "";
         const rowColor = item.color && item.color !== "none" ? `row-${item.color}` : "";
