@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_15_SUBPAGE_LOOP_LOGO_VIDEO">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_16_SUBPAGE_WHITE_BG">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4408,6 +4408,35 @@
       }
     }
 
+
+    /* ===== V18.16 SUBPAGE WHITE BACKGROUND ===== */
+    body.app-mode,
+    body.app-mode html {
+      background: #ffffff !important;
+    }
+
+    body.app-mode .page,
+    body.app-mode #appView,
+    body.app-mode .appView,
+    body.app-mode .titleBar,
+    body.app-mode .searchPickupBar,
+    body.app-mode #content {
+      background: #ffffff !important;
+      background-image: none !important;
+    }
+
+    body.app-mode .layout,
+    body.app-mode .leftCol,
+    body.app-mode .rightCol,
+    body.app-mode .fullSections {
+      background: #ffffff !important;
+      background-image: none !important;
+    }
+
+    body.app-mode .subpageVideoLogo {
+      background: #ffffff !important;
+    }
+
   </style>
 </head>
 
@@ -4647,7 +4676,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_15_SUBPAGE_LOOP_LOGO_VIDEO";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_16_SUBPAGE_WHITE_BG";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
