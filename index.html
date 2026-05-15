@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_11_RECIPE_PILL_BG">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_13_INLINE_RECIPE_DOT">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4336,18 +4336,17 @@
     }
 
 
-    /* ===== V18.11 RECIPE / NOTE SUBTLE PILL BACKGROUND ===== */
-    .itemName.hasRecipeBg {
-      background: #e6e8ec !important;
-      box-shadow: inset 0 0 0 1px rgba(156, 163, 175, .34) !important;
-    }
 
-    .row.row-red .itemName.hasRecipeBg,
-    .row.row-green .itemName.hasRecipeBg,
-    .row.row-yellow .itemName.hasRecipeBg,
-    .row.row-blue .itemName.hasRecipeBg {
-      background: rgba(255, 255, 255, .38) !important;
-      box-shadow: inset 0 0 0 1px rgba(17, 24, 39, .09) !important;
+    /* ===== V18.13 INLINE RECIPE DOT ===== */
+    .itemLabelText.hasRecipeDot::after {
+      content: "●" !important;
+      display: inline !important;
+      margin-left: 2px !important;
+      color: #16a34a !important;
+      font-size: .58em !important;
+      line-height: 1 !important;
+      vertical-align: .18em !important;
+      font-weight: 950 !important;
     }
 
   </style>
@@ -4589,7 +4588,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_11_RECIPE_PILL_BG";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_13_INLINE_RECIPE_DOT";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -5746,7 +5745,7 @@
       list.forEach(item => {
         const checkedClass = item.checked ? "checked" : "";
         const rowColor = item.color && item.color !== "none" ? `row-${item.color}` : "";
-        const hasRecipeBg = String(item.recipe || item.note || "").trim() ? "hasRecipeBg" : "";
+        const hasRecipeDot = String(item.recipe || item.note || "").trim() ? "hasRecipeDot" : "";
         const safeId = escapeAttr(item.id);
         const safeName = escapeAttr(item.item);
         const qtyValue = escapeAttr(item.orderQty || "");
@@ -5769,8 +5768,8 @@
         html += `
           <div class="row ${rowColor} ${orderOn ? "row-order" : ""}" data-row-id="${safeId}">
             <div class="checkCell" onclick="toggleCheck('${safeId}')"><div class="customCheck ${checkedClass}">✓</div></div>
-            <div class="itemName ${hasRecipeBg}" onclick="openRecipeModal('${safeId}')" title="Open note">
-              <span class="itemLabelText">${escapeHtml(item.item)}</span>
+            <div class="itemName" onclick="openRecipeModal('${safeId}')" title="Open note">
+              <span class="itemLabelText ${hasRecipeDot}">${escapeHtml(item.item)}</span>
             </div>
             ${qtyInput}
             <div class="colorCell">${rightControl}</div>
