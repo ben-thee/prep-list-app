@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_14_EDIT_SECTION_LAYOUT">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_15_SUBPAGE_LOOP_LOGO_VIDEO">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4377,6 +4377,37 @@
       filter: brightness(.94) !important;
     }
 
+
+    /* ===== V18.15 SUBPAGE LOOP VIDEO LOGO ===== */
+    .subpageVideoLogo {
+      width: min(40vw, 132px) !important;
+      height: 46px !important;
+      display: block !important;
+      object-fit: contain !important;
+      object-position: center center !important;
+      border: 0 !important;
+      outline: 0 !important;
+      background: transparent !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      pointer-events: none !important;
+    }
+
+    .titleBar .subpageVideoLogo {
+      margin: 0 auto !important;
+      transform: translateZ(0) !important;
+      -webkit-transform: translateZ(0) !important;
+      backface-visibility: hidden !important;
+      -webkit-backface-visibility: hidden !important;
+    }
+
+    @media (min-width: 780px) {
+      .subpageVideoLogo {
+        width: 154px !important;
+        height: 54px !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -4404,7 +4435,7 @@
     <div id="appView" class="appView">
     <div class="titleBar">
       <button id="homeBackBtn" class="titleBackBtn" onclick="showHome()" aria-label="Back home" title="Back home">‹</button>
-      <div id="activePageTitle" class="title">PREP LIST</div>
+      <video class="subpageVideoLogo" id="activePageTitleVideo" src="subpage-logo-loop.mp4" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Subpage logo"></video>
       <button id="editModeBtn" class="titleEditBtn" onclick="toggleEditMode()" aria-label="Edit mode">✏️</button>
     </div>
 
@@ -4616,7 +4647,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_14_EDIT_SECTION_LAYOUT";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_15_SUBPAGE_LOOP_LOGO_VIDEO";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -5147,8 +5178,7 @@
               document.body.classList.remove("app-mode");
             }
 
-            const title = document.getElementById("activePageTitle");
-            if (title) title.textContent = getActivePageName().toUpperCase();
+            keepSubpageLogoVideoPlaying();
 
             updateSectionDropdown();
             render();
@@ -5263,8 +5293,7 @@
         appView.classList.add("subpageFadeIn");
       }
 
-      const title = document.getElementById("activePageTitle");
-      if (title) title.textContent = getActivePageName().toUpperCase();
+      keepSubpageLogoVideoPlaying();
       updateSectionDropdown();
       render();
     };
@@ -5426,8 +5455,7 @@
       await pushHomeConfigToCloud(latest, "rename-subpage");
 
       if (currentPageId === pageId) {
-        const title = document.getElementById("activePageTitle");
-        if (title) title.textContent = name.toUpperCase();
+        keepSubpageLogoVideoPlaying();
       }
 
       setStatus("Subpage renamed and synced OK: " + name);
@@ -5727,7 +5755,20 @@
           <div class="rightCol">${rightHtml}</div>
         </div>
         ${fullHtml ? `<div class="fullSections">${fullHtml}</div>` : ""}`;
+      keepSubpageLogoVideoPlaying();
     }
+
+    function keepSubpageLogoVideoPlaying() {
+      const video = document.getElementById("activePageTitleVideo");
+      if (!video) return;
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.setAttribute("playsinline", "");
+      video.setAttribute("webkit-playsinline", "");
+      video.play().catch(() => {});
+    }
+
     window.handleSearchInput = function(value) {
       searchQuery = value || "";
       const clearBtn = document.getElementById("searchClearBtn");
