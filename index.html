@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_21_SUBPAGE_HOME_LOGO">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_22_QTY_FIRESTORE_STABLE">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4729,7 +4729,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_21_SUBPAGE_HOME_LOGO";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_22_QTY_FIRESTORE_STABLE";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -4749,7 +4749,7 @@
           "prep_home_open_v1",
           "prep_section_layout_v1",
           "prep_section_collapsed_v1",
-          "prep_section_order_config_v1"
+          
         ].forEach(key => localStorage.removeItem(key));
 
         Object.keys(localStorage).forEach(key => {
@@ -4931,6 +4931,9 @@
     let isOffline = !navigator.onLine;
     const PENDING_WRITES_KEY = "prep_pending_writes_v2";
     const SECTION_ORDER_CONFIG_KEY = "prep_section_order_config_v1";
+    const SECTION_SETTINGS_DOC_ID = "__sectionSettings";
+    const sectionSettingsRef = doc(db, "prepItems", SECTION_SETTINGS_DOC_ID);
+    let sectionOrderConfigCache = null;
 
     function getPendingWrites() {
       return [];
@@ -4949,23 +4952,76 @@
       updateOfflineBadge();
     }
 
+    function sectionSettingKey(section, pageId = currentPageId || DEFAULT_PAGE_ID) {
+      return `${pageId}::${normalizeSectionName(section)}`;
+    }
+
     function getSectionOrderConfig() {
+      if (sectionOrderConfigCache && typeof sectionOrderConfigCache === "object") return sectionOrderConfigCache;
+
       try {
         const raw = localStorage.getItem(SECTION_ORDER_CONFIG_KEY);
         const parsed = raw ? JSON.parse(raw) : {};
-        return parsed && typeof parsed === "object" ? parsed : {};
+        sectionOrderConfigCache = parsed && typeof parsed === "object" ? parsed : {};
+        return sectionOrderConfigCache;
       } catch {
-        return {};
+        sectionOrderConfigCache = {};
+        return sectionOrderConfigCache;
       }
     }
 
-    function saveSectionOrderConfig(config) {
-      localStorage.setItem(SECTION_ORDER_CONFIG_KEY, JSON.stringify(config || {}));
+    async function saveSectionOrderConfig(config) {
+      const fixed = config && typeof config === "object" ? config : {};
+      sectionOrderConfigCache = fixed;
+
+      try {
+        localStorage.setItem(SECTION_ORDER_CONFIG_KEY, JSON.stringify(fixed));
+      } catch {}
+
+      if (!navigator.onLine) {
+        setStatus("Offline - QTY mode not synced. Connect internet and try again.");
+        return;
+      }
+
+      try {
+        await setDoc(sectionSettingsRef, {
+          id: SECTION_SETTINGS_DOC_ID,
+          type: "sectionSettings",
+          sectionOrderMode: fixed,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      } catch (error) {
+        console.error("QTY mode Firestore save failed", error);
+        setStatus("QTY mode sync failed - check Firestore");
+      }
     }
 
     function isOrderSection(section) {
       const config = getSectionOrderConfig();
-      return !!config[normalizeSectionName(section)];
+      const clean = normalizeSectionName(section);
+      const pageKey = sectionSettingKey(clean);
+      return !!config[pageKey] || !!config[clean];
+    }
+
+    function loadSectionSettingsRealtime() {
+      onSnapshot(sectionSettingsRef, snapshot => {
+        if (!snapshot.exists()) return;
+
+        const data = snapshot.data() || {};
+        const remote = data.sectionOrderMode && typeof data.sectionOrderMode === "object"
+          ? data.sectionOrderMode
+          : {};
+
+        sectionOrderConfigCache = remote;
+        try {
+          localStorage.setItem(SECTION_ORDER_CONFIG_KEY, JSON.stringify(remote));
+        } catch {}
+
+        render();
+      }, error => {
+        console.error("Section settings realtime failed", error);
+        setStatus("QTY settings sync failed - check Firestore");
+      });
     }
 
     function updateOfflineBadge() {
@@ -4981,7 +5037,7 @@
     }
 
     async function savePatch(id, patch, options = {}) {
-      if (id === HOME_CONFIG_DOC_ID) return;
+      if (id === HOME_CONFIG_DOC_ID || id === SECTION_SETTINGS_DOC_ID) return;
       if (!navigator.onLine) {
         setStatus("Offline - change not saved. Connect internet and try again.");
         throw new Error("Offline item save blocked");
@@ -5023,7 +5079,7 @@
     }
 
     async function deleteItemOfflineSafe(id) {
-      if (id === HOME_CONFIG_DOC_ID) return;
+      if (id === HOME_CONFIG_DOC_ID || id === SECTION_SETTINGS_DOC_ID) return;
       if (!navigator.onLine) {
         setStatus("Offline - item not deleted. Connect internet and try again.");
         throw new Error("Offline item delete blocked");
@@ -5788,7 +5844,7 @@
       onSnapshot(prepRef, snapshot => {
         items = snapshot.docs
           .map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
-          .filter(item => item.id !== HOME_CONFIG_DOC_ID && item.type !== "homeConfig" && item.section !== "__meta");
+          .filter(item => item.id !== HOME_CONFIG_DOC_ID && item.id !== SECTION_SETTINGS_DOC_ID && item.type !== "homeConfig" && item.type !== "sectionSettings" && item.section !== "__meta");
         sortItemsLocal(); updateSectionDropdown(); renderHome(); render(); updateDeleteModeButton(); updateEditModeButton(); updateOfflineBadge();
         setStatus(navigator.onLine ? "Loaded OK / Firestore real-time sync" : "Offline - changes will not save");
       }, error => {
@@ -6156,22 +6212,29 @@
       if (id) commitOrderQty(id);
     }
 
-    window.toggleSectionOrderMode = function(section) {
+    window.toggleSectionOrderMode = async function(section) {
       if (!editMode) return;
+
       const clean = normalizeSectionName(section);
-      const config = getSectionOrderConfig();
-      config[clean] = !config[clean];
-      saveSectionOrderConfig(config);
+      const key = sectionSettingKey(clean);
+      const config = { ...getSectionOrderConfig() };
+      const nextValue = !isOrderSection(clean);
+
+      config[key] = nextValue;
+
+      // Remove old global section key to prevent random cross-page ON/OFF.
+      if (Object.prototype.hasOwnProperty.call(config, clean)) delete config[clean];
+
+      await saveSectionOrderConfig(config);
       render();
-      setStatus(config[clean] ? `Order number ON: ${clean}` : `Order number OFF: ${clean}`);
+      setStatus(`${clean} QTY ${nextValue ? "ON" : "OFF"} / synced`);
     };
     function getPickupLines(sectionFilter = "") {
-      const config = getSectionOrderConfig();
       return items
         .filter(item => {
           const section = normalizeSectionName(item.section);
           if (sectionFilter && section !== normalizeSectionName(sectionFilter)) return false;
-          if (!config[section]) return false;
+          if (!isOrderSection(section)) return false;
           return String(item.orderQty || "").trim();
         })
         .sort((a, b) => {
@@ -7057,6 +7120,7 @@
         clearHomeLocalStateForNewBuild();
         clearOldPWACaches();
         loadHomeConfigRealtime();
+        loadSectionSettingsRealtime();
         loadRealtime();
       } catch (error) {
         console.error("App start failed", error);
