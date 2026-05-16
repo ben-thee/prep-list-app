@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_25_REPLACED_SUBPAGE_LOOP_VIDEO">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_26_IPHONE_ROUNDED_SUBPAGE_LOGO_NO_SIDE_LINES">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4545,6 +4545,152 @@
       }
     }
 
+  
+/* ===== V18.26 SUBPAGE LOGO FINAL FIX: IPHONE-STYLE ROUNDED + NO SIDE LINES ===== */
+/* Crops the loop logo so the black side lines in the MP4 edge are hidden. */
+.titleBar {
+  position: relative !important;
+}
+
+.subpageLogoClip,
+.subpageLogoFrame {
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  min-height: 64px !important;
+  max-width: 64px !important;
+  max-height: 64px !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  border-radius: 18px !important;
+  clip-path: inset(0 round 18px) !important;
+  -webkit-clip-path: inset(0 round 18px) !important;
+  background: #ffffff !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+}
+
+.subpageVideoLogo,
+.subpageRoundedVideoLogo,
+.subpageHomeLogo,
+.titleBar .subpageVideoLogo,
+.titleBar .subpageRoundedVideoLogo,
+.titleBar .subpageHomeLogo {
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  min-height: 64px !important;
+  max-width: 64px !important;
+  max-height: 64px !important;
+  aspect-ratio: 1 / 1 !important;
+  display: block !important;
+  margin: 0 auto !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: #ffffff !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  clip-path: inset(0 round 18px) !important;
+  -webkit-clip-path: inset(0 round 18px) !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  pointer-events: none !important;
+  transform: scale(1.18) translateZ(0) !important;
+  -webkit-transform: scale(1.18) translateZ(0) !important;
+  transform-origin: center center !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+}
+
+.subpageLogoClip .subpageVideoLogo,
+.subpageLogoClip .subpageRoundedVideoLogo,
+.subpageLogoFrame .subpageVideoLogo,
+.subpageLogoFrame .subpageRoundedVideoLogo,
+.subpageLogoClip video,
+.subpageLogoFrame video,
+.subpageLogoClip img,
+.subpageLogoFrame img {
+  width: 78px !important;
+  height: 78px !important;
+  min-width: 78px !important;
+  min-height: 78px !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  border-radius: 0 !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+  background: #ffffff !important;
+}
+
+body.app-mode .titleBar {
+  min-height: 72px !important;
+  align-items: center !important;
+}
+
+@media (min-width: 780px) {
+  .subpageLogoClip,
+  .subpageLogoFrame {
+    width: 72px !important;
+    height: 72px !important;
+    min-width: 72px !important;
+    min-height: 72px !important;
+    max-width: 72px !important;
+    max-height: 72px !important;
+    border-radius: 20px !important;
+    clip-path: inset(0 round 20px) !important;
+    -webkit-clip-path: inset(0 round 20px) !important;
+  }
+
+  .subpageVideoLogo,
+  .subpageRoundedVideoLogo,
+  .subpageHomeLogo,
+  .titleBar .subpageVideoLogo,
+  .titleBar .subpageRoundedVideoLogo,
+  .titleBar .subpageHomeLogo {
+    width: 72px !important;
+    height: 72px !important;
+    min-width: 72px !important;
+    min-height: 72px !important;
+    max-width: 72px !important;
+    max-height: 72px !important;
+    border-radius: 20px !important;
+    clip-path: inset(0 round 20px) !important;
+    -webkit-clip-path: inset(0 round 20px) !important;
+  }
+
+  .subpageLogoClip .subpageVideoLogo,
+  .subpageLogoClip .subpageRoundedVideoLogo,
+  .subpageLogoFrame .subpageVideoLogo,
+  .subpageLogoFrame .subpageRoundedVideoLogo,
+  .subpageLogoClip video,
+  .subpageLogoFrame video,
+  .subpageLogoClip img,
+  .subpageLogoFrame img {
+    width: 88px !important;
+    height: 88px !important;
+    min-width: 88px !important;
+    min-height: 88px !important;
+  }
+
+  body.app-mode .titleBar {
+    min-height: 82px !important;
+  }
+}
+
   </style>
 </head>
 
@@ -4572,7 +4718,7 @@
     <div id="appView" class="appView">
     <div class="titleBar">
       <button id="homeBackBtn" class="titleBackBtn" onclick="showHome()" aria-label="Back home" title="Back home">‹</button>
-      <video class="subpageRoundedVideoLogo" id="activePageTitleVideo" src="subpage-logo-loop.mp4?v=18.23" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Subpage logo"></video>
+      <div class="subpageLogoClip"><video class="subpageRoundedVideoLogo" id="activePageTitleVideo" src="subpage-logo-loop.mp4?v=18.23" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Subpage logo"></video></div>
       <button id="editModeBtn" class="titleEditBtn" onclick="toggleEditMode()" aria-label="Edit mode">✏️</button>
     </div>
 
