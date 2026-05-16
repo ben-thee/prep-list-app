@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_27_BACKUP_RESTORE_JSON">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_28_NO_SEED_RECOVER_SUBPAGES_DELETE_EMPTY_SECTIONS">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4739,6 +4739,30 @@ body.edit-mode-active .backupRestoreBar {
   }
 }
 
+  
+/* ===== V18.28 DELETE EMPTY SECTION BUTTON ===== */
+.sectionDeleteEmptyBtn {
+  width: 21px !important;
+  min-width: 21px !important;
+  max-width: 21px !important;
+  height: 21px !important;
+  min-height: 21px !important;
+  max-height: 21px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  border: 1.5px solid #fecaca !important;
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+body.edit-mode-active .sectionDeleteEmptyBtn {
+  display: inline-flex !important;
+}
+
   </style>
 </head>
 
@@ -4983,7 +5007,7 @@ body.edit-mode-active .backupRestoreBar {
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_27_BACKUP_RESTORE_JSON";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_28_NO_SEED_RECOVER_SUBPAGES_DELETE_EMPTY_SECTIONS";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -5970,7 +5994,7 @@ body.edit-mode-active .backupRestoreBar {
 
     window.addEventListener("pointerdown", playStartupSoundOnce, { once: true });
 
-    const BASE_SECTIONS = ["Prep", "Sauce", "Bakery", "Cookie"];
+    const BASE_SECTIONS = []; // V18.28: no default seed sections on new subpages
     const CUSTOM_SECTIONS_KEY = "prep_custom_sections_v1";
     const SECTION_LAYOUT_KEY = "prep_section_layout_v1";
     const SECTION_COLLAPSED_KEY = "prep_section_collapsed_v1";
@@ -6023,10 +6047,125 @@ body.edit-mode-active .backupRestoreBar {
     function normalizeSectionName(value) {
       return String(value || "").trim().replace(/\s+/g, " ");
     }
+    
+    // ===== V18.28 RECOVER HIDDEN SUBPAGES FROM EXISTING ITEMS =====
+    function getKnownHomePageIds(config) {
+      const ids = new Set();
+      (config.categories || []).forEach(category => {
+        (category.subpages || []).forEach(page => {
+          if (page && page.id) ids.add(String(page.id));
+        });
+      });
+      return ids;
+    }
+
+    function inferPageNameFromPageId(pageId) {
+      const id = String(pageId || "").trim();
+      if (!id || id === DEFAULT_PAGE_ID) return "Prep List";
+      return id
+        .replace(/^page[-_]/i, "")
+        .replace(/^subpage[-_]/i, "")
+        .replace(/[-_]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .replace(/\b\w/g, c => c.toUpperCase()) || id;
+    }
+
+    async function recoverMissingSubpagesFromItems() {
+      try {
+        const latest = await getCloudHomeConfig();
+        const knownIds = getKnownHomePageIds(latest);
+        const pageIdsFromItems = Array.from(new Set(
+          (items || [])
+            .map(item => String(item.pageId || DEFAULT_PAGE_ID).trim())
+            .filter(Boolean)
+        ));
+
+        const missing = pageIdsFromItems.filter(pageId => !knownIds.has(pageId));
+        if (!missing.length) return false;
+
+        let category = (latest.categories || []).find(c => c && c.id === "recovered-subpages");
+        if (!category) {
+          category = {
+            id: "recovered-subpages",
+            name: "Recovered",
+            pinned: false,
+            subpages: []
+          };
+          latest.categories = latest.categories || [];
+          latest.categories.push(category);
+        }
+
+        category.subpages = category.subpages || [];
+        const existingInRecovered = new Set(category.subpages.map(p => p.id));
+
+        missing.forEach(pageId => {
+          if (!existingInRecovered.has(pageId)) {
+            category.subpages.push({
+              id: pageId,
+              name: inferPageNameFromPageId(pageId),
+              pinned: false
+            });
+          }
+        });
+
+        await pushHomeConfigToCloud(latest, "recover-missing-subpages-from-items");
+
+        const openConfig = getHomeOpenConfig();
+        openConfig[category.id] = true;
+        saveHomeOpenConfig(openConfig);
+
+        setStatus(`Recovered ${missing.length} hidden subpage(s)`);
+        return true;
+      } catch (error) {
+        console.warn("Recover missing subpages skipped", error);
+        return false;
+      }
+    }
+
     function getAllSections() {
       const fromItems = getCurrentPageItems().map(item => normalizeSectionName(item.section)).filter(Boolean);
-      return Array.from(new Set([...BASE_SECTIONS, ...getStoredCustomSections(), ...fromItems]));
+      return Array.from(new Set([...BASE_SECTIONS, ...getStoredCustomSections(), ...fromItems])).filter(Boolean);
     }
+    
+    // ===== V18.28 DELETE EMPTY SECTIONS SAFELY =====
+    window.deleteEmptySection = async function(section, btn) {
+      const sectionName = normalizeSectionName(section);
+      if (!sectionName) return;
+
+      const pageItems = getCurrentPageItems().filter(item => normalizeSectionName(item.section) === sectionName);
+      if (pageItems.length) {
+        alert(`Cannot delete "${sectionName}" because it still has ${pageItems.length} item(s).\n\nDelete or move the items first.`);
+        setStatus(`Section not deleted - ${sectionName} has items`);
+        return;
+      }
+
+      const ok = confirm(`Delete empty section "${sectionName}" from this subpage?\n\nNo list or recipe will be deleted.`);
+      if (!ok) {
+        setStatus("Delete section cancelled");
+        return;
+      }
+
+      const sections = getStoredCustomSections().filter(s => normalizeSectionName(s) !== sectionName);
+      saveCustomSections(sections);
+
+      const layout = getSectionLayoutConfig();
+      delete layout[sectionName];
+      saveSectionLayoutConfig(layout);
+
+      const collapsed = getSectionCollapsedConfig();
+      delete collapsed[sectionName];
+      saveSectionCollapsedConfig(collapsed);
+
+      const orderConfig = getSectionOrderConfig();
+      delete orderConfig[sectionSettingKey(sectionName)];
+      await saveSectionOrderConfig(orderConfig);
+
+      updateSectionDropdown();
+      render();
+      setStatus(`Deleted empty section: ${sectionName}`);
+    };
+
     function setStatus(text) { document.getElementById("status").textContent = text; }
     function setSavingState(value) {
       isSaving = value;
@@ -6260,7 +6399,11 @@ body.edit-mode-active .backupRestoreBar {
         items = snapshot.docs
           .map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
           .filter(item => item.id !== HOME_CONFIG_DOC_ID && item.id !== SECTION_SETTINGS_DOC_ID && item.type !== "homeConfig" && item.type !== "sectionSettings" && item.section !== "__meta");
-        sortItemsLocal(); updateSectionDropdown(); renderHome(); render(); updateDeleteModeButton(); updateEditModeButton(); updateOfflineBadge();
+        sortItemsLocal(); updateSectionDropdown();
+        recoverMissingSubpagesFromItems().then(recovered => {
+          if (!recovered) renderHome();
+        });
+        render(); updateDeleteModeButton(); updateEditModeButton(); updateOfflineBadge();
         setStatus(navigator.onLine ? "Loaded OK / Firestore real-time sync" : "Offline - changes will not save");
       }, error => {
         console.error(error);
@@ -7542,7 +7685,43 @@ body.edit-mode-active .backupRestoreBar {
         clearOldPWACaches();
         loadHomeConfigRealtime();
         loadSectionSettingsRealtime();
-        loadRealtime();
+        
+    // ===== V18.28 INJECT DELETE BUTTON FOR EMPTY CUSTOM SECTIONS =====
+    function injectEmptySectionDeleteButtons() {
+      try {
+        if (!editMode) return;
+        document.querySelectorAll(".box").forEach(box => {
+          const titleText = box.querySelector(".boxTitleText");
+          const title = box.querySelector(".boxTitle");
+          if (!titleText || !title) return;
+          const sectionName = normalizeSectionName(titleText.textContent);
+          if (!sectionName || title.querySelector(".sectionDeleteEmptyBtn")) return;
+          const hasItems = getCurrentPageItems().some(item => normalizeSectionName(item.section) === sectionName);
+          if (hasItems) return;
+
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "sectionDeleteEmptyBtn";
+          btn.textContent = "🗑️";
+          btn.title = "Delete empty section";
+          btn.onclick = function(event) {
+            event.stopPropagation();
+            deleteEmptySection(sectionName, btn);
+          };
+          title.appendChild(btn);
+        });
+      } catch (error) {
+        console.warn("Inject empty section delete buttons failed", error);
+      }
+    }
+
+    const originalRenderForEmptySectionDelete = render;
+    render = function() {
+      originalRenderForEmptySectionDelete();
+      injectEmptySectionDeleteButtons();
+    };
+
+    loadRealtime();
       } catch (error) {
         console.error("App start failed", error);
         document.body.classList.add("appReady");
