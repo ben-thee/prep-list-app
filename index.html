@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_38_MOVE_BUTTON_TITLE_ROW">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_39_NATIVE_RENDER_MOVE_SECTION">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -5507,6 +5507,113 @@ body.edit-mode-active .box.boxFull .sectionTools {
   }
 }
 
+  
+/* ===== V18.39 NATIVE RENDER MOVE SECTION BUTTON ===== */
+.nativeMoveSectionBtnV1839 {
+  width: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  border: 1.5px solid #c7cbd1 !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 6px rgba(17,24,39,.08) !important;
+  z-index: 99 !important;
+}
+
+body:not(.edit-mode-active) .nativeMoveSectionBtnV1839 {
+  display: none !important;
+}
+
+body.edit-mode-active .box .boxTitle,
+body.edit-mode-active .box.boxFull .boxTitle {
+  display: grid !important;
+  grid-template-columns: 36px minmax(0, 1fr) 24px !important;
+  grid-template-rows: auto auto !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  gap: 5px 6px !important;
+  min-height: 58px !important;
+  padding: 6px 8px !important;
+  overflow: visible !important;
+}
+
+body.edit-mode-active .box .nativeMoveSectionBtnV1839 {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  justify-self: start !important;
+  align-self: center !important;
+}
+
+body.edit-mode-active .box .boxTitleText,
+body.edit-mode-active .box.boxFull .boxTitleText {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  justify-self: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.edit-mode-active .box .sectionEyeBtn,
+body.edit-mode-active .box.boxFull .sectionEyeBtn {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  position: static !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+body.edit-mode-active .box .sectionTools,
+body.edit-mode-active .box.boxFull .sectionTools {
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: nowrap !important;
+  gap: 4px !important;
+  overflow: visible !important;
+}
+
+@media (max-width: 520px) {
+  .nativeMoveSectionBtnV1839 {
+    width: 30px !important;
+    min-width: 30px !important;
+    max-width: 30px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    max-height: 22px !important;
+    font-size: 14px !important;
+  }
+
+  body.edit-mode-active .box .boxTitle,
+  body.edit-mode-active .box.boxFull .boxTitle {
+    grid-template-columns: 32px minmax(0, 1fr) 22px !important;
+    gap: 4px 5px !important;
+    padding: 5px 6px !important;
+  }
+}
+
   </style>
 </head>
 
@@ -5751,7 +5858,7 @@ body.edit-mode-active .box.boxFull .sectionTools {
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_38_MOVE_BUTTON_TITLE_ROW";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_39_NATIVE_RENDER_MOVE_SECTION";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -7155,6 +7262,89 @@ body.edit-mode-active .box.boxFull .sectionTools {
         document.getElementById("content").innerHTML = `<div class="loading">Cannot connect to Firebase</div>`;
       });
     }
+    
+    // ===== V18.39 NATIVE RENDER MOVE SECTION LAYOUT =====
+    function nativeMoveSideKeyV1839() {
+      return `prep_section_side_v1_${currentPageId || DEFAULT_PAGE_ID}`;
+    }
+
+    function nativeMoveOrderKeyV1839() {
+      return `prep_section_side_order_v1_${currentPageId || DEFAULT_PAGE_ID}`;
+    }
+
+    function nativeReadStoreV1839(key) {
+      try {
+        const raw = localStorage.getItem(key);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function nativeWriteStoreV1839(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value || {}));
+      } catch {}
+    }
+
+    function nativeGetSectionSideV1839(section, index) {
+      const clean = normalizeSectionName(section);
+      const sideConfig = nativeReadStoreV1839(nativeMoveSideKeyV1839());
+      if (sideConfig[clean] === "left" || sideConfig[clean] === "right") return sideConfig[clean];
+      return index % 2 === 0 ? "left" : "right";
+    }
+
+    function nativeGetOrderedSectionsV1839(side, sections) {
+      const cleanSections = (sections || []).map(normalizeSectionName).filter(Boolean);
+      const orderConfig = nativeReadStoreV1839(nativeMoveOrderKeyV1839());
+      const saved = Array.isArray(orderConfig[side]) ? orderConfig[side].map(normalizeSectionName) : [];
+
+      const sideSections = cleanSections.filter((section, index) => nativeGetSectionSideV1839(section, index) === side);
+      const sideSet = new Set(sideSections);
+
+      const ordered = saved.filter(section => section && sideSet.has(section));
+      sideSections.forEach(section => {
+        if (!ordered.includes(section)) ordered.push(section);
+      });
+
+      return ordered;
+    }
+
+    function nativeSplitHalfSectionsV1839(halfSections) {
+      return {
+        left: nativeGetOrderedSectionsV1839("left", halfSections),
+        right: nativeGetOrderedSectionsV1839("right", halfSections)
+      };
+    }
+
+    window.nativeMoveSectionV1839 = function(sectionName) {
+      const clean = normalizeSectionName(sectionName);
+      if (!clean) return;
+
+      const halfSections = getAllSections().filter(section => !isFullSection(section));
+      const index = Math.max(0, halfSections.indexOf(clean));
+      const currentSide = nativeGetSectionSideV1839(clean, index);
+      const nextSide = currentSide === "right" ? "left" : "right";
+
+      const sideConfig = nativeReadStoreV1839(nativeMoveSideKeyV1839());
+      sideConfig[clean] = nextSide;
+      nativeWriteStoreV1839(nativeMoveSideKeyV1839(), sideConfig);
+
+      const orderConfig = nativeReadStoreV1839(nativeMoveOrderKeyV1839());
+      ["left", "right"].forEach(side => {
+        const arr = Array.isArray(orderConfig[side]) ? orderConfig[side] : [];
+        orderConfig[side] = arr.map(normalizeSectionName).filter(section => section && section !== clean);
+      });
+
+      orderConfig[nextSide] = Array.isArray(orderConfig[nextSide]) ? orderConfig[nextSide] : [];
+      orderConfig[nextSide].push(clean);
+      nativeWriteStoreV1839(nativeMoveOrderKeyV1839(), orderConfig);
+
+      render();
+      setStatus(`Moved "${clean}" to bottom of ${nextSide}`);
+    };
+
     function render() {
       const content = document.getElementById("content");
       const pageItems = getCurrentPageItems();
@@ -7184,9 +7374,9 @@ body.edit-mode-active .box.boxFull .sectionTools {
       const halfSections = sections.filter(section => !isFullSection(section));
       const fullSections = sections.filter(section => isFullSection(section));
 
-      const leftSection = halfSections[0] || "";
-      const leftHtml = leftSection ? renderBox(leftSection, groups[leftSection] || [], { layout: "half" }) : "";
-      const rightHtml = halfSections.slice(1).map(section => renderBox(section, groups[section] || [], { layout: "half" })).join("");
+      const splitHalfSections = nativeSplitHalfSectionsV1839(halfSections);
+      const leftHtml = splitHalfSections.left.map(section => renderBox(section, groups[section] || [], { layout: "half", side: "left" })).join("");
+      const rightHtml = splitHalfSections.right.map(section => renderBox(section, groups[section] || [], { layout: "half", side: "right" })).join("");
       const fullHtml = fullSections.map(section => renderBox(section, groups[section] || [], { layout: "full", forceShow: true })).join("");
 
       const emptySearch = q && !visibleItems.length ? `<div class="loading">No search result</div>` : "";
@@ -7241,6 +7431,7 @@ body.edit-mode-active .box.boxFull .sectionTools {
       let html = `
         <div class="box ${isFull ? "boxFull" : ""} ${collapsed ? "boxCollapsed" : ""}">
           <div class="boxTitle">
+            ${editMode && !isFull ? `<button class="nativeMoveSectionBtnV1839" onclick="nativeMoveSectionV1839('${safeTitle}'); event.stopPropagation();" aria-label="Move section" title="Move to bottom of other side">${options.side === "right" ? "⬅️" : "➡️"}</button>` : ""}
             <span class="boxTitleText">${escapeHtml(title)}</span>
             <button class="sectionEyeBtn ${collapsed ? "eyeClosed" : ""}" onclick="toggleSectionCollapse('${safeTitle}', this); event.stopPropagation();" aria-label="${collapsed ? "Show section" : "Hide section"}" title="${collapsed ? "Show section" : "Hide section"}">${collapsed ? "🔻" : "🔺"}</button>
             <span class="sectionTools ${orderOn ? "orderOn" : ""}">
