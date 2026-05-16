@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_32_EYE_RIGHT_TITLE_TOOLS_SECOND_ROW">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_33_STABLE_SPLASH_B_NO_JUMP">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -5092,6 +5092,85 @@ body.edit-mode-active .box.boxFull .sectionTools .sectionEyeBtn {
   }
 }
 
+  
+/* ===== V18.33 STABLE SPLASH B LOGO - NO JUMP ===== */
+.appSplash {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  display: block !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  contain: strict !important;
+}
+
+.splashStack {
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  width: min(44vw, 230px) !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: translate3d(-50%, -50%, 0) !important;
+  -webkit-transform: translate3d(-50%, -50%, 0) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  will-change: opacity !important;
+  contain: layout paint style !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+}
+
+.splashBLogo {
+  width: min(44vw, 230px) !important;
+  height: auto !important;
+  display: block !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  transform: translate3d(0, 0, 0) !important;
+  -webkit-transform: translate3d(0, 0, 0) !important;
+  animation: none !important;
+  transition: none !important;
+  will-change: auto !important;
+  filter: drop-shadow(0 6px 18px rgba(17,24,39,.08)) !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+}
+
+.splashSideReveal {
+  width: 89% !important;
+  align-self: center !important;
+  margin: 0 !important;
+  transform: translate3d(0, -2px, 0) !important;
+  -webkit-transform: translate3d(0, -2px, 0) !important;
+}
+
+@media (max-width: 520px) {
+  .splashStack {
+    width: min(54vw, 220px) !important;
+    transform: translate3d(-50%, -50%, 0) !important;
+    -webkit-transform: translate3d(-50%, -50%, 0) !important;
+  }
+
+  .splashBLogo {
+    width: min(54vw, 220px) !important;
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-transform: translate3d(0, 0, 0) !important;
+  }
+
+  .splashSideReveal {
+    width: 89% !important;
+  }
+}
+
   </style>
 </head>
 
@@ -5336,7 +5415,7 @@ body.edit-mode-active .box.boxFull .sectionTools .sectionEyeBtn {
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_32_EYE_RIGHT_TITLE_TOOLS_SECOND_ROW";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_33_STABLE_SPLASH_B_NO_JUMP";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
