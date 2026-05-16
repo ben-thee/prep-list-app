@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_33_STABLE_SPLASH_B_NO_JUMP">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_34_RESTORE_MOVE_SECTION_BOTTOM">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -5171,6 +5171,59 @@ body.edit-mode-active .box.boxFull .sectionTools .sectionEyeBtn {
   }
 }
 
+  
+/* ===== V18.34 RESTORE MOVE SECTION BUTTON + BOTTOM OF OPPOSITE SIDE ===== */
+body.edit-mode-active .sectionMoveSideBtn {
+  display: inline-flex !important;
+  width: 24px !important;
+  min-width: 24px !important;
+  max-width: 24px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  max-height: 22px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  border: 1.5px solid #c7cbd1 !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 6px rgba(17,24,39,.05) !important;
+  flex: 0 0 24px !important;
+  margin: 0 !important;
+}
+
+body:not(.edit-mode-active) .sectionMoveSideBtn {
+  display: none !important;
+}
+
+body.edit-mode-active .box .sectionTools,
+body.edit-mode-active .box.boxFull .sectionTools {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: nowrap !important;
+  gap: 4px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+@media (max-width: 520px) {
+  body.edit-mode-active .sectionMoveSideBtn {
+    width: 22px !important;
+    min-width: 22px !important;
+    max-width: 22px !important;
+    height: 20px !important;
+    min-height: 20px !important;
+    max-height: 20px !important;
+    font-size: 12px !important;
+    flex-basis: 22px !important;
+  }
+}
+
   </style>
 </head>
 
@@ -5415,7 +5468,7 @@ body.edit-mode-active .box.boxFull .sectionTools .sectionEyeBtn {
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_33_STABLE_SPLASH_B_NO_JUMP";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_34_RESTORE_MOVE_SECTION_BOTTOM";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -8265,6 +8318,179 @@ body.edit-mode-active .box.boxFull .sectionTools .sectionEyeBtn {
       moveSectionEyeButtonsToTitleRow();
       if (typeof applySectionSideLayoutBottomOrder === "function") applySectionSideLayoutBottomOrder();
       if (typeof injectSectionMoveButtons === "function") injectSectionMoveButtons();
+      if (typeof injectEmptySectionDeleteButtons === "function") injectEmptySectionDeleteButtons();
+    };
+
+    
+    // ===== V18.34 RESTORE MOVE SECTION BUTTON + ALWAYS MOVE TO BOTTOM =====
+    function getStoredSectionSideConfigV1834() {
+      try {
+        const key = `prep_section_side_v1_${currentPageId || DEFAULT_PAGE_ID}`;
+        const raw = localStorage.getItem(key);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveStoredSectionSideConfigV1834(config) {
+      try {
+        const key = `prep_section_side_v1_${currentPageId || DEFAULT_PAGE_ID}`;
+        localStorage.setItem(key, JSON.stringify(config || {}));
+      } catch {}
+    }
+
+    function getStoredSectionSideOrderConfigV1834() {
+      try {
+        const key = `prep_section_side_order_v1_${currentPageId || DEFAULT_PAGE_ID}`;
+        const raw = localStorage.getItem(key);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveStoredSectionSideOrderConfigV1834(config) {
+      try {
+        const key = `prep_section_side_order_v1_${currentPageId || DEFAULT_PAGE_ID}`;
+        localStorage.setItem(key, JSON.stringify(config || {}));
+      } catch {}
+    }
+
+    function getSectionSideV1834(sectionName, index) {
+      const clean = normalizeSectionName(sectionName);
+      const config = getStoredSectionSideConfigV1834();
+      if (config[clean] === "left" || config[clean] === "right") return config[clean];
+      return index % 2 === 0 ? "left" : "right";
+    }
+
+    function getOrderedSectionNamesForSideV1834(sideName, sections) {
+      const cleanSections = (sections || []).map(normalizeSectionName).filter(Boolean);
+      const orderConfig = getStoredSectionSideOrderConfigV1834();
+      const savedOrder = Array.isArray(orderConfig[sideName]) ? orderConfig[sideName] : [];
+
+      const sideSections = cleanSections.filter((section, index) => getSectionSideV1834(section, index) === sideName);
+      const sideSet = new Set(sideSections);
+
+      const ordered = savedOrder
+        .map(normalizeSectionName)
+        .filter(section => section && sideSet.has(section));
+
+      sideSections.forEach(section => {
+        if (!ordered.includes(section)) ordered.push(section);
+      });
+
+      return ordered;
+    }
+
+    window.moveSectionAcrossSide = function(sectionName, btn) {
+      const clean = normalizeSectionName(sectionName);
+      if (!clean) return;
+
+      const sections = getAllSections();
+      const currentIndex = Math.max(0, sections.indexOf(clean));
+      const currentSide = getSectionSideV1834(clean, currentIndex);
+      const nextSide = currentSide === "right" ? "left" : "right";
+
+      const sideConfig = getStoredSectionSideConfigV1834();
+      sideConfig[clean] = nextSide;
+      saveStoredSectionSideConfigV1834(sideConfig);
+
+      const orderConfig = getStoredSectionSideOrderConfigV1834();
+      ["left", "right"].forEach(side => {
+        const currentOrder = Array.isArray(orderConfig[side]) ? orderConfig[side] : [];
+        orderConfig[side] = currentOrder
+          .map(normalizeSectionName)
+          .filter(section => section && section !== clean);
+      });
+
+      orderConfig[nextSide] = Array.isArray(orderConfig[nextSide]) ? orderConfig[nextSide] : [];
+      orderConfig[nextSide].push(clean);
+      saveStoredSectionSideOrderConfigV1834(orderConfig);
+
+      render();
+      setStatus(`Moved section "${clean}" to bottom of ${nextSide}`);
+    };
+
+    function applySectionSideLayoutBottomOrderV1834() {
+      try {
+        const sections = getAllSections();
+        const leftCol = document.querySelector(".leftCol");
+        const rightCol = document.querySelector(".rightCol");
+        if (!leftCol || !rightCol) return;
+
+        const boxes = Array.from(document.querySelectorAll(".leftCol > .box, .rightCol > .box"));
+        const boxMap = new Map();
+
+        boxes.forEach(box => {
+          const titleText = box.querySelector(".boxTitleText");
+          if (!titleText) return;
+          const sectionName = normalizeSectionName(titleText.textContent);
+          if (sectionName) boxMap.set(sectionName, box);
+        });
+
+        getOrderedSectionNamesForSideV1834("left", sections).forEach(section => {
+          const box = boxMap.get(section);
+          if (box) leftCol.appendChild(box);
+        });
+
+        getOrderedSectionNamesForSideV1834("right", sections).forEach(section => {
+          const box = boxMap.get(section);
+          if (box) rightCol.appendChild(box);
+        });
+      } catch (error) {
+        console.warn("Apply section side layout v18.34 failed", error);
+      }
+    }
+
+    function injectSectionMoveButtonsV1834() {
+      try {
+        if (!editMode) return;
+
+        document.querySelectorAll(".box").forEach(box => {
+          const title = box.querySelector(".boxTitle");
+          const titleText = box.querySelector(".boxTitleText");
+          if (!title || !titleText) return;
+
+          const sectionName = normalizeSectionName(titleText.textContent);
+          if (!sectionName) return;
+
+          let tools = title.querySelector(".sectionTools");
+          if (!tools) {
+            tools = document.createElement("span");
+            tools.className = "sectionTools";
+            title.appendChild(tools);
+          }
+
+          let btn = tools.querySelector(".sectionMoveSideBtn");
+          if (!btn) {
+            btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "sectionMoveSideBtn";
+            btn.onclick = function(event) {
+              event.stopPropagation();
+              moveSectionAcrossSide(sectionName, btn);
+            };
+            tools.insertBefore(btn, tools.firstChild);
+          }
+
+          const side = box.closest(".rightCol") ? "right" : "left";
+          btn.textContent = side === "right" ? "⬅️" : "➡️";
+          btn.title = side === "right" ? "Move section to bottom of left side" : "Move section to bottom of right side";
+        });
+      } catch (error) {
+        console.warn("Inject section move buttons v18.34 failed", error);
+      }
+    }
+
+    const originalRenderForMoveSectionV1834 = render;
+    render = function() {
+      originalRenderForMoveSectionV1834();
+      applySectionSideLayoutBottomOrderV1834();
+      if (typeof moveSectionEyeButtonsToTitleRow === "function") moveSectionEyeButtonsToTitleRow();
+      injectSectionMoveButtonsV1834();
       if (typeof injectEmptySectionDeleteButtons === "function") injectEmptySectionDeleteButtons();
     };
 
