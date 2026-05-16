@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_26_IPHONE_ROUNDED_SUBPAGE_LOGO_NO_SIDE_LINES">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_27_BACKUP_RESTORE_JSON">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4691,6 +4691,54 @@ body.app-mode .titleBar {
   }
 }
 
+  
+/* ===== V18.27 BACKUP / RESTORE BUTTONS ===== */
+.backupRestoreBar {
+  display: none;
+  grid-column: 1 / -1;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  width: 100%;
+}
+
+body.edit-mode-active .backupRestoreBar {
+  display: grid !important;
+}
+
+.backupBtn,
+.restoreBtn {
+  min-height: 38px !important;
+  height: 38px !important;
+  padding: 0 8px !important;
+  border-radius: 999px !important;
+  border: 1.5px solid #c7cbd1 !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 6px rgba(17,24,39,.05) !important;
+}
+
+.restoreBtn {
+  background: #eef2f7 !important;
+}
+
+@media (min-width: 780px) {
+  .backupRestoreBar {
+    gap: 8px;
+  }
+
+  .backupBtn,
+  .restoreBtn {
+    min-height: 42px !important;
+    height: 42px !important;
+    font-size: 13px !important;
+  }
+}
+
   </style>
 </head>
 
@@ -4728,6 +4776,11 @@ body.app-mode .titleBar {
       <button id="addBtn" class="editOnlyBtn" onclick="openAddModal()">ADD</button>
       <button id="addSectionBtn" class="editOnlyBtn" onclick="openSectionModal()">ADD SECTION</button>
       <button id="deleteModeBtn" class="editOnlyBtn" onclick="toggleDeleteMode()">🗑️ DELETE</button>
+      <div class="backupRestoreBar">
+        <button class="backupBtn" type="button" onclick="backupAllPrepData()">💾 BACKUP</button>
+        <button class="restoreBtn" type="button" onclick="document.getElementById('restoreJsonInput').click()">♻️ RESTORE</button>
+        <input id="restoreJsonInput" type="file" accept="application/json,.json" style="display:none" onchange="restorePrepDataFromFile(event)">
+      </div>
     </div>
 
     <div id="addPanel" class="addPanel legacyAddPanel">
@@ -4878,7 +4931,7 @@ body.app-mode .titleBar {
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import {
-      getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, deleteField, getDoc,
+      getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, deleteField, getDoc, getDocs,
       onSnapshot, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -4930,7 +4983,7 @@ body.app-mode .titleBar {
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_24_SUBPAGE_ROUNDED_LOOP_LOGO_FIX";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_27_BACKUP_RESTORE_JSON";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -6040,6 +6093,167 @@ body.app-mode .titleBar {
         return compareItemsForDisplay(a, b);
       });
     }
+    
+    // ===== V18.27 BACKUP / RESTORE JSON =====
+    function safeJsonCloneForBackup(value) {
+      try {
+        return JSON.parse(JSON.stringify(value));
+      } catch (error) {
+        return value;
+      }
+    }
+
+    function normalizeBackupDocument(rawDoc) {
+      if (!rawDoc || typeof rawDoc !== "object") return null;
+
+      const id = String(rawDoc.id || rawDoc.docId || "").trim();
+      const data = rawDoc.data && typeof rawDoc.data === "object" ? rawDoc.data : null;
+
+      if (!id || !data) return null;
+
+      return {
+        id,
+        data: safeJsonCloneForBackup(data)
+      };
+    }
+
+    window.backupAllPrepData = async function() {
+      try {
+        setStatus("Creating backup...");
+        const snap = await getDocs(prepRef);
+
+        const documents = snap.docs.map(docSnap => ({
+          id: docSnap.id,
+          data: safeJsonCloneForBackup(docSnap.data())
+        }));
+
+        const backup = {
+          app: "prep-list",
+          backupVersion: 1,
+          build: APP_BUILD_VERSION,
+          backupAt: new Date().toISOString(),
+          firestoreCollection: "prepItems",
+          documentCount: documents.length,
+          includes: [
+            "items",
+            "section",
+            "pageId",
+            "checked",
+            "color",
+            "qty",
+            "recipe",
+            "photo",
+            "__homeConfig",
+            "__sectionSettings",
+            "all other fields"
+          ],
+          documents
+        };
+
+        const blob = new Blob([JSON.stringify(backup, null, 2)], {
+          type: "application/json"
+        });
+
+        const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `prep-list-backup-${stamp}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+        setStatus(`Backup downloaded OK (${documents.length} docs)`);
+      } catch (error) {
+        console.error(error);
+        alert("Backup failed. Check internet / Firestore permission.");
+        setStatus("Backup failed");
+      }
+    };
+
+    window.restorePrepDataFromFile = async function(event) {
+      const input = event && event.target;
+      const file = input && input.files && input.files[0];
+
+      try {
+        if (!file) return;
+
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+
+        const rawDocuments = Array.isArray(parsed.documents)
+          ? parsed.documents
+          : Array.isArray(parsed)
+            ? parsed
+            : [];
+
+        const documents = rawDocuments
+          .map(normalizeBackupDocument)
+          .filter(Boolean);
+
+        if (!documents.length) {
+          alert("Restore failed: no valid documents found in this JSON file.");
+          setStatus("Restore failed - invalid JSON");
+          return;
+        }
+
+        const hasHomeConfig = documents.some(docItem => docItem.id === HOME_CONFIG_DOC_ID);
+        const hasSectionSettings = documents.some(docItem => docItem.id === SECTION_SETTINGS_DOC_ID);
+        const itemCount = documents.filter(docItem =>
+          docItem.id !== HOME_CONFIG_DOC_ID &&
+          docItem.id !== SECTION_SETTINGS_DOC_ID &&
+          docItem.data &&
+          docItem.data.section !== "__meta" &&
+          docItem.data.type !== "homeConfig" &&
+          docItem.data.type !== "sectionSettings"
+        ).length;
+
+        const ok = confirm(
+          `Restore backup from JSON?\n\n` +
+          `File: ${file.name}\n` +
+          `Documents: ${documents.length}\n` +
+          `Items: ${itemCount}\n` +
+          `Home config: ${hasHomeConfig ? "YES" : "NO"}\n` +
+          `Section settings: ${hasSectionSettings ? "YES" : "NO"}\n\n` +
+          `This will write these documents back to Firestore using the same document IDs.\n` +
+          `It will NOT delete documents that are not in the backup.\n\n` +
+          `Continue?`
+        );
+
+        if (!ok) {
+          setStatus("Restore cancelled");
+          return;
+        }
+
+        setStatus("Restoring backup...");
+
+        let restored = 0;
+        for (const docItem of documents) {
+          await setDoc(doc(db, "prepItems", docItem.id), {
+            ...docItem.data,
+            restoredAt: serverTimestamp()
+          }, { merge: false });
+          restored += 1;
+        }
+
+        homeConfigCache = null;
+        sectionOrderConfigCache = null;
+        clearUnsyncedHomeConfig();
+
+        setStatus(`Restore completed OK (${restored} docs). Reloading...`);
+        alert(`Restore completed OK.\n\nRestored documents: ${restored}\n\nThe app will reload now.`);
+        location.reload();
+      } catch (error) {
+        console.error(error);
+        alert("Restore failed. Make sure the file is a valid prep-list backup JSON and Firestore permission allows writing.");
+        setStatus("Restore failed");
+      } finally {
+        if (input) input.value = "";
+      }
+    };
+
+
     function loadRealtime() {
       setStatus("Loading...");
       onSnapshot(prepRef, snapshot => {
