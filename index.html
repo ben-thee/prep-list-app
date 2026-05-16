@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_30_MOVE_SECTION_EDIT_TOOLS_ROW">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_32_EYE_RIGHT_TITLE_TOOLS_SECOND_ROW">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4987,6 +4987,111 @@ body.edit-mode-active .sectionMoveSideBtn {
   }
 }
 
+  
+/* ===== V18.32 SECTION HEADER: EYE ON TITLE ROW RIGHT, TOOLS SECOND ROW ===== */
+body.edit-mode-active .box .boxTitle,
+body.edit-mode-active .box.boxFull .boxTitle {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 24px !important;
+  grid-template-rows: auto auto !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  gap: 5px 6px !important;
+  min-height: 58px !important;
+  padding: 6px 8px !important;
+  overflow: visible !important;
+}
+
+body.edit-mode-active .box .boxTitleText,
+body.edit-mode-active .box.boxFull .boxTitleText {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  justify-self: center !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  padding-left: 24px !important;
+}
+
+body.edit-mode-active .box .sectionEyeBtn,
+body.edit-mode-active .box.boxFull .sectionEyeBtn {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  position: static !important;
+  right: auto !important;
+  top: auto !important;
+  transform: none !important;
+  justify-self: end !important;
+  align-self: center !important;
+  margin: 0 !important;
+  width: 23px !important;
+  min-width: 23px !important;
+  max-width: 23px !important;
+  height: 23px !important;
+  min-height: 23px !important;
+  max-height: 23px !important;
+  display: inline-flex !important;
+}
+
+body.edit-mode-active .box .sectionTools,
+body.edit-mode-active .box.boxFull .sectionTools {
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: nowrap !important;
+  gap: 4px !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+}
+
+/* keep only tools except show/hide on the lower row */
+body.edit-mode-active .box .sectionTools .sectionEyeBtn,
+body.edit-mode-active .box.boxFull .sectionTools .sectionEyeBtn {
+  display: none !important;
+}
+
+@media (max-width: 520px) {
+  body.edit-mode-active .box .boxTitle,
+  body.edit-mode-active .box.boxFull .boxTitle {
+    grid-template-columns: minmax(0, 1fr) 22px !important;
+    min-height: 56px !important;
+    gap: 4px 5px !important;
+    padding: 5px 6px !important;
+  }
+
+  body.edit-mode-active .box .boxTitleText,
+  body.edit-mode-active .box.boxFull .boxTitleText {
+    padding-left: 22px !important;
+  }
+
+  body.edit-mode-active .box .sectionEyeBtn,
+  body.edit-mode-active .box.boxFull .sectionEyeBtn {
+    width: 21px !important;
+    min-width: 21px !important;
+    max-width: 21px !important;
+    height: 21px !important;
+    min-height: 21px !important;
+    max-height: 21px !important;
+  }
+
+  body.edit-mode-active .box .sectionTools,
+  body.edit-mode-active .box.boxFull .sectionTools {
+    gap: 3px !important;
+    transform: scale(.96) !important;
+    transform-origin: center center !important;
+  }
+}
+
   </style>
 </head>
 
@@ -5231,7 +5336,7 @@ body.edit-mode-active .sectionMoveSideBtn {
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_30_MOVE_SECTION_EDIT_TOOLS_ROW";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_32_EYE_RIGHT_TITLE_TOOLS_SECOND_ROW";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -7945,11 +8050,10 @@ body.edit-mode-active .sectionMoveSideBtn {
       injectEmptySectionDeleteButtons();
     };
 
-    
-    // ===== V18.30 MOVE SECTION BETWEEN LEFT / RIGHT COLUMNS =====
-    function getStoredSectionSideConfig() {
+    // ===== V18.31 MOVE SECTION TO BOTTOM OF OPPOSITE SIDE =====
+    function getStoredSectionSideOrderConfig() {
       try {
-        const key = `prep_section_side_v1_${currentPageId || DEFAULT_PAGE_ID}`;
+        const key = `prep_section_side_order_v1_${currentPageId || DEFAULT_PAGE_ID}`;
         const raw = localStorage.getItem(key);
         const parsed = raw ? JSON.parse(raw) : {};
         return parsed && typeof parsed === "object" ? parsed : {};
@@ -7958,18 +8062,31 @@ body.edit-mode-active .sectionMoveSideBtn {
       }
     }
 
-    function saveStoredSectionSideConfig(config) {
+    function saveStoredSectionSideOrderConfig(config) {
       try {
-        const key = `prep_section_side_v1_${currentPageId || DEFAULT_PAGE_ID}`;
+        const key = `prep_section_side_order_v1_${currentPageId || DEFAULT_PAGE_ID}`;
         localStorage.setItem(key, JSON.stringify(config || {}));
       } catch {}
     }
 
-    function getSectionSide(sectionName, index) {
-      const clean = normalizeSectionName(sectionName);
+    function getOrderedSectionNamesForSide(sideName, sections) {
+      const cleanSections = (sections || []).map(normalizeSectionName).filter(Boolean);
       const config = getStoredSectionSideConfig();
-      if (config[clean] === "left" || config[clean] === "right") return config[clean];
-      return index % 2 === 0 ? "left" : "right";
+      const orderConfig = getStoredSectionSideOrderConfig();
+      const savedOrder = Array.isArray(orderConfig[sideName]) ? orderConfig[sideName] : [];
+
+      const sideSections = cleanSections.filter((section, index) => getSectionSide(section, index) === sideName);
+      const sideSet = new Set(sideSections);
+
+      const ordered = savedOrder
+        .map(normalizeSectionName)
+        .filter(section => section && sideSet.has(section));
+
+      sideSections.forEach(section => {
+        if (!ordered.includes(section)) ordered.push(section);
+      });
+
+      return ordered;
     }
 
     window.moveSectionAcrossSide = function(sectionName, btn) {
@@ -7985,77 +8102,90 @@ body.edit-mode-active .sectionMoveSideBtn {
       config[clean] = nextSide;
       saveStoredSectionSideConfig(config);
 
+      const orderConfig = getStoredSectionSideOrderConfig();
+      ["left", "right"].forEach(side => {
+        const currentOrder = Array.isArray(orderConfig[side]) ? orderConfig[side] : [];
+        orderConfig[side] = currentOrder.map(normalizeSectionName).filter(section => section && section !== clean);
+      });
+
+      orderConfig[nextSide] = Array.isArray(orderConfig[nextSide]) ? orderConfig[nextSide] : [];
+      orderConfig[nextSide].push(clean);
+      saveStoredSectionSideOrderConfig(orderConfig);
+
       render();
-      setStatus(`Moved section "${clean}" to ${nextSide}`);
+      setStatus(`Moved section "${clean}" to bottom of ${nextSide}`);
     };
 
-    function injectSectionMoveButtons() {
+    function applySectionSideLayoutBottomOrder() {
       try {
-        if (!editMode) return;
-        document.querySelectorAll(".box").forEach((box, index) => {
-          const title = box.querySelector(".boxTitle");
-          const titleText = box.querySelector(".boxTitleText");
-          if (!title || !titleText) return;
-
-          const sectionName = normalizeSectionName(titleText.textContent);
-          if (!sectionName) return;
-
-          let tools = title.querySelector(".sectionTools");
-          if (!tools) {
-            tools = document.createElement("span");
-            tools.className = "sectionTools";
-            title.appendChild(tools);
-          }
-
-          if (tools.querySelector(".sectionMoveSideBtn")) return;
-
-          const side = box.closest(".rightCol") ? "right" : "left";
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "sectionMoveSideBtn";
-          btn.textContent = side === "right" ? "⬅️" : "➡️";
-          btn.title = side === "right" ? "Move section to left side" : "Move section to right side";
-          btn.onclick = function(event) {
-            event.stopPropagation();
-            moveSectionAcrossSide(sectionName, btn);
-          };
-
-          tools.insertBefore(btn, tools.firstChild);
-        });
-      } catch (error) {
-        console.warn("Inject section move buttons failed", error);
-      }
-    }
-
-    const originalRenderForSectionMove = render;
-    render = function() {
-      originalRenderForSectionMove();
-
-      try {
-        const config = getStoredSectionSideConfig();
         const sections = getAllSections();
         const leftCol = document.querySelector(".leftCol");
         const rightCol = document.querySelector(".rightCol");
+        if (!leftCol || !rightCol) return;
 
-        if (leftCol && rightCol) {
-          const boxes = Array.from(document.querySelectorAll(".leftCol > .box, .rightCol > .box"));
-          boxes.forEach((box, index) => {
-            const titleText = box.querySelector(".boxTitleText");
-            if (!titleText) return;
-            const sectionName = normalizeSectionName(titleText.textContent);
-            const sectionIndex = Math.max(0, sections.indexOf(sectionName));
-            const side = getSectionSide(sectionName, sectionIndex);
-            const targetCol = side === "right" ? rightCol : leftCol;
-            if (box.parentElement !== targetCol) {
-              targetCol.appendChild(box);
-            }
-          });
-        }
+        const boxes = Array.from(document.querySelectorAll(".leftCol > .box, .rightCol > .box"));
+        const boxMap = new Map();
+
+        boxes.forEach(box => {
+          const titleText = box.querySelector(".boxTitleText");
+          if (!titleText) return;
+          const sectionName = normalizeSectionName(titleText.textContent);
+          if (sectionName) boxMap.set(sectionName, box);
+        });
+
+        const leftOrder = getOrderedSectionNamesForSide("left", sections);
+        const rightOrder = getOrderedSectionNamesForSide("right", sections);
+
+        leftOrder.forEach(section => {
+          const box = boxMap.get(section);
+          if (box) leftCol.appendChild(box);
+        });
+
+        rightOrder.forEach(section => {
+          const box = boxMap.get(section);
+          if (box) rightCol.appendChild(box);
+        });
       } catch (error) {
-        console.warn("Apply section side layout failed", error);
+        console.warn("Apply section bottom-order layout failed", error);
       }
+    }
 
+
+    const originalRenderForSectionMoveBottom = render;
+    render = function() {
+      originalRenderForSectionMoveBottom();
+      applySectionSideLayoutBottomOrder();
       injectSectionMoveButtons();
+      if (typeof injectEmptySectionDeleteButtons === "function") injectEmptySectionDeleteButtons();
+    };
+
+
+    
+    // ===== V18.32 MOVE SHOW/HIDE BUTTON TO TITLE ROW RIGHT IN EDIT MODE =====
+    function moveSectionEyeButtonsToTitleRow() {
+      try {
+        document.querySelectorAll(".box").forEach(box => {
+          const title = box.querySelector(".boxTitle");
+          if (!title) return;
+
+          const eye = title.querySelector(".sectionEyeBtn");
+          if (!eye) return;
+
+          if (eye.parentElement && eye.parentElement.classList.contains("sectionTools")) {
+            title.appendChild(eye);
+          }
+        });
+      } catch (error) {
+        console.warn("Move section eye buttons failed", error);
+      }
+    }
+
+    const originalRenderForEyeRightTitle = render;
+    render = function() {
+      originalRenderForEyeRightTitle();
+      moveSectionEyeButtonsToTitleRow();
+      if (typeof applySectionSideLayoutBottomOrder === "function") applySectionSideLayoutBottomOrder();
+      if (typeof injectSectionMoveButtons === "function") injectSectionMoveButtons();
       if (typeof injectEmptySectionDeleteButtons === "function") injectEmptySectionDeleteButtons();
     };
 
