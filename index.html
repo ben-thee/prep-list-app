@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_23_SUBPAGE_ROUNDED_LOOP_VIDEO">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_25_REPLACED_SUBPAGE_LOOP_VIDEO">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -4520,6 +4520,31 @@
       }
     }
 
+  
+
+    /* ===== V18.24 SUBPAGE LOOP LOGO ROUNDED CORNERS FIX ===== */
+    .subpageVideoLogo,
+    .subpageRoundedVideoLogo,
+    .titleBar .subpageVideoLogo,
+    .titleBar .subpageRoundedVideoLogo {
+      border-radius: 18px !important;
+      overflow: hidden !important;
+      clip-path: inset(0 round 18px) !important;
+      -webkit-clip-path: inset(0 round 18px) !important;
+      background: #ffffff !important;
+    }
+
+    @media (min-width: 780px) {
+      .subpageVideoLogo,
+      .subpageRoundedVideoLogo,
+      .titleBar .subpageVideoLogo,
+      .titleBar .subpageRoundedVideoLogo {
+        border-radius: 20px !important;
+        clip-path: inset(0 round 20px) !important;
+        -webkit-clip-path: inset(0 round 20px) !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -4759,7 +4784,7 @@
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_23_SUBPAGE_ROUNDED_LOOP_VIDEO";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_24_SUBPAGE_ROUNDED_LOOP_LOGO_FIX";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
