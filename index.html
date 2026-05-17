@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_44_CENTER_SUBPAGE_LOGO">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_45_FIX_ADD_DARK_MODE">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -5300,6 +5300,166 @@ body.app-mode .titleEditBtn:active {
   }
 }
 
+  
+/* ===== V18.45 FIX ADD + DARK / BRIGHT MODE ===== */
+.themeModeBtnV1845 {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-color: #c7cbd1 !important;
+}
+
+body.dark-mode-active,
+body.dark-mode-active html,
+body.dark-mode-active .page,
+body.dark-mode-active .homeView,
+body.dark-mode-active .homeHeader,
+body.dark-mode-active .homeCategoryList,
+body.dark-mode-active #appView,
+body.dark-mode-active .appView,
+body.dark-mode-active .layout,
+body.dark-mode-active .leftCol,
+body.dark-mode-active .rightCol,
+body.dark-mode-active .fullSections,
+body.dark-mode-active #content,
+body.dark-mode-active .titleBar,
+body.dark-mode-active .searchPickupBar {
+  background: #000000 !important;
+  background-image: none !important;
+  color: #f9fafb !important;
+}
+
+body.dark-mode-active .controls,
+body.dark-mode-active .addPanel,
+body.dark-mode-active .box,
+body.dark-mode-active .modalBox,
+body.dark-mode-active .photoModalBox,
+body.dark-mode-active .addModalBox,
+body.dark-mode-active .homeCategoryCard,
+body.dark-mode-active .homeCategoryPill,
+body.dark-mode-active .homeSubpagePill,
+body.dark-mode-active .searchPickupBar,
+body.dark-mode-active .row {
+  background: #111111 !important;
+  background-image: none !important;
+  border-color: #2f2f2f !important;
+  color: #f9fafb !important;
+  box-shadow: none !important;
+}
+
+body.dark-mode-active .boxTitle,
+body.dark-mode-active .status,
+body.dark-mode-active .modalHeader,
+body.dark-mode-active .photoModalHeader,
+body.dark-mode-active .addModalHeader {
+  background: #171717 !important;
+  background-image: none !important;
+  border-color: #333333 !important;
+  color: #f9fafb !important;
+}
+
+body.dark-mode-active .boxTitleText,
+body.dark-mode-active .itemName,
+body.dark-mode-active .itemLabelText,
+body.dark-mode-active .modalTitle,
+body.dark-mode-active .addModalTitle,
+body.dark-mode-active .addLabel,
+body.dark-mode-active .homeNameBtn,
+body.dark-mode-active .homeOpenPageBtn,
+body.dark-mode-active .recipeTextView,
+body.dark-mode-active .recipeCheckList,
+body.dark-mode-active .recipeCheckText,
+body.dark-mode-active .emptySectionMsg {
+  color: #f9fafb !important;
+}
+
+body.dark-mode-active .homeCategoryPill .homeNameBtn,
+body.dark-mode-active .homeCategoryPill .homeOpenPageBtn,
+body.dark-mode-active .homeCategoryPill {
+  color: #ff3b30 !important;
+}
+
+body.dark-mode-active input,
+body.dark-mode-active select,
+body.dark-mode-active textarea,
+body.dark-mode-active .popupInput,
+body.dark-mode-active .recipeTextarea,
+body.dark-mode-active .recipeTextView,
+body.dark-mode-active .recipeCheckList,
+body.dark-mode-active .photoImage,
+body.dark-mode-active .photoEmpty {
+  background: #050505 !important;
+  color: #f9fafb !important;
+  border-color: #3a3a3a !important;
+}
+
+body.dark-mode-active input::placeholder,
+body.dark-mode-active textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+body.dark-mode-active button,
+body.dark-mode-active .titleEditBtn,
+body.dark-mode-active .backupBtn,
+body.dark-mode-active .restoreBtn,
+body.dark-mode-active .themeModeBtnV1845,
+body.dark-mode-active .popupAddBtn,
+body.dark-mode-active .sectionSettingBtnV1843,
+body.dark-mode-active .nativeMoveSectionBtnV1839,
+body.dark-mode-active .sectionEyeBtn,
+body.dark-mode-active .sectionLayoutToggleBtn,
+body.dark-mode-active .sectionOrderToggleBtn,
+body.dark-mode-active .pickupSectionBtn,
+body.dark-mode-active .resetQtySectionBtn {
+  background: #1f1f1f !important;
+  color: #f9fafb !important;
+  border-color: #3a3a3a !important;
+}
+
+body.dark-mode-active #deleteModeBtn.deleteOn {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode-active .row.row-red { background: #2a1616 !important; border-color: #5b2a2a !important; }
+body.dark-mode-active .row.row-green { background: #102414 !important; border-color: #285435 !important; }
+body.dark-mode-active .row.row-yellow { background: #28230f !important; border-color: #5b5124 !important; }
+body.dark-mode-active .row.row-blue { background: #101d2f !important; border-color: #263f68 !important; }
+
+body.dark-mode-active .customCheck {
+  background: #050505 !important;
+  border-color: #6b7280 !important;
+}
+
+body.dark-mode-active .customCheck.checked {
+  color: #ff3b30 !important;
+  border-color: #ff3b30 !important;
+}
+
+body.dark-mode-active .subpageLogoClip,
+body.dark-mode-active .subpageLogoHomeBtn,
+body.dark-mode-active .subpageVideoLogo,
+body.dark-mode-active .subpageRoundedVideoLogo,
+body.dark-mode-active .homeLogo,
+body.dark-mode-active .homeLogoIcon {
+  background: #000000 !important;
+}
+
+body.dark-mode-active .emptySectionMsg {
+  background: #0b0b0b !important;
+  border-color: #3a3a3a !important;
+}
+
+@media (max-width: 520px) {
+  body.edit-mode-active .controls {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  body.edit-mode-active #themeModeBtn {
+    grid-column: auto !important;
+  }
+}
+
   </style>
 </head>
 
@@ -5335,6 +5495,7 @@ body.app-mode .titleEditBtn:active {
       <div id="offlineBadge" class="offlineBadge"></div>
       <button id="addBtn" class="editOnlyBtn unifiedAddBtnV1843" onclick="openUnifiedAddModal()">＋ ADD</button>
       <button id="deleteModeBtn" class="editOnlyBtn" onclick="toggleDeleteMode()">🗑️ DELETE</button>
+      <button id="themeModeBtn" class="editOnlyBtn themeModeBtnV1845" onclick="toggleThemeModeV1845()">🌙 DARK</button>
       <div class="backupRestoreBar">
         <button class="backupBtn" type="button" onclick="backupAllPrepData()">💾 BACKUP</button>
         <button class="restoreBtn" type="button" onclick="document.getElementById('restoreJsonInput').click()">♻️ RESTORE</button>
@@ -5576,7 +5737,7 @@ body.app-mode .titleEditBtn:active {
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_44_CENTER_SUBPAGE_LOGO";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_45_FIX_ADD_DARK_MODE";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -8418,6 +8579,85 @@ body.app-mode .titleEditBtn:active {
     
     
     
+    
+    // ===== V18.45 FIX UNIFIED ADD + DARK / BRIGHT MODE =====
+    const THEME_MODE_KEY_V1845 = "prep_theme_mode_v1845";
+
+    function applyThemeModeV1845(mode) {
+      const cleanMode = mode === "dark" ? "dark" : "bright";
+      document.body.classList.toggle("dark-mode-active", cleanMode === "dark");
+
+      const btn = document.getElementById("themeModeBtn");
+      if (btn) {
+        btn.textContent = cleanMode === "dark" ? "☀️ BRIGHT" : "🌙 DARK";
+        btn.setAttribute("aria-label", cleanMode === "dark" ? "Switch to bright mode" : "Switch to dark mode");
+        btn.title = cleanMode === "dark" ? "Switch to bright mode" : "Switch to dark mode";
+      }
+
+      try {
+        localStorage.setItem(THEME_MODE_KEY_V1845, cleanMode);
+      } catch {}
+    }
+
+    window.toggleThemeModeV1845 = function() {
+      const current = document.body.classList.contains("dark-mode-active") ? "dark" : "bright";
+      applyThemeModeV1845(current === "dark" ? "bright" : "dark");
+      setStatus(current === "dark" ? "Bright mode ON" : "Dark mode ON");
+    };
+
+    function initThemeModeV1845() {
+      try {
+        const saved = localStorage.getItem(THEME_MODE_KEY_V1845) || "bright";
+        applyThemeModeV1845(saved === "dark" ? "dark" : "bright");
+      } catch {
+        applyThemeModeV1845("bright");
+      }
+    }
+
+    window.openUnifiedAddModal = function() {
+      if (!editMode) {
+        setStatus("Turn Edit mode ON before adding");
+        return;
+      }
+
+      updateSectionDropdown();
+
+      const modal = document.getElementById("addModal");
+      const input = document.getElementById("popupNewItem");
+      const sectionInput = document.getElementById("popupSectionNameUnified");
+      const layoutSelect = document.getElementById("popupSectionLayout");
+      const title = document.querySelector("#addModal .addModalTitle");
+
+      if (title) title.textContent = "Add item / section";
+      if (modal) modal.classList.add("show");
+
+      setTimeout(() => {
+        if (layoutSelect) layoutSelect.value = "half";
+        if (sectionInput) sectionInput.value = "";
+        if (input) {
+          input.value = "";
+          input.focus();
+        }
+      }, 0);
+    };
+
+    window.addSectionFromUnifiedPopup = function() {
+      const input = document.getElementById("popupSectionNameUnified");
+      const layoutSelect = document.getElementById("popupSectionLayout");
+      const name = normalizeSectionName(input ? input.value : "");
+      const layout = layoutSelect ? layoutSelect.value : "half";
+
+      if (!name) {
+        setStatus("Section name required");
+        if (input) input.focus();
+        return;
+      }
+
+      addSectionCore(name, true, layout);
+      if (input) input.value = "";
+    };
+
+    initThemeModeV1845();
     loadRealtime();
       } catch (error) {
         console.error("App start failed", error);
