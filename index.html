@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_40_CLEANUP_NATIVE_MOVE">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_41_TOP_ADD_POPUP">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -5067,6 +5067,51 @@ body.edit-mode-active .box.boxFull .sectionTools {
   }
 }
 
+  
+/* ===== V18.41 ADD / ADD SECTION POPUP AT TOP ===== */
+.addModalOverlay,
+#addModalOverlay,
+.sectionModalOverlay,
+#sectionModalOverlay {
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 18px) !important;
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+  padding-bottom: 14px !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.addModalBox,
+#addModalBox,
+.sectionModalBox,
+#sectionModalBox {
+  margin-top: 0 !important;
+  margin-bottom: 18px !important;
+  transform: none !important;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 36px) !important;
+  overflow-y: auto !important;
+}
+
+@media (max-width: 520px) {
+  .addModalOverlay,
+  #addModalOverlay,
+  .sectionModalOverlay,
+  #sectionModalOverlay {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .addModalBox,
+  #addModalBox,
+  .sectionModalBox,
+  #sectionModalBox {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px) !important;
+  }
+}
+
   </style>
 </head>
 
@@ -5311,7 +5356,7 @@ body.edit-mode-active .box.boxFull .sectionTools {
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_40_CLEANUP_NATIVE_MOVE";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_41_TOP_ADD_POPUP";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
