@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_42_RECIPE_CHECK_REALTIME_SYNC">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_43_UNIFIED_ADD_SECTION_SETTINGS_LOGO_BACK">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -5112,6 +5112,144 @@ body.edit-mode-active .box.boxFull .sectionTools {
   }
 }
 
+  
+/* ===== V18.43 UNIFIED ADD + SECTION SETTINGS + LOGO BACK ===== */
+#homeBackBtn,
+.titleBackBtn#homeBackBtn {
+  display: none !important;
+}
+
+.subpageLogoHomeBtn {
+  cursor: pointer !important;
+  touch-action: manipulation !important;
+}
+
+.unifiedAddBtnV1843 {
+  grid-column: auto !important;
+}
+
+#addSectionBtn {
+  display: none !important;
+}
+
+.unifiedAddDividerV1843 {
+  width: 100%;
+  height: 1px;
+  background: #e5e7eb;
+  margin: 8px 0 2px;
+}
+
+.secondaryAddBtnV1843 {
+  background: #eef2f7 !important;
+  color: #111827 !important;
+  border-color: #c7cbd1 !important;
+}
+
+.sectionTitleSettingTargetV1843 {
+  cursor: pointer !important;
+  touch-action: manipulation !important;
+}
+
+/* Edit mode section row: only MOVE | section name | show/hide on one line */
+body.edit-mode-active .box .boxTitle,
+body.edit-mode-active .box.boxFull .boxTitle {
+  display: grid !important;
+  grid-template-columns: 36px minmax(0, 1fr) 24px !important;
+  grid-template-rows: auto !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  gap: 5px 6px !important;
+  min-height: 42px !important;
+  padding: 6px 8px !important;
+  overflow: visible !important;
+}
+
+body.edit-mode-active .box .nativeMoveSectionBtnV1839,
+body.edit-mode-active .box.boxFull .nativeMoveSectionBtnV1839 {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  justify-self: start !important;
+  align-self: center !important;
+}
+
+body.edit-mode-active .box .boxTitleText,
+body.edit-mode-active .box.boxFull .boxTitleText {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  justify-self: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.edit-mode-active .box .sectionEyeBtn,
+body.edit-mode-active .box.boxFull .sectionEyeBtn {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  position: static !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+/* Hide old row tools from section header; settings popup owns them now */
+body.edit-mode-active .box .sectionTools,
+body.edit-mode-active .box.boxFull .sectionTools {
+  display: none !important;
+}
+
+.sectionSettingsSubV1843 {
+  font-size: 11px;
+  font-weight: 900;
+  color: #6b7280;
+  margin-top: 3px;
+}
+
+.sectionSettingsGridV1843 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 4px;
+}
+
+.sectionSettingBtnV1843 {
+  min-height: 42px !important;
+  border-radius: 999px !important;
+  border: 1.5px solid #c7cbd1 !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  box-shadow: 0 2px 6px rgba(17,24,39,.05) !important;
+}
+
+.dangerSectionSettingBtnV1843 {
+  background: #fff5f5 !important;
+  border-color: #fecaca !important;
+  color: #dc2626 !important;
+}
+
+@media (max-width: 520px) {
+  body.edit-mode-active .box .boxTitle,
+  body.edit-mode-active .box.boxFull .boxTitle {
+    grid-template-columns: 32px minmax(0, 1fr) 22px !important;
+    min-height: 40px !important;
+    gap: 4px 5px !important;
+    padding: 5px 6px !important;
+  }
+
+  .sectionSettingBtnV1843 {
+    min-height: 40px !important;
+    font-size: 12px !important;
+  }
+}
+
   </style>
 </head>
 
@@ -5138,16 +5276,14 @@ body.edit-mode-active .box.boxFull .sectionTools {
 
     <div id="appView" class="appView">
     <div class="titleBar">
-      <button id="homeBackBtn" class="titleBackBtn" onclick="showHome()" aria-label="Back home" title="Back home">‹</button>
-      <div class="subpageLogoClip"><video class="subpageRoundedVideoLogo" id="activePageTitleVideo" src="subpage-logo-loop.mp4?v=18.23" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Subpage logo"></video></div>
+      <div class="subpageLogoClip subpageLogoHomeBtn" onclick="showHome()" role="button" aria-label="Back home" title="Back home"><video class="subpageRoundedVideoLogo" id="activePageTitleVideo" src="subpage-logo-loop.mp4?v=18.23" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Subpage logo"></video></div>
       <button id="editModeBtn" class="titleEditBtn" onclick="toggleEditMode()" aria-label="Edit mode">✏️</button>
     </div>
 
     <div class="controls">
       <div id="status" class="status">Loading...</div>
       <div id="offlineBadge" class="offlineBadge"></div>
-      <button id="addBtn" class="editOnlyBtn" onclick="openAddModal()">ADD</button>
-      <button id="addSectionBtn" class="editOnlyBtn" onclick="openSectionModal()">ADD SECTION</button>
+      <button id="addBtn" class="editOnlyBtn unifiedAddBtnV1843" onclick="openUnifiedAddModal()">＋ ADD</button>
       <button id="deleteModeBtn" class="editOnlyBtn" onclick="toggleDeleteMode()">🗑️ DELETE</button>
       <div class="backupRestoreBar">
         <button class="backupBtn" type="button" onclick="backupAllPrepData()">💾 BACKUP</button>
@@ -5177,6 +5313,19 @@ body.edit-mode-active .box.boxFull .sectionTools {
         <input id="popupNewItem" class="popupInput" placeholder="New item name">
 
         <button class="popupAddBtn" onclick="addNewItemFromPopup()">ADD ITEM</button>
+
+        <div class="unifiedAddDividerV1843"></div>
+
+        <label class="addLabel">New section</label>
+        <input id="popupSectionNameUnified" class="popupInput" placeholder="New section name">
+
+        <label class="addLabel">Section layout</label>
+        <select id="popupSectionLayout" class="popupInput sectionLayoutSelect">
+          <option value="half">HALF - 2 columns</option>
+          <option value="full">FULL - full width</option>
+        </select>
+
+        <button class="popupAddBtn secondaryAddBtnV1843" onclick="addSectionFromUnifiedPopup()">ADD SECTION</button>
       </div>
     </div>
   </div>
@@ -5199,6 +5348,27 @@ body.edit-mode-active .box.boxFull .sectionTools {
         </select>
 
         <button class="popupAddBtn" onclick="addSectionFromPopup()">ADD SECTION</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="sectionSettingsModal" class="addModalOverlay sectionSettingsOverlayV1843" onclick="sectionSettingsOverlayClose(event)">
+    <div class="addModalBox sectionSettingsBoxV1843">
+      <div class="addModalHeader">
+        <div>
+          <div id="sectionSettingsTitle" class="addModalTitle">Section settings</div>
+          <div id="sectionSettingsSub" class="sectionSettingsSubV1843"></div>
+        </div>
+        <button class="closeBtn" onclick="closeSectionSettingsModal()" aria-label="Close">×</button>
+      </div>
+
+      <div class="sectionSettingsGridV1843">
+        <button id="sectionSettingLayoutBtn" class="sectionSettingBtnV1843" onclick="toggleSectionLayoutFromSettings()">↔️ HALF / FULL</button>
+        <button id="sectionSettingQtyBtn" class="sectionSettingBtnV1843" onclick="toggleSectionQtyFromSettings()">QTY</button>
+        <button id="sectionSettingResetQtyBtn" class="sectionSettingBtnV1843" onclick="resetSectionQtyFromSettings()">RESET QTY</button>
+        <button id="sectionSettingPickupBtn" class="sectionSettingBtnV1843" onclick="copyPickupSectionFromSettings()">📝 PICKUP</button>
+        <button id="sectionSettingDeleteBtn" class="sectionSettingBtnV1843 dangerSectionSettingBtnV1843" onclick="deleteSectionFromSettings()">🗑️ DELETE SECTION</button>
       </div>
     </div>
   </div>
@@ -5356,7 +5526,7 @@ body.edit-mode-active .box.boxFull .sectionTools {
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_42_RECIPE_CHECK_REALTIME_SYNC";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_43_UNIFIED_ADD_SECTION_SETTINGS_LOGO_BACK";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -6930,7 +7100,7 @@ body.edit-mode-active .box.boxFull .sectionTools {
         <div class="box ${isFull ? "boxFull" : ""} ${collapsed ? "boxCollapsed" : ""}">
           <div class="boxTitle">
             ${editMode && !isFull ? `<button class="nativeMoveSectionBtnV1839" onclick="nativeMoveSectionV1839('${safeTitle}'); event.stopPropagation();" aria-label="Move section" title="Move to bottom of other side">${options.side === "right" ? "⬅️" : "➡️"}</button>` : ""}
-            <span class="boxTitleText">${escapeHtml(title)}</span>
+            <span class="boxTitleText sectionTitleSettingTargetV1843" ${editMode ? `onclick="openSectionSettingsModal('${safeTitle}'); event.stopPropagation();" title="Section settings"` : ""}>${escapeHtml(title)}</span>
             <button class="sectionEyeBtn ${collapsed ? "eyeClosed" : ""}" onclick="toggleSectionCollapse('${safeTitle}', this); event.stopPropagation();" aria-label="${collapsed ? "Show section" : "Hide section"}" title="${collapsed ? "Show section" : "Hide section"}">${collapsed ? "🔻" : "🔺"}</button>
             <span class="sectionTools ${orderOn ? "orderOn" : ""}">
               ${deleteMode ? `<button class="sectionDeleteBtn" onclick="deleteSection('${safeTitle}', this); event.stopPropagation();" aria-label="Delete section" title="Delete section">🗑️</button>` : ""}
