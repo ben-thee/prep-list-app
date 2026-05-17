@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_43_UNIFIED_ADD_SECTION_SETTINGS_LOGO_BACK">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_44_CENTER_SUBPAGE_LOGO">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -5250,6 +5250,56 @@ body.edit-mode-active .box.boxFull .sectionTools {
   }
 }
 
+  
+/* ===== V18.44 CENTER SUBPAGE LOOP LOGO ===== */
+/* Back button was removed, so the title bar no longer needs left-side spacing. */
+body.app-mode .titleBar {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 72px !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+body.app-mode .subpageLogoClip,
+body.app-mode .subpageLogoHomeBtn {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  transform: none !important;
+  justify-self: center !important;
+  align-self: center !important;
+}
+
+body.app-mode .titleEditBtn {
+  position: absolute !important;
+  right: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  margin: 0 !important;
+}
+
+body.app-mode .titleEditBtn:active {
+  transform: translateY(-50%) scale(.955) !important;
+}
+
+@media (min-width: 780px) {
+  body.app-mode .titleBar {
+    min-height: 82px !important;
+  }
+
+  body.app-mode .titleEditBtn {
+    right: 0 !important;
+  }
+}
+
   </style>
 </head>
 
@@ -5526,7 +5576,7 @@ body.edit-mode-active .box.boxFull .sectionTools {
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_43_UNIFIED_ADD_SECTION_SETTINGS_LOGO_BACK";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_44_CENTER_SUBPAGE_LOGO";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
