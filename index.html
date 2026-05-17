@@ -15,7 +15,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f7f7f8">
-  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_41_TOP_ADD_POPUP">
+  <meta name="app-build" content="FIRESTORE_ONLY_CLEAN_V18_42_RECIPE_CHECK_REALTIME_SYNC">
 
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -5356,7 +5356,7 @@ body.edit-mode-active .box.boxFull .sectionTools {
     let currentPageId = "prep-list";
 
 
-    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_41_TOP_ADD_POPUP";
+    const APP_BUILD_VERSION = "FIRESTORE_ONLY_CLEAN_V18_42_RECIPE_CHECK_REALTIME_SYNC";
     const APP_BUILD_KEY = "prep_app_build_version_v1";
 
     async function clearOldPWACaches() {
@@ -6752,7 +6752,7 @@ body.edit-mode-active .box.boxFull .sectionTools {
         recoverMissingSubpagesFromItems().then(recovered => {
           if (!recovered) renderHome();
         });
-        render(); updateDeleteModeButton(); updateEditModeButton(); updateOfflineBadge();
+        render(); refreshActiveRecipeModalFromRealtime(); updateDeleteModeButton(); updateEditModeButton(); updateOfflineBadge();
         setStatus(navigator.onLine ? "Loaded OK / Firestore real-time sync" : "Offline - changes will not save");
       }, error => {
         console.error(error);
@@ -7614,25 +7614,63 @@ body.edit-mode-active .box.boxFull .sectionTools {
       if (editMode || !activeRecipeItemId) return;
       const item = items.find(x => x.id === activeRecipeItemId);
       if (!item) return;
+
       const checks = getRecipeChecks(item);
-      checks[key] = checked;
+      checks[key] = !!checked;
       item.recipeChecks = checks;
+
       renderRecipePreview(currentRecipePreview || originalRecipePreview);
       scheduleRecipeCheckSave(item.id, checks);
     };
+
     function scheduleRecipeCheckSave(id, checks) {
       if (recipeCheckSaveTimer) clearTimeout(recipeCheckSaveTimer);
-      setStatus("Checklist saving...");
+      setStatus("Checklist syncing...");
+
       recipeCheckSaveTimer = setTimeout(async () => {
         try {
-          await savePatch(id, { recipeChecks: checks }, { silent: true });
-          setStatus("Checklist saved OK");
+          await savePatch(id, { recipeChecks: { ...(checks || {}) } }, { silent: true });
+          setStatus("Checklist synced OK");
         } catch (error) {
           console.error(error);
-          setStatus("Checklist save failed ERROR");
+          setStatus("Checklist sync failed ERROR");
         }
-      }, 300);
+      }, 120);
     }
+    
+    // ===== V18.42 RECIPE CHECKBOX REALTIME SYNC ACROSS DEVICES =====
+    function refreshActiveRecipeModalFromRealtime() {
+      try {
+        if (!activeRecipeItemId) return;
+
+        const modal = document.getElementById("recipeModal");
+        if (!modal || !modal.classList.contains("show")) return;
+
+        const item = items.find(x => x.id === activeRecipeItemId);
+        if (!item) return;
+
+        const latestRecipe = String(item.recipe || item.note || "");
+
+        // Do not overwrite textarea while editing recipe text.
+        if (editMode) {
+          const input = document.getElementById("recipeInput");
+          if (input && document.activeElement !== input && input.value !== latestRecipe) {
+            input.value = latestRecipe;
+          }
+          return;
+        }
+
+        originalRecipePreview = latestRecipe;
+        if (!currentRecipePreview || activeMultiplierValue === 1) {
+          currentRecipePreview = latestRecipe;
+        }
+
+        renderRecipePreview(currentRecipePreview || latestRecipe);
+      } catch (error) {
+        console.warn("Recipe realtime modal refresh skipped", error);
+      }
+    }
+
     function setMultiplierButtonState(value) {
       activeMultiplierValue = value || 1;
       const buttons = [
